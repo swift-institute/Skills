@@ -27,7 +27,7 @@ Single-skill orientation for the Swift Institute ecosystem. Maps the published G
 
 ## TL;DR — 30-second view
 
-Three active layers, each with its own GitHub organization. Standards additionally distributes across a constellation of per-authority sub-orgs — it is *"an organization of organizations"*. Every layer's main target is Apple-`Foundation`-free; every layer's dependencies flow downward only. The normative five-layer model, the downward-dependency rule, and per-layer licensing are owned by **swift-institute** ([ARCH-LAYER-001]); package locations on disk are owned by **swift-institute-core**. This tour maps orgs and naming onto that model rather than redefining it.
+Three active layers, each with its own GitHub organization. Standards additionally distributes across a constellation of per-authority sub-orgs — it is *"an organization of organizations"*. Every layer's main target is Apple-`Foundation`-free; dependencies never flow upward, while essential same-layer composition forms an acyclic graph. The normative five-layer model, dependency-direction rule, and per-layer licensing are owned by **swift-institute** ([ARCH-LAYER-001]); package locations on disk are owned by **swift-institute-core**. This tour maps orgs and naming onto that model rather than redefining it.
 
 | Layer | Question answered | Org | Package naming | License |
 |-------|-------------------|-----|----------------|---------|
@@ -160,7 +160,7 @@ swift-{authority}/swift-{spec-id}           ← spec-direct packages
 
 | # | Discipline | Canonical source |
 |---|------------|------------------|
-| 1 | **Downward dependencies only**: layers depend on lower layers; lateral and upward are forbidden. Within L1, lower tier on lower tier. | [ARCH-LAYER-001] in **swift-institute**, [PRIM-ARCH-002] in **primitives** |
+| 1 | **No upward dependencies**: packages may compose lower layers and essential same-layer prerequisites through an acyclic graph. Same-layer convenience and cycles are forbidden. Within L1, the stricter tier DAG applies. | [ARCH-LAYER-001] in **swift-institute**, [PRIM-ARCH-002] in **primitives** |
 | 2 | **No Apple `Foundation` in main targets**: applies to all five layers (not just L1). Foundation-adjacent interop lives in opt-in `* Foundation Integration` subtargets. | [PRIM-FOUND-001] in **primitives**, [ARCH-LAYER-007] in **swift-institute** |
 | 3 | **Typed everything**: typed throws (`throws(IO.Error)`); typed indices (`Index<T>`); typed counts/positions (`Cardinal<N>`, `Ordinal<N>`); ownership and lifetime annotations (`~Copyable`, `~Escapable`, `borrowing`/`consuming`, `@_lifetime`); strict memory safety. Before writing arithmetic, conversions, or accessors, check **existing-infrastructure** — the missing operator is usually intentional. | [API-ERR-001] in **code-surface**, [INFRA-*] in **existing-infrastructure**, [MEM-COPY-*] in **memory-safety** |
 | 4 | **Nested-namespace, noun-form naming**: `File.Directory.Walk`, not `FileDirectoryWalk`; `Stack.push.front(_:)`, not `stackPushFront(_:)`; specification-mirroring (`RFC_4122.UUID`, not `UUID`). One type per file. | [API-NAME-001], [API-NAME-002], [API-NAME-003], [API-IMPL-005] in **code-surface**, [PKG-NAME-001] in **swift-package** |

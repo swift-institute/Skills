@@ -300,7 +300,7 @@ For each `import X` from L3-package `P` targeting L3-package `Q`:
 
 If a domain package needs platform-specific policy, the missing capability belongs in the unifier — extend the unifier rather than reach past it.
 
-**Rationale**: [ARCH-LAYER-001] forbids lateral within-layer dependencies in strict reading; the sub-tier matrix codifies the structurally intentional within-L3 patterns and makes them SPM-enforceable via the dep DAG. Full text (architectural background, provenance): rationale archive §[PLAT-ARCH-008h].
+**Rationale**: [ARCH-LAYER-001] permits essential acyclic same-layer composition; the sub-tier matrix specializes that permission for the platform stack and makes the allowed L3 directions SPM-enforceable via the dependency DAG. Full text (architectural background, provenance): rationale archive §[PLAT-ARCH-008h].
 
 **Lint enforcement**: Workflow `validate-layer-deps.yml` flags (a) L3-policy packages depending on L3-unifier/L3-domain (upward), (b) L3-domain packages depending on L3-policy directly. The [PLAT-ARCH-008i] permission is enforced at `validate-platform-architecture.py`. [VERIFICATION: WF validate-layer-deps.py (PLAT-ARCH-008h)]
 

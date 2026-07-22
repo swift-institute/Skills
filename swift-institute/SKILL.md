@@ -39,7 +39,16 @@ Layer 1: Primitives      (Apache 2.0)   - Atomic building blocks
 
 ### [ARCH-LAYER-001] Dependency Direction
 
-Packages MUST depend only on layers below them. Upward and lateral dependencies are FORBIDDEN.
+Packages MUST NOT depend on higher layers. Packages MAY depend on lower layers and on
+same-layer packages when every same-layer edge is an essential semantic prerequisite,
+the complete same-layer dependency graph remains acyclic, and the edge does not move
+higher-layer policy into the dependency. Same-layer convenience, incidental reuse, and
+cycles are FORBIDDEN.
+
+Same-layer permission is not blanket peer access. Apply stricter internal dependency
+rules where they exist, including the Layer-1 tier DAG and the Layer-3 platform
+composition matrix. A package's layer continues to follow its essence; a legal
+same-layer edge does not merge the packages' missions or change either package's layer.
 
 | Layer | Question Answered | Examples |
 |-------|-------------------|----------|
@@ -68,7 +77,7 @@ Packages MUST depend only on layers below them. Upward and lateral dependencies 
 
 **Statement**: L2 spec packages (swift-iso-9945, swift-windows-standard, swift-linux-standard, swift-darwin-standard) ARE the syscalls level. There MUST be NO `swift-syscall-primitives`, `swift-outcome-primitives`, or similar L1 primitives package for syscall-framework machinery. Each L2 spec package owns its own syscall-declaration framework.
 
-**Why**: Syscall machinery is platform-specific (POSIX read/write, Win32 ReadFile/WriteFile). Different platforms have different error conventions (errno vs LastError), different result shapes (Int return vs BOOL+OUT param), different retry semantics (POSIX EINTR vs Windows none). A unified L1 framework forces a least-common-denominator abstraction; per-L2-package frameworks fit each platform's syscall ABI naturally. Consistent with `[ARCH-LAYER-001]` (no upward/lateral dependencies) and `feedback_authority_not_platform` (placement follows spec authority).
+**Why**: Syscall machinery is platform-specific (POSIX read/write, Win32 ReadFile/WriteFile). Different platforms have different error conventions (errno vs LastError), different result shapes (Int return vs BOOL+OUT param), different retry semantics (POSIX EINTR vs Windows none). A unified L1 framework forces a least-common-denominator abstraction; per-L2-package frameworks fit each platform's syscall ABI naturally. Consistent with `[ARCH-LAYER-001]` (no upward dependencies; same-layer edges require an essential semantic relationship) and `feedback_authority_not_platform` (placement follows spec authority).
 
 **How to apply**:
 - For relocation cycles: treat as L2 absorption (Bucket A / G3), NOT L1 domain-primitive (Bucket B / G1).
@@ -201,10 +210,10 @@ Packages MUST depend only on layers below them. Upward and lateral dependencies 
 
 ### [ARCH-LAYER-012] Layer Dependency Rule Applies to Test Targets
 
-**Statement**: `[ARCH-LAYER-001]`'s upward/lateral dependency prohibition applies to **test targets too**. Tests share the package's `Package.swift`, so an L2 package's test target MUST NOT declare a dependency on an L3 foundation (e.g. an L2 `swift-*-standard`'s tests depending on L3 `swift-json`). The layer position is the package's, not the target's; SwiftPM has no mechanism to scope one product's dependency to a different layer for tests only, so a test-only upward dep is still a `Package.swift`-level layer violation.
+**Statement**: `[ARCH-LAYER-001]`'s upward dependency prohibition and same-layer admissibility test apply to **test targets too**. Tests share the package's `Package.swift`, so an L2 package's test target MUST NOT declare a dependency on an L3 foundation (e.g. an L2 `swift-*-standard`'s tests depending on L3 `swift-json`). A same-layer test dependency is permitted only when it satisfies `[ARCH-LAYER-001]`; test convenience alone does not make an edge semantically essential. The layer position is the package's, not the target's; SwiftPM has no mechanism to scope one product's dependency to a different layer for tests only, so a test-only upward dep is still a `Package.swift`-level layer violation.
 
 **How to apply** — an L2 package whose tests need an L3 foundation:
-1. **Preferred (architecturally clean)**: author a new sibling L3 package depending on the L2 package (downward) + the L3 foundation (lateral L3↔L3, permitted by orchestrator disposition), and move the tests + any retroactive-conformance helpers there.
+1. **Preferred (architecturally clean)**: author a new sibling L3 package depending on the L2 package (downward) + the L3 foundation (same-layer, subject to `[ARCH-LAYER-001]`), and move the tests + any retroactive-conformance helpers there.
 2. **Pragmatic (accepted with caveat)**: leave the violating dep in the L2 tests with an explicit `// swiftlint:disable` + comment citing the structural constraint — a marked, known exception (e.g. Codable-round-trip tests whose coverage mostly exercises Foundation anyway, with the load-bearing wire-shape coverage living in real-data tests elsewhere).
 3. **Forbidden**: silently adding the L3 dep to the L2 test target.
 
