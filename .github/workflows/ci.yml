@@ -1,0 +1,35 @@
+# ci.yml — per-repo consumer for the universal skill-description lint.
+#
+# Per [CI-001] three-tier shape, this consumer carries only triggers and
+# delegates to the universal reusable in swift-institute/.github.
+#
+# Triggers on PRs and pushes that touch SKILL.md frontmatter, plus manual
+# dispatch for ad-hoc audits. Concurrency cancels in-flight runs on the
+# same ref to keep PR feedback fast.
+
+name: ci
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - '*'
+    paths:
+      - '**/SKILL.md'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    paths:
+      - '**/SKILL.md'
+      - '.github/workflows/ci.yml'
+  workflow_dispatch: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  skill-descriptions:
+    uses: swift-institute/.github/.github/workflows/lint-skill-descriptions.yml@main
+    with:
+      skills-paths: '.'
+      ceiling: 250

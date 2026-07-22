@@ -1,0 +1,11 @@
+# .github/metadata.yaml
+# Triaged by AI-assisted bulk pass (2026-04-29).
+description: "Canonical development conventions for the Swift Institute ecosystem (normative)."
+topics:
+  - swift-institute
+  - skills
+  - conventions
+  - agent-routing
+homepage: "https://swift-institute.org"
+readme:
+  family: C
