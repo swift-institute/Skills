@@ -37,7 +37,7 @@ Process READMEs operate in a third-person, organizational register. Every paragr
 | Person | Third-person, organizational. "These scripts coordinate …", "Each subdirectory is …", "The convention is documented at …". Implicit org-voice without first-person plural ("we") in declarative content. First-person plural is acceptable in the workflow-process narrative section when the org-as-collective is the agent. |
 | Tense | Present tense for what the repo *is*; past tense for historical context (rare). |
 | Marketing language | Forbidden. The reader is already a maintainer; pitching is unnecessary. |
-| Code examples | Permitted only when they document the *workflow* (e.g., "run `swift build` inside the experiment directory"), not when they advertise a capability. |
+| Code examples | Permitted only when they document the *workflow* (e.g., "run `swift-build package build` inside the experiment directory"), not when they advertise a capability. |
 | Tables | Preferred for structure documentation. Two-column (path/role) is the typical shape. |
 | Internal rule-IDs in prose | Forbidden per [README-026]. The Swift-Evolution README's reference to `[PITCH-PROC-001]` is a known instance; pending cleanup. |
 | Author-side context | Forbidden. No "this repo evolved from …", no implementation autobiography. Process READMEs document the *current* shape and workflow only. |

@@ -479,7 +479,7 @@ The compiler emits a different error here[^v7].
 | Step | Action |
 |------|--------|
 | 1. List verifiable claims | Enumerate every claim about compiler behavior, error messages, feature flags, source code locations, or SE-proposal text. These are the candidates for verification. |
-| 2. Re-run experiment | For each claim with an existing experiment variant, clean-build (`rm -rf .build && swift build`) against the current toolchain. If the claim is about a failure mode, confirm the failure still triggers. If it's about a compile pass, confirm it still compiles. |
+| 2. Re-run experiment | For each claim with an existing experiment variant, run `swift-build package clean` and `swift-build package build` against the current toolchain through the coordinator. If the claim is about a failure mode, confirm the failure still triggers. If it's about a compile pass, confirm it still compiles. |
 | 3. Re-verify quoted text | Every quoted passage from SE proposals, compiler source files, or diagnostic messages MUST be checked against the current source. Paraphrases presented as quotes are a load-bearing integrity failure; verified quotes are cheap to maintain. |
 | 4. Re-verify source paths | Every cited source file path (e.g., `lib/AST/Decl.cpp`) MUST resolve at the cited location in the referenced branch. Functions named in references MUST still exist in that file. |
 | 5. Confirm before promotion | A draft MUST NOT move to `Blog/Review/` with unverified verifiable claims. If a claim cannot be verified (e.g., production-only failure that resists minimal reproduction), [BLOG-014a] applies. |

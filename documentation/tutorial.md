@@ -12,7 +12,7 @@ Tutorials (Layer 4 of the four-layer audience model) are interactive, step-by-st
 
 ### [DOC-070] Tutorial Table of Contents (Required)
 
-**Statement**: A `.docc/` catalog containing one or more `@Tutorial` files MUST also contain a `@Tutorials` table-of-contents file. Without it, `xcodebuild docbuild` emits a warning ("Missing tutorial table of contents page") and silently omits the tutorial from the rendered archive.
+**Statement**: A `.docc/` catalog containing one or more `@Tutorial` files MUST also contain a `@Tutorials` table-of-contents file. Without it, DocC rendering emits a warning ("Missing tutorial table of contents page") and silently omits the tutorial from the rendered archive.
 
 **Correct**:
 ```
@@ -126,7 +126,7 @@ Naming: `.tutorial` files use `PascalCase.tutorial`. Step source files use `keba
 
 ### [DOC-073] Tutorial Code Verification
 
-**Statement**: DocC does NOT verify the correctness of tutorial step code — `xcodebuild docbuild` renders step files as text even when the Swift is invalid. Packages that ship tutorials as part of a long-lived release MUST establish a separate verification mechanism so tutorial code stays valid as the underlying API evolves.
+**Statement**: DocC does NOT verify the correctness of tutorial step code — the renderer treats step files as text even when the Swift is invalid. Packages that ship tutorials as part of a long-lived release MUST establish a separate verification mechanism so tutorial code stays valid as the underlying API evolves.
 
 Three acceptable mechanisms:
 

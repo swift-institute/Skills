@@ -272,7 +272,7 @@ extension MyType {
 | 4 | Add explicit `path:` to nested test targets (e.g., `path: "{Module} Snapshot Tests"`) |
 | 5 | Add explicit `path:` to parent `Package.swift` test targets (e.g., `path: "Tests/{Module} Tests"`) |
 | 6 | Remove old `Tests/Testing/` directory |
-| 7 | Verify the structural split (a SwiftPM structural check, not the local-iteration path): `swift test` from parent runs unit tests only; `swift test` from `Tests/` runs performance + snapshot. Routine local runs go through the workspace test scheme ([PKG-BUILD-023]) |
+| 7 | Verify the structural split through the coordinator: `swift-build package test` from the parent runs unit tests only; the same action from `Tests/` runs performance + snapshot. Routine local runs go through the workspace test scheme ([PKG-BUILD-023]) |
 
 **Rationale**: Eliminates the `Tests/Testing/Tests/` stutter and reduces `__Snapshots__/` path depth from 5 to 3 levels.
 

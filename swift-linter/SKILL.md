@@ -511,7 +511,7 @@ This skill does NOT duplicate the cohort description. A consumer wiring `Lint.sw
 - [ ] If brand-owner: `.excluding(rules:)` list narrows the bundle per [LINT-EXCLUDE-001]
 - [ ] Each exclusion has a justification comment per [LINT-EXCLUDE-004]
 - [ ] No JSON/YAML config sidecar — all configuration and metadata is Swift per [LINT-SETUP-005]
-- [ ] `swift run swift-linter .` runs clean (or surfaces only intended violations)
+- [ ] `/Users/coen/Developer/swift-institute/Scripts/swift-build package run -- swift-linter .` runs clean (or surfaces only intended violations)
 
 ---
 
@@ -523,7 +523,7 @@ This skill does NOT duplicate the cohort description. A consumer wiring `Lint.sw
 - **code-surface** ([API-IMPL-006]) — file-naming enforcement uses `validate-file-naming.py`, a workflow validator that runs alongside `Lint.swift` in CI.
 - **code-surface** ([API-NAME-001c]) — capability-marker protocol; [LINT-EXCLUDE-002] cites it for protocol-form brand-owner exclusion cardinality.
 - **swift-package** ([PKG-DEP-*]) — `path:` vs `url:` form rotation for `Lint.run(dependencies:)`.
-- **ci-cd-workflows** ([CI-*]) — per-package `ci.yml` invokes `swift run swift-linter .` against the consumer's `Lint.swift`.
+- **ci-cd-workflows** ([CI-*]) — per-package CI invokes the linter executable against the consumer's `Lint.swift`; local reproduction uses `swift-build package run`.
 - **implementation/style.md** ([IMPL-104]) — leading-dot inference at top-level result-builder positions (relevant to advanced `Lint/` shape).
 
 ### Related research

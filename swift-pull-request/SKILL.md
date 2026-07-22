@@ -120,7 +120,7 @@ ls /Library/Developer/Toolchains/
 TOOLCHAINS=swift xcrun swiftc -O reproducer.swift -o /tmp/test 2>&1
 
 # Or via SwiftPM:
-TOOLCHAINS=swift swift build -c release
+TOOLCHAINS=swift /Users/coen/Developer/swift-institute/Scripts/swift-build package build -- -c release
 ```
 
 **Rationale**: Compiler bugs on released Xcode toolchains may already be fixed on `main`. Deep-diving into compiler source, creating experiments, or preparing a PR for a bug that's already fixed wastes significant effort. This check takes 30 seconds and can save hours.

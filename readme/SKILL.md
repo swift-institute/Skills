@@ -368,7 +368,7 @@ Three org tiers within one family file; the tier determines which subset of rule
 | [README-167] | Reporting shape — drift surfaces as a tracking issue (mirror sync-metadata-nightly) |
 | [README-168] | Discussion-link auto-generation and validation (cross-refs **github-repository** [GH-REPO-090..093]) |
 | [README-169] | (reserved) |
-| [README-170] | Composed-example empirical validation — real call-site citation or scratch-package `swift build`, not `swiftc -parse` alone |
+| [README-170] | Composed-example empirical validation — real call-site citation or coordinator-built scratch package, not `swiftc -parse` alone |
 
 ---
 

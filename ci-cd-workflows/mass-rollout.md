@@ -70,7 +70,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 ### [CI-056] Per-Package Build Verification Before Push During Mass Source-Modifying Rollouts
 
-**Statement**: When a mass rollout applies source-modifying transforms (e.g., `swift-format format --in-place`, sed sweeps, automated rewrites) across multiple consumer packages, EACH per-package commit MUST be gated on a successful local `swift build` (or equivalent compile-verify) BETWEEN the source modification and `git push`. Stop-on-first-build-failure for the package; track and surface dirty/failing packages rather than continuing the fan-out.
+**Statement**: When a mass rollout applies source-modifying transforms (e.g., `swift-format format --in-place`, sed sweeps, automated rewrites) across multiple consumer packages, EACH per-package commit MUST be gated on a successful coordinator-owned package build (or equivalent compile-verify) BETWEEN the source modification and `git push`. Stop on the first build failure for the package; track and surface dirty/failing packages rather than continuing the fan-out.
 
 **Why mandatory**: source-modifying rollouts can produce semantically-equivalent changes ON AVERAGE while breaking SPECIFIC packages (e.g., the `[UseShorthandTypeNames]` rule rewriting `Array<X>` → `[X]` in packages that shadow `Swift.Array`). Without per-package build-verify, the fan-out ships broken commits to remote main where they trigger red CI and require recovery.
 
@@ -79,12 +79,12 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 ```text
 For each target package P in the mass-rollout scope:
   1. Apply transform locally to P's source.
-  2. Run swift build -c release (or equivalent compile-verify).
+  2. Run `/Users/coen/Developer/swift-institute/Scripts/swift-build package build -- -c release` (or equivalent coordinator-owned compile verification).
   3. If build succeeds: commit + push P. Continue to next package.
   4. If build fails:
-     a. Reset P's working tree (git reset --hard HEAD).
-     b. Add P to a tracked skip-list with the failure mode.
-     c. Continue to next package OR halt fan-out depending on failure pattern (e.g., halt if >5 packages fail, suggesting systemic issue).
+     a. Preserve P's working tree exactly; do not reset, restore, stash, or clean it.
+     b. Add P to a tracked skip-list with the failure mode and report the collision.
+     c. Continue only when the package owner has resolved the state explicitly.
 ```
 
 **Exceptions**: rollouts that are PROVABLY non-source-modifying (e.g., CI-yml edits, .swift-format config edits, README updates) do not require build verification — only the source-modifying class triggers this rule.

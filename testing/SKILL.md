@@ -39,17 +39,18 @@ Umbrella skill for test organization across the Swift Institute ecosystem. Route
 
 ## Test Invocation
 
-Local test runs go through the workspace ([PKG-BUILD-023]):
+Local test runs go through the coordinator and the sole workspace ([PKG-BUILD-023]):
 
 ```bash
-xcodebuild -workspace institute.xcworkspace -scheme "<Test Target>" \
-    -destination 'platform=macOS,arch=arm64' test
+/Users/coen/Developer/swift-institute/Scripts/swift-build workspace test \
+    --scheme "<Test Target>"
 ```
 
-Clean environment — never set `TOOLCHAINS` locally. `swift test` invocations
-in the rules below (e.g. [TEST-036] clean-build gates, [TEST-037] TSan) apply
-in the scoped SwiftPM contexts of [PKG-BUILD-024]: release/publication
-clean-rooms, forward-compat spikes, and CI.
+Clean environment — never set `TOOLCHAINS` locally. Package-level invocations
+in the scoped SwiftPM contexts of [PKG-BUILD-024] (e.g. [TEST-036] clean-build
+gates, [TEST-037] TSan) also run through the coordinator. Raw SwiftPM
+invocations are confined to CI runners where the machine-wide local coordinator
+is unavailable.
 
 ---
 
@@ -1059,7 +1060,7 @@ In both rows the masking is structural, not statistical: the default state satis
 
 ### [TEST-036] Clean Build Is the Gate of Record for `canImport`-Gated Suites
 
-**Statement**: A gate whose evidence covers `#if canImport(...)`-conditioned test suites MUST run from a clean build (`rm -rf .build`). `canImport` conditions do NOT re-evaluate on incremental builds: a suite rejoined by a dependency change stays silently EXCLUDED from a green incremental run, so the run under-counts without failing.
+**Statement**: A gate whose evidence covers `#if canImport(...)`-conditioned test suites MUST run from a clean git worktree after `swift-build package clean`; direct `.build` deletion is forbidden. `canImport` conditions do NOT re-evaluate on incremental builds: a suite rejoined by a dependency change stays silently EXCLUDED from a green incremental run, so the run under-counts without failing.
 
 **Procedure**: clean-build for the gate of record; incremental runs are development convenience only. Where suite counts are the claim, the count comparison MUST come from the clean log.
 
@@ -1069,7 +1070,7 @@ In both rows the masking is structural, not statistical: the default state satis
 
 ### [TEST-037] The Carved TSan Gate
 
-**Statement**: TSan legs on packages whose dependency closure carries `~Copyable & ~Escapable` lifetime-dependent accessor projections run under the CARVED invocation — `swift test --sanitize=thread --scratch-path .build-tsan -Xswiftc -Xllvm -Xswiftc -sil-disable-pass=lifetime-dependence-diagnostics` — subject to ALL of:
+**Statement**: TSan legs on packages whose dependency closure carries `~Copyable & ~Escapable` lifetime-dependent accessor projections run under the CARVED invocation — `swift-build package test -- --sanitize=thread --scratch-path .build-tsan -Xswiftc -Xllvm -Xswiftc -sil-disable-pass=lifetime-dependence-diagnostics` — subject to ALL of:
 
 1. The carve appears in INVOCATIONS ONLY — never in manifests or sources.
 2. The unsanitized debug+release legs of the same gate sequence remain the gate of record for compiler warnings AND lifetime diagnostics (no source can land that fails them).

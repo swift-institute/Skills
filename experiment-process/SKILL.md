@@ -60,7 +60,7 @@ Workflows for conducting implementation experiments. Three source documents defi
 
 Reduction steps: (1) Start with failing code, (2) remove unused imports, (3) remove uninvolved types, (4) inline function calls, (5) remove unexercised properties/methods, (6) simplify type hierarchies, (7) remove generic parameters if possible. Verify behavior persists after each step.
 
-**Build verification**: Each reduction step MUST use a verified clean build. `rm -rf .build` can silently fail (locked files, nested structures). After deletion, confirm the directory is actually gone (`! test -d .build`) before building. Alternatively, build with `swiftc` directly (no build cache). Stale caches have caused false reductions in multiple investigations — a "crashing" reduction may actually be running cached SIL from a previous variant.
+**Build verification**: Each reduction step MUST use a verified clean build. For SwiftPM experiments, run the machine-wide coordinator's `package clean` action before its `package build` action; never delete `.build` directly. Alternatively, build a standalone reproducer with `swiftc` directly (no SwiftPM cache). Stale caches have caused false reductions in multiple investigations — a "crashing" reduction may actually be running cached SIL from a previous variant.
 
 ```swift
 // CORRECT — Minimal reproduction
@@ -343,10 +343,10 @@ The canonical human-browsable view of a public experiments corpus is the [Experi
 ```bash
 cd Experiments/sendable-closure-test
 mkdir -p Outputs
-swift package clean
-swift build 2>&1 | tee Outputs/build.txt        # Standard
-swift build -c release 2>&1 | tee Outputs/build-release.txt  # Release
-swift run 2>&1 | tee Outputs/run.txt             # Runtime
+/Users/coen/Developer/swift-institute/Scripts/swift-build package clean
+/Users/coen/Developer/swift-institute/Scripts/swift-build package build 2>&1 | tee Outputs/build.txt
+/Users/coen/Developer/swift-institute/Scripts/swift-build package build -- -c release 2>&1 | tee Outputs/build-release.txt
+/Users/coen/Developer/swift-institute/Scripts/swift-build package run 2>&1 | tee Outputs/run.txt
 ```
 
 Output files are working artifacts, NOT committed by default. The main.swift header is the primary evidence record.
@@ -622,7 +622,7 @@ Template for "What error does {invalid code} produce?": Purpose, hypothesis, too
 
 ### [EXP-010d] Configuration Comparison
 
-Template for "Does {behavior} differ between debug and release?": Purpose, hypothesis, toolchain → test code → run both `swift build -c debug` and `-c release` → document debug result, release result, and any differences.
+Template for "Does {behavior} differ between debug and release?": Purpose, hypothesis, toolchain → test code → run coordinator-owned package builds for both debug and release configurations → document debug result, release result, and any differences.
 
 ---
 
@@ -728,7 +728,7 @@ Template: Purpose, hypothesis, baseline measurement → current implementation �
 
 **Procedure additions to [EXP-003]**:
 
-1. Add a `release-mode-pass.txt` receipt file capturing `swift build -c release` output.
+1. Add a `release-mode-pass.txt` receipt file capturing `/Users/coen/Developer/swift-institute/Scripts/swift-build package build -- -c release` output.
 2. Add a `cross-module-pass.txt` receipt file capturing build output from a sibling target that imports the experimental API.
 3. Only upon both passing does the experiment advance to CONFIRMED.
 

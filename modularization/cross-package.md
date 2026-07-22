@@ -102,7 +102,7 @@ Naïve "no `import X` in source ⇒ drop X" misclassifies the kitchen-sink → s
 | (d) | Scan both `Tests/<TargetName>/` AND `Tests/Support/` recursively for imports | Test-only deps falsely flagged as UNUSED |
 | (e) | Exclude `* Test Support` deps declared on `* Test Support` targets from UNUSED candidacy per [MOD-024] | Spine deps falsely flagged; cleanup would silently break TS spine |
 
-**Per-edit verification gate**: Every cleanup edit MUST be gated by `rm -rf .build && swift build && swift test` from the package's own directory. The clean-build precondition catches stale-cache false positives; the test run catches missing transitive providers that compile-only checks miss. A cleanup pass that batches multiple package edits without per-package verification is non-conforming.
+**Per-edit verification gate**: Every cleanup edit MUST be gated from the package's own directory by coordinator-owned `package clean`, `package build`, and `package test` actions. The clean-build precondition catches stale-cache false positives; the test run catches missing transitive providers that compile-only checks miss. A cleanup pass that batches multiple package edits without per-package verification is non-conforming.
 
 **Stub-package exemption**: Packages tagged per [MOD-EXCEPT-002] (placeholders with design-intent deps) are excluded from the UNUSED sweep — their unused declarations are intentional.
 
@@ -114,7 +114,7 @@ Naïve "no `import X` in source ⇒ drop X" misclassifies the kitchen-sink → s
 2. Compute per-module provider sets by following `@_exported public import` chains in each target's source.
 3. For each declared dep `i` in each package, compute coverage and classify (REQUIRED / UNUSED / TS-SPINE).
 4. For each UNUSED finding, cross-check against [MOD-024] — if it's a TS-spine dep with a missing re-export, reclassify as spine-completion gap.
-5. For each true UNUSED finding, propose the edit, then run `rm -rf .build && swift build && swift test` after applying. Only commit on green.
+5. For each true UNUSED finding, propose the edit, then run `/Users/coen/Developer/swift-institute/Scripts/swift-build package clean`, `package build`, and `package test` after applying. Only commit on green.
 6. Audit-completion check: re-run the audit post-cleanup; remaining UNUSED findings MUST all be either stub packages or TS-spine candidates already routed to [MOD-024].
 
 **Rationale**: Dep cleanup is high-leverage but its failure modes are silent (a dropped uniquely-providing dep breaks downstream consumers weeks later); the procedure's safety properties collectively eliminate the class of failure where a dep looks unused at source level but is load-bearing for re-export chains. Sweep evidence + provenance: rationale archive §[MOD-025].

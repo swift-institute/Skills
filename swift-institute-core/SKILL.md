@@ -63,7 +63,7 @@ This is the root meta-skill for the Swift Institute ecosystem.
 - **blog-process** - [BLOG-*] Blog post workflows
 - **skill-lifecycle** - Skill creation, update, review, and deprecation
 - **package-export** - [PKG-EXPORT-*] Export packages for LLM consumption
-- **swift-package-build** - [PKG-BUILD-*] Operational build instructions: local iteration via the workspace (headless xcodebuild against institute.xcworkspace, clean environment — no TOOLCHAINS) [PKG-BUILD-023–024]; toolchain selection/assert for scoped SwiftPM contexts (release/publication clean-rooms, 6.4-dev spikes, CI); Linux via Docker (`swift:<version>` stable + `swiftlang/swift:nightly-main-jammy` nightly, release-config convention); Embedded Swift source-guard pattern (`#if !hasFeature(Embedded)`) + build-mode invocation; clean-room + resolution-identity discipline (pin-assert cold-room; canonical-basename identity; mirror-first publication) [PKG-BUILD-013–015]
+- **swift-package-build** - [PKG-BUILD-*] Single build boundary for local SwiftPM and Xcode work: machine-wide capacity slots, same-root serialization, isolated concurrent workspace builds, generated/ignored `Package.resolved`, toolchain assertion, Linux/Embedded contexts, and evidence discipline
 - **collaborative-discussion** - [COLLAB-*] Multi-agent collaborative discussions
 - **reflect-session** - Structured post-session reflection capture
 - **issue-investigation** - [ISSUE-*] Systematic compiler/toolchain issue investigation: reproduce, reduce, verify, resolve

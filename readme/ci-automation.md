@@ -365,7 +365,7 @@ section structural rule this workflow targets), [README-160]
 
 ### [README-170] Composed-Example Empirical Validation
 
-**Statement**: When a README example composes ≥2 distinct ecosystem types in a single code block (e.g., `Source.Location` + `Diagnostic.Record` + `Lint.Rule.Protocol` in one snippet), `swiftc -parse` validation alone is structurally insufficient. The validation discipline MUST cite (a) a real call-site reference for each composed type — `<package>/Sources/<path>/<file>.swift:<line>` — confirming the example's API shapes match the call site's API shapes, OR (b) a full `swift build` of an extracted scratch package containing the example, demonstrating the example type-checks against the real type definitions.
+**Statement**: When a README example composes ≥2 distinct ecosystem types in a single code block (e.g., `Source.Location` + `Diagnostic.Record` + `Lint.Rule.Protocol` in one snippet), `swiftc -parse` validation alone is structurally insufficient. The validation discipline MUST cite (a) a real call-site reference for each composed type — `<package>/Sources/<path>/<file>.swift:<line>` — confirming the example's API shapes match the call site's API shapes, OR (b) a full coordinator-owned build of an extracted scratch package containing the example, demonstrating the example type-checks against the real type definitions.
 
 `swiftc -parse` validates that the example is grammatically Swift; it does NOT validate that the example uses real APIs in their real shapes — a composed example can parse and still not compile against the real types. (Full "why parse-only is structurally insufficient" analysis: rationale archive §[README-170].)
 
@@ -374,7 +374,7 @@ section structural rule this workflow targets), [README-160]
 | Example shape | Validation discipline |
 |---------------|------------------------|
 | Single type, ≤2 method calls (e.g., `UUID().uuidString`) | `swiftc -parse` is sufficient |
-| Composed example (≥2 ecosystem types) | (a) Cite real call-site for each composed type, OR (b) extract to scratch SwiftPM package and run `swift build` |
+| Composed example (≥2 ecosystem types) | (a) Cite real call-site for each composed type, OR (b) extract to a scratch SwiftPM package and run `swift-build package build` |
 | Quick Start examples (high-visibility, evaluator-facing) | (b) — full build, regardless of complexity |
 | Code blocks inside narrative (lower-visibility) | (a) — real call-site citation per composed type |
 
@@ -382,8 +382,8 @@ section structural rule this workflow targets), [README-160]
 
 1. At README authoring time, identify each code block's composition class.
 2. For composed examples, before declaring the README "validated," locate each composed type's nearest real call site in the ecosystem (`grep -rn "<typename>(" <ecosystem>/Sources/`) and verify the README's invocation shape matches the call site's shape.
-3. For Quick Start examples, additionally extract the example to a scratch SwiftPM package whose `Package.swift` declares deps on every composed type's owning package; run `swift build`.
-4. Document the validation report in the commit message or PR description: list each composed type + its cited real call-site OR the extracted scratch-package path + `swift build` result.
+3. For Quick Start examples, additionally extract the example to a scratch SwiftPM package whose `Package.swift` declares deps on every composed type's owning package; run `/Users/coen/Developer/swift-institute/Scripts/swift-build package build`.
+4. Document the validation report in the commit message or PR description: list each composed type + its cited real call-site OR the extracted scratch-package path + coordinator build result.
 
 **Rationale**: Per-example call-site discipline catches non-compiling examples at authoring time, composing with [RELEASE-007]'s publication-gate check; the 30-second grep per composed type is strictly cheaper than post-publication rework (full text, origin incident, and the 4-of-5 swift-linter cohort finding: rationale archive §[README-170]).
 

@@ -16,9 +16,9 @@ Part of the **documentation** skill. See `SKILL.md` for the navigation hub, four
 Sources/{Module Name}/{Module Name}.docc/
 ```
 
-**Exception — umbrella-consolidation pattern**: in a package with a multi-target + umbrella + `@_exported public import` shape (see the multi-target consolidation rule below), variant modules whose documentation is consolidated under the umbrella catalog MAY omit the `.docc/` directory entirely. The umbrella owns the sole catalog; variant modules are documented through the umbrella's archive. No `.gitkeep` placeholder is needed when the CI pipeline uses `swift build -Xswiftc -emit-symbol-graph` for symbol-graph extraction (which emits no warnings for absent variant catalogs). Packages still on the older `xcodebuild docbuild` pipeline MAY retain `.gitkeep`-only variant directories as a warning-silencing workaround; the `swift build` route supersedes that workaround.
+**Exception — umbrella-consolidation pattern**: in a package with a multi-target + umbrella + `@_exported public import` shape (see the multi-target consolidation rule below), variant modules whose documentation is consolidated under the umbrella catalog MAY omit the `.docc/` directory entirely. The umbrella owns the sole catalog; variant modules are documented through the umbrella's archive. No `.gitkeep` placeholder is needed: the CI runner's symbol-graph extraction emits no warnings for absent variant catalogs. The retired Xcode documentation-build workaround is not a supported compatibility surface.
 
-**Rationale**: DocC discovers catalogue content by matching directory names to module names. Mismatched names prevent catalogue association. The exception preserves the literal-rule invariant while allowing packages to route all reader-facing content through a single umbrella catalog. With the `swift build` symbol-graph route, the umbrella-owns-everything invariant becomes visible on disk — there are no empty placeholder directories obscuring which target carries documentation.
+**Rationale**: DocC discovers catalogue content by matching directory names to module names. Mismatched names prevent catalogue association. The exception preserves the literal-rule invariant while allowing packages to route all reader-facing content through a single umbrella catalog. With the CI symbol-graph route, the umbrella-owns-everything invariant becomes visible on disk — there are no empty placeholder directories obscuring which target carries documentation.
 
 **Lint enforcement**: Reusable workflow `validate-docc-structure.yml` (`swift-institute/.github/.github/workflows/`) checks `.docc/` presence per Swift module under `Sources/`; honours [DOC-019a] umbrella-consolidation exception (target whose only source is `exports.swift` is exempt). Added Wave 2b finalization 2026-05-10.
 
@@ -56,11 +56,12 @@ Sources/
 
 **Per-symbol article headings**: in the consolidated catalogue, every per-symbol article's `#` heading MUST address the symbol through the umbrella module, not its declaring module. A per-symbol article for `Property.Typed` (declared in `Property_Typed_Primitives`) consolidated into the umbrella catalogue uses `# ``Property_Primitives/Property/Typed`` `, not `# ``Property_Typed_Primitives/Property/Typed`` `. DocC attaches the article as a documentation extension of the symbol as seen through the catalogue's primary module; the umbrella IS the catalogue's primary module.
 
-**CI shape**: `swift build -c release -Xswiftc -emit-symbol-graph -Xswiftc -emit-symbol-graph-dir <out>` to emit per-module symbol graphs (this route preserves `@_exported` doc comments, unlike `xcodebuild docbuild`), a symbol-graph post-processing step, and a single `xcrun docc convert` on the umbrella catalogue with `--additional-symbol-graph-dir` pointing at a directory containing ONLY the patched umbrella graph. The post-processing step serves two roles: (a) inject any missing doc comments into the umbrella graph from sibling graphs — defensive no-op under `swift build -emit-symbol-graph`, guards against future regression; (b) **isolate** the umbrella graph into a dedicated output directory so `docc convert` can receive only the umbrella — isolation is load-bearing per the "cross-module ambiguity gotcha" below. Reference implementation: `swift-institute/Scripts/patch-umbrella-symbol-graph.py` (stdlib-only Python 3, authored 2026-04-24 under the ecosystem-wide R3 mandate of research `docc-multi-target-documentation-aggregation.md`).
+**CI-runner shape**: CI may invoke SwiftPM directly to emit per-module symbol graphs, followed by a symbol-graph post-processing step and one `xcrun docc convert` on the umbrella catalogue with `--additional-symbol-graph-dir` pointing at a directory containing ONLY the patched umbrella graph. Local reproduction MUST route the SwiftPM build through `/Users/coen/Developer/swift-institute/Scripts/swift-build package build -- ...`. The post-processing step serves two roles: (a) inject any missing doc comments into the umbrella graph from sibling graphs — defensive no-op under the CI symbol-graph build, guarding against future regression; (b) **isolate** the umbrella graph into a dedicated output directory so `docc convert` can receive only the umbrella — isolation is load-bearing per the "cross-module ambiguity gotcha" below. Reference implementation: `swift-institute/Scripts/patch-umbrella-symbol-graph.py` (stdlib-only Python 3, authored 2026-04-24 under the ecosystem-wide R3 mandate of research `docc-multi-target-documentation-aggregation.md`).
 
 **Correct pipeline invocation**:
 ```bash
-# 1. swift build emits per-module symbol graphs (preserves @_exported doc comments)
+# 1. CI runner emits per-module symbol graphs (preserves @_exported doc comments)
+#    Local reproduction passes the same arguments after `swift-build package build --`.
 swift build -c release \
     -Xswiftc -emit-symbol-graph \
     -Xswiftc -emit-symbol-graph-dir -Xswiftc "${DOCS_WORK}/symbol-graphs-raw"
@@ -89,14 +90,14 @@ xcrun docc convert "Sources/<Umbrella>/<Umbrella>.docc" \
     --output-path "${DOCS_WORK}/archives/<Umbrella>.doccarchive"
 ```
 
-**Why `swift build` instead of `xcodebuild docbuild`**:
+**Why the SwiftPM symbol-graph route**:
 
-| Property | `xcodebuild docbuild` | `swift build -emit-symbol-graph` |
-|----------|----------------------|----------------------------------|
-| Doc comments on `@_exported` re-exports | STRIPPED (patch step is load-bearing) | PRESERVED (patch is defensive no-op) |
-| Empty variant `.docc/` | Warns "No valid content" — ten warnings on a five-variant package | No warning; never enters docbuild code path |
-| Derived-data footprint | Full docbuild under `DerivedData/` | Object files + graphs under `.build/` |
-| Cross-platform portability | macOS-only (requires Xcode) | Any platform swift supports |
+| Property | Retired Xcode documentation route | SwiftPM symbol-graph route |
+|----------|-----------------------------------|-----------------------------|
+| Doc comments on `@_exported` re-exports | Stripped | Preserved (patch is defensive no-op) |
+| Empty variant `.docc/` | Warns "No valid content" | No warning |
+| Build footprint | Full derived-data tree | Object files + symbol graphs |
+| Cross-platform portability | macOS-only | Any supported SwiftPM platform |
 
 **Cross-module ambiguity gotcha**: `xcrun docc convert` must receive ONLY the patched umbrella graph via `--additional-symbol-graph-dir`, NOT the full pool of graphs. Passing the pool causes DocC to see the same precise identifier under both its declaring module AND the umbrella, and every in-catalog cross-reference to the symbol becomes ambiguous — DocC cannot choose which module path to resolve under, and `` `SymbolName` `` code spans in articles silently fail to resolve. Symptom: "Failed to resolve reference" warnings for every symbol referenced in articles. Fix: isolate the umbrella-graph file in a dedicated directory and pass only that directory.
 

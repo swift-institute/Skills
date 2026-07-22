@@ -41,7 +41,7 @@ has direct consequences for collections ([SPI-010]) that a single-org project ne
 ### [SPI-001] Listing Prerequisites
 
 **Statement**: A package MUST NOT be submitted to SPI until ALL hold: (1) the repo is
-public; (2) it has at least one semantic-version git tag; (3) `swift package dump-package`
+public; (2) it has at least one semantic-version git tag; (3) `swift-build package dump-package`
 emits valid JSON on the launch toolchain; (4) its **entire** dependency closure is itself
 public, tagged, and declared in URL form.
 
@@ -287,7 +287,7 @@ explicit anti-pattern for this ecosystem.
 **Statement**: This skill owns SPI domain **policy** (`[SPI-*]`), including the `.spi.yml`
 authoring rules ([SPI-020]–[SPI-024]). The CI **mechanics** live in **ci-cd-workflows**
 (`[CI-*]`): a centralized reusable `validate-spi-manifest.yml` in `swift-institute/.github`
-(cheap JSON-Schema PR-gate + a weekly `swift package dump-package` target-fidelity sweep —
+(cheap JSON-Schema PR-gate + a weekly coordinator-owned package-dump target-fidelity sweep —
 the check that catches the [SPI-022] defects), and the cross-org collection-generation
 workflow ([SPI-012]). **github-repository** carries a one-line cross-reference (its
 homepage rule already points at SPI docs).

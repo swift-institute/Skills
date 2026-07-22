@@ -860,7 +860,7 @@ When creating an immediate experiment for a premise item, the experiment package
 | Reproduction layer | What it eliminates | What it preserves |
 |--------------------|--------------------|--------------------|
 | Single-file `swiftc -O bench.swift` | Concurrency mode default, `-entry-point-function-name` wrapping, library-evolution flags, cross-module-optimization state, SwiftPM target shape | Source code, Swift version, optimization level |
-| SwiftPM `swift build -c release` minimal package | (above factors come back) | Source code, Swift version, optimization level, package shape |
+| Minimal package via `swift-build package build -- -c release` | (above factors come back) | Source code, Swift version, optimization level, package shape |
 | SwiftPM full target | (all factors come back) | Source code + full ecosystem build context |
 
 The cascade lets the investigator localize the cause: a phenomenon visible at every layer is source-intrinsic; a phenomenon visible only at SwiftPM layers is build-context-conditioned; a phenomenon visible only in the full target is workspace-state-conditioned (e.g., specific dep version, specific cross-module specialization state).

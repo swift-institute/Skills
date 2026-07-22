@@ -76,9 +76,15 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 **Local-equivalent substitution shape**:
 
 ```bash
-rm -rf .build && swift build && swift test    # per package
-swift run <linter>                             # if the repo's CI runs a linter step
+/Users/coen/Developer/swift-institute/Scripts/swift-build package build
+/Users/coen/Developer/swift-institute/Scripts/swift-build package test
+/Users/coen/Developer/swift-institute/Scripts/swift-build package run \
+  -- <linter>                                  # if CI runs a linter step
 ```
+
+Run the build/test pair from a clean git worktree when fresh compilation is
+required. Do not manufacture freshness by deleting generated state in a dirty
+working tree.
 
 The release brief's Phase 0 verification section MUST document the substitution so the next reviewer can confirm the gate cleared via local-equivalent.
 
@@ -113,10 +119,9 @@ The release brief's Phase 0 verification section MUST document the substitution 
 
 ### [CI-112] Clean-Room (Mirror-Bypassed) Resolve Is a Non-Substitutable Off-Machine Gate
 
-**Statement**: A gate that asserts a package "resolves from scratch" / off-machine (publication, public-flip, closure re-verify) MUST be satisfied by an ACTUAL mirror-bypassed clean-room `swift package resolve` — never by substitute proofs (`grep` + `git ls-remote` reachability + a mirror-backed resolve) declared "equivalent." Only the mirror-bypassed resolve catches the off-machine failures the substitutes miss: empty/unpushed dependency repos (`git ls-remote <url> HEAD` exits 0 on an EMPTY repo, so a reachability sweep counts it green while it has no `main` off-machine) and off-machine package identity ([PKG-DEP-008]). A mirror-backed resolve only proves the graph is internally consistent against LOCAL clones. Run it on PRIVATE repos WITHOUT a temp HOME or token injection ([CI-094] free-plan discipline): keep the real session's ambient auth, briefly `mv ~/.swiftpm/configuration/mirrors.json` aside, `git clone` a consumer-root fresh + resolve, then restore the mirror via a `trap`-guarded self-restoring script. CI-runner form (a clean-runner resolve job on the public hub) + full safe-run recipe: Research/ci-cd-workflows-skill-rationale.md §[CI-112].
+**Statement**: A gate that asserts a package "resolves from scratch" / off-machine (publication, public-flip, closure re-verify) MUST be satisfied by an ACTUAL mirror-bypassed resolve in a fresh clone or worktree — never by substitute proofs (`grep` + `git ls-remote` reachability + a mirror-backed resolve) declared "equivalent." Only the mirror-bypassed resolve catches empty/unpushed dependency repositories and off-machine package identity ([PKG-DEP-008]). A mirror-backed resolve proves only the local graph. Locally, use the `swift-package-build` coordinator with an explicit empty SwiftPM configuration path and ambient authentication; do not move the user's mirror configuration, inject a temporary HOME, or edit `Package.resolved`. CI performs the same manifest-based resolve on its clean runner.
 
-**Enforcement (CI-runner form, LANDED)**: `clean-room-resolve.yml` on the public hub (/promote-rule 2026-07-06) — weekly + dispatch, matrix over the heaviest consumer-roots, per-org bot-token `insteadOf` injection, `rm Package.resolved` + full resolve, per-pin `refs/heads/main` sweep. ADVISORY during soak (`gating=false`); flip gating before any publication flip. Discipline: `Audits/PROMOTE-CI-112-2026-07-06.md`. [VERIFICATION: WF]
+**Enforcement (CI-runner form, LANDED)**: `clean-room-resolve.yml` on the public hub (/promote-rule 2026-07-06) — weekly + dispatch, matrix over the heaviest consumer roots, per-org bot-token `insteadOf` injection, a clean-runner manifest resolve, and a guard that rejects any tracked `Package.resolved`. The workflow never deletes, stages, or inspects individual pins. ADVISORY during soak (`gating=false`); flip gating before any publication flip. Discipline: `Audits/PROMOTE-CI-112-2026-07-06.md`. [VERIFICATION: WF]
 
 
 ---
-

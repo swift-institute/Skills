@@ -53,7 +53,7 @@ The skill does not drive feature work. It captures the discipline of going from 
 |----|-------|------|
 | [RELEASE-001] | Release-readiness brief | Four-phase template; per-package, gitignored |
 | [RELEASE-001a] | Phase 0 partial-verification (private-repo CI) | Substitute CI-green gate with local clean-build when repo is PRIVATE |
-| [RELEASE-001b] | Phase 0 baseline MUST include lint + L1 Embedded build | `swift-format lint`, `swiftlint lint`, and (for L1) `swift build -enable-experimental-feature Embedded` are baseline checks, not Phase 1 work |
+| [RELEASE-001b] | Phase 0 baseline MUST include lint + L1 Embedded build | `swift-format lint`, `swiftlint lint`, and (for L1) a coordinator-owned Embedded build are baseline checks, not Phase 1 work |
 | [RELEASE-002] | Final pre-release scan | Seven-phase template; runs after substantial recent changes |
 | [RELEASE-003] | Skill-incorporation gate | Phase 4 for pilot launches (the fifth phase by count); Tier 1 backlog blocks next-package audit |
 | [RELEASE-004] | Per-action authorization gates | Tag, visibility flip, blog publish, deploy — stage but never execute |
@@ -109,7 +109,7 @@ The skill does not drive feature work. It captures the discipline of going from 
 | Step | Action |
 |------|--------|
 | (a) Cite rationale | The brief's Phase 0 section MUST cite `feedback_private_repos_no_ci_runs` AND `feedback_free_plan_private_ci_unrunnable` (or successor memories) as the explicit reason for substitution. The citation grounds the substitution in the Free-plan billing-constraint root cause; without it, future readers will not understand why the CI gate was bypassed. |
-| (b) Execute clean-build locally + record | Run `swift build` and `swift test` on the principal toolchain (Swift 6.3 macOS unless the principal directs otherwise) from a clean state (`.build` deleted). Record the result verbatim in the brief's Phase 0 §Build & Test sub-section: command, exit code, duration, test count, and any warnings. The local clean-build is the substituted gate; the record is the audit trail. |
+| (b) Execute clean-build locally + record | From a clean git worktree, run coordinator-owned `package clean`, `package build`, and `package test` actions on the principal toolchain (Swift 6.3 macOS unless the principal directs otherwise). Record the result verbatim in the brief's Phase 0 §Build & Test sub-section: command, exit code, duration, test count, and any warnings. The local clean-build is the substituted gate; the record is the audit trail. |
 | (c) Defer matrix entries to named post-flip dispatch | Enumerate the remaining matrix entries (Swift 6.4-dev nightly, Linux Docker, Windows when in scope) and name the post-flip dispatch that will run them. The dispatch SHOULD be named in the brief (e.g., "post-flip CI matrix re-verification dispatch") and tracked as a release-blocking follow-up before the cohort's NEXT package's audit, not before the pilot's tag. |
 
 **When the rule fires**:
@@ -127,48 +127,48 @@ The skill does not drive feature work. It captures the discipline of going from 
 
 ### [RELEASE-001b] Phase 0 Baseline MUST Include Local Lint + L1 Embedded Build
 
-**Statement**: [RELEASE-001] Phase 0's "CI green" gate (or its [RELEASE-001a] private-repo substitute) MUST verify the FULL local-checkable surface, not just `swift build` + `swift test`. On the principal toolchain (Swift 6.3 macOS unless directed otherwise), the following checks all MUST exit 0 before Phase 0 closes. Any non-zero exit is a Phase 0 failure to close before opening Phase 1.
+**Statement**: [RELEASE-001] Phase 0's "CI green" gate (or its [RELEASE-001a] private-repo substitute) MUST verify the FULL local-checkable surface, not just coordinator build + test. On the principal toolchain (Swift 6.3 macOS unless directed otherwise), the following checks all MUST exit 0 before Phase 0 closes. Any non-zero exit is a Phase 0 failure to close before opening Phase 1.
 
 | Check | Required when | Tool | Catches |
 |-------|---------------|------|---------|
-| `swift build` clean | Always | toolchain default | Compile errors |
-| `swift test` matches published count | Always | toolchain default | Test regressions |
+| `swift-build package build` clean | Always | toolchain default | Compile errors |
+| `swift-build package test` matches published count | Always | toolchain default | Test regressions |
 | `swift-format lint --strict --recursive Sources/` | Always | swift-format paired with CI's `swift:6.3` image (currently 6.3.1; see workspace tooling pin) | Formatting + missing doc + structural issues that swift-format covers |
 | `swiftlint lint --strict` (Sources + Tests) | Always | SwiftLint paired with workspace pin | Institute custom rules: `swift_error_qualification` ([PLAT-ARCH-011]), `cardinal_count_minus_one_anti_pattern` ([INFRA-025]), `l1_no_platform_conditionals` ([PLAT-ARCH-008c]), `no_foundation_import_*` ([PRIM-FOUND-001]), etc. — disjoint from swift-format's coverage |
-| `swift build -Xswiftc -enable-experimental-feature -Xswiftc Embedded` per [PKG-BUILD-008] | L1 packages only (in `swift-primitives` org or `metadata.yaml` topic includes `primitives`) | Swift 6.4-dev nightly | Concurrency-surface (`Actor`, `_Concurrency`, `CheckedContinuation`, `UnsafeContinuation`, `async`/`await`), Foundation leaks, non-Embedded-stdlib usage that grep-for-`import Foundation` cannot detect |
+| `swift-build package build -- -Xswiftc -enable-experimental-feature -Xswiftc Embedded` per [PKG-BUILD-008] | L1 packages only (in `swift-primitives` org or `metadata.yaml` topic includes `primitives`) | Swift 6.4-dev nightly | Concurrency-surface (`Actor`, `_Concurrency`, `CheckedContinuation`, `UnsafeContinuation`, `async`/`await`), Foundation leaks, non-Embedded-stdlib usage that grep-for-`import Foundation` cannot detect |
 
 **Why these specific tools**:
 
-- `swift build` + `swift test` only verify what the compiler accepts. Lint surface is independent and CI gates on it.
+- Coordinator build + test only verify what the compiler accepts. Lint surface is independent and CI gates on it.
 - `swift-format` (institute-canonical config in `.swift-format`) covers formatting, doc-comment presence, structural issues.
 - `swiftlint` carries institute-specific custom rules that swift-format does NOT cover. Both must run.
 - The Embedded build is the only way to surface concurrency-surface (`Actor`, `_Concurrency`, continuations, `async`/`await`) usage that breaks on Embedded — grep for `import Foundation` is necessary but NOT sufficient for L1 Embedded compatibility per `[PRIM-FOUND-001]` / `[PKG-BUILD-007]`.
 
 **Procedure** (additions to [RELEASE-001a] step (b) "Execute clean-build locally + record"):
 
-After `swift build` and `swift test`:
+After the coordinator-owned build and test:
 
 1. Run `swift-format lint --strict --recursive Sources/`. Record exit code and violation count.
 2. Run `swiftlint lint --strict` (full scope, including Tests/). Record exit code and violation count.
-3. For L1 packages, run `TOOLCHAINS=<6.4-dev-bundle-id> swift build -Xswiftc -enable-experimental-feature -Xswiftc Embedded` per [PKG-BUILD-008]. Record exit code and any unguarded-stdlib-surface findings.
+3. For L1 packages, run `TOOLCHAINS=<6.4-dev-bundle-id> /Users/coen/Developer/swift-institute/Scripts/swift-build package build -- -Xswiftc -enable-experimental-feature -Xswiftc Embedded` per [PKG-BUILD-008]. Record exit code and any unguarded-stdlib-surface findings.
 
 **Cross-references**: [RELEASE-001] (parent), [RELEASE-001a] (substitution shape this extends), [PKG-BUILD-007] (Embedded source-guard pattern), [PKG-BUILD-008] (Embedded build invocation), [CI-054] (developer contract for lint), `[PRIM-FOUND-001]` (Foundation-free invariant).
 
 ---
 
-### [RELEASE-001c] Phase 0 Baseline Build MUST Use `rm -rf .build` Clean State
+### [RELEASE-001c] Phase 0 Baseline Build MUST Use a Clean Worktree and Coordinator Clean
 
-**Statement**: [RELEASE-001] / [RELEASE-001a] / [RELEASE-001b] Phase 0 baseline build/test runs MUST start from a clean state via `rm -rf .build`. Incremental-cache builds report success against a stale on-disk cache that masks upstream-package state divergence — a class of pre-tag defect that ONLY surfaces under clean rebuild.
+**Statement**: [RELEASE-001] / [RELEASE-001a] / [RELEASE-001b] Phase 0 baseline build/test runs MUST start from a clean git worktree and use the coordinator's `package clean` action. Direct `.build` deletion is forbidden. Incremental-cache builds can report success against stale on-disk state that masks upstream-package divergence — a class of pre-tag defect that only surfaces under a clean rebuild.
 
 **Composite:** clean-state requirement (mechanical) + cache-invalidation rationale (semantic) + worked-example mapping (semantic).
 
 **Procedure** (sub-step inserted before [RELEASE-001a] step (b) "Execute clean-build locally + record"):
 
 ```bash
-# At Phase 0 start, before swift build / swift test:
-rm -rf .build
-# If consumers depend on this package, also clean their .build/ directories:
-# (per multi-package workspace; consumer caches retain stale resolution against the prior public API surface)
+# At Phase 0 start, after confirming the git worktree is clean:
+/Users/coen/Developer/swift-institute/Scripts/swift-build package clean
+# If consumers depend on this package, invoke the same coordinator action in
+# each consumer package; never manipulate their generated state directly.
 ```
 
 **Why incremental-cache builds mask this defect**:
@@ -176,10 +176,10 @@ rm -rf .build
 | Cause | Effect |
 |-------|--------|
 | Upstream package removed/relocated a public type | Downstream resolution cache retains the prior resolution |
-| `swift build` runs in incremental mode | Touched-file recompile only; un-touched-file resolutions unchanged |
-| `swift package resolve` may not always force re-resolve | Manifest-vs-resolution drift |
+| A package build runs in incremental mode | Touched-file recompile only; un-touched-file resolutions unchanged |
+| Dependency resolution may not force every source recompile | Manifest-vs-resolution drift |
 
-The cache-invalidation boundary is not always observable from the package-author's desk. The mechanical safeguard (`rm -rf .build`) is one shell command per Phase 0 run; the cost is wall-clock seconds (small package) to minutes (large package) of additional rebuild time. The benefit is catching upstream-state divergence at brief-author time, not at post-flip CI time.
+The cache-invalidation boundary is not always observable from the package-author's desk. The mechanical safeguard is a clean worktree plus one coordinator clean action per Phase 0 run; the cost is wall-clock seconds (small package) to minutes (large package) of additional rebuild time. The benefit is catching upstream-state divergence at brief-author time, not at post-flip CI time.
 
 **Relationship to [RELEASE-001b]**: [RELEASE-001b] specifies WHAT to verify (build + test + lint + Embedded). This rule specifies the prerequisite STATE (clean cache) before those verifications run. Both are necessary; one without the other leaves a verification gap.
 
@@ -198,7 +198,7 @@ git log --oneline -20 \
   | grep -iE "^[a-f0-9]+ (save progress|wip|tmp|temp|fix later|todo|scratch)"
 ```
 
-If any match returns: re-run `swift build`, `swift test`, `swift-format lint --strict`, `swiftlint lint --strict` per [RELEASE-001b] before declaring Phase 0 baseline. The save-progress commit's tree may pass on the author's machine while failing on the next clean build because the author saved before completing the change.
+If any match returns: re-run coordinator-owned package clean/build/test plus `swift-format lint --strict` and `swiftlint lint --strict` per [RELEASE-001b] before declaring Phase 0 baseline. The save-progress commit's tree may pass on the author's machine while failing on the next clean build because the author saved before completing the change.
 
 **What patterns the grep should match** (all case-insensitive):
 
@@ -270,7 +270,7 @@ Each match MUST be converted to:
 | `.package(path: "../../<org>/<sibling>")` | Same — depends on the maintainer's local workspace shape, not on the public dep graph |
 | Commented `// .package(path: ...)` | Out of scope — commented declarations don't resolve; flag only if uncommenting is imminent |
 
-**Why this is a release-blocking finding**: SwiftPM resolves path-form deps only against the local filesystem. Public-consumer `swift package resolve` runs in environments without the sibling-clone — CI runners, downstream consumers, Linux build hosts. The resolve will fail with a path-not-found error at the first non-local resolve. The defect is undetectable in the maintainer's environment (resolve succeeds) and 100%-detectable in any consumer's environment. Phase 0 is the only place this surfaces before public flip; downstream consumers cannot work around the violation.
+**Why this is a release-blocking finding**: SwiftPM resolves path-form deps only against the local filesystem. Public-consumer resolution runs in environments without the sibling clone — CI runners, downstream consumers, Linux build hosts. It will fail with a path-not-found error at the first non-local resolve. The defect is undetectable in the maintainer's environment (resolve succeeds) and 100%-detectable in any consumer's environment. Phase 0 is the only place this surfaces before public flip; downstream consumers cannot work around the violation.
 
 **Cross-references**: [RELEASE-001] Phase 0, `[PKG-DEP-001]` (path pre-publish / url post-publish), `[PKG-DEP-002]` (package-identity audit before path-form sibling deps), **swift-package** skill, `swift-institute/Research/versioning-and-release-strategy.md` (the canonical bottom-up visibility-flip × tag × pin-form-switch phase model + one-form-per-package invariant this Phase-0 path-form check serves).
 
@@ -339,7 +339,7 @@ This rule owns publication-mode behavior.
 
 | Phase | Purpose |
 |-------|---------|
-| **0 — Baseline verification** | Working tree clean and HEAD matches origin; CI green on the latest commit; `swift build` clean; `swift test` count matches the published claim; `swift package dump-package` matches README's Architecture section |
+| **0 — Baseline verification** | Working tree clean and HEAD matches origin; CI green on the latest commit; coordinator package build clean; coordinator package test count matches the published claim; coordinator package dump matches README's Architecture section |
 | **1 — Re-audit prior findings** | Every entry in `Audits/audit.md` re-verified independently; mark `RE-VERIFIED`, `RESOLVED` (with resolving SHA), or `CORRECTED` (new finding); do NOT trust prior verdicts |
 | **2 — Independent fresh-eyes sweep** | Each relevant skill applied independently and produces findings whether or not the prior pass found them; particular attention to areas the prior pass may have skimmed. Phase 2 MUST include an explicit **discovery-lens** sub-pass on the README and the org/repo profile (per [README-023] evaluator's lens): for each paragraph, cover-with-your-hand test ("could the reader skip this and still answer the family's evaluation question?"). Single-package per-rule audits do not surface cohort-recurring patterns where the rules themselves need extension; the discovery-lens pass catches such patterns before launch. Cost: minutes per package; benefit: avoids the post-launch ecosystem-uniformity sweep that propagates the missed pattern across N already-shipped READMEs. |
 | **3 — Recent-change regression check** | Per substantial-change set, verify no regression: spot-check claims in any consolidated narrative, re-read the README cold, grep the repo for dangling references after relocations, trigger workflow dry-runs |
@@ -499,16 +499,16 @@ This rule owns publication-mode behavior.
 
 ### [RELEASE-007] Empirical Example-Compile Gate
 
-**Statement**: Phase 3 of [RELEASE-001] (Release-Readiness Brief) and [RELEASE-002] (Final Pre-Release Scan) MUST include an empirical-compile gate for every README, DocC article, and skill-rule example. Each code example in a customer-facing artifact MUST be empirically validated — extracted as-is and either parsed (`swiftc -parse`) or fully built (`swift build` against a scratch SwiftPM package) — before the package can pass to the per-action authorization gates per [RELEASE-004]. Examples that fail the gate are a release-blocking defect; the package CANNOT proceed to tag until they compile.
+**Statement**: Phase 3 of [RELEASE-001] (Release-Readiness Brief) and [RELEASE-002] (Final Pre-Release Scan) MUST include an empirical-compile gate for every README, DocC article, and skill-rule example. Each code example in a customer-facing artifact MUST be empirically validated — extracted as-is and either parsed (`swiftc -parse`) or fully built through the coordinator against a scratch SwiftPM package — before the package can pass to the per-action authorization gates per [RELEASE-004]. Examples that fail the gate are a release-blocking defect; the package CANNOT proceed to tag until they compile.
 
 **Validation tier mapping** (per [README-170] composed-example matrix):
 
 | Example shape | Validation discipline | Gate status |
 |---------------|------------------------|-------------|
 | Single type, ≤2 method calls | `swiftc -parse` | Required |
-| Composed example (≥2 ecosystem types) | Real call-site citation per type OR `swift build` against scratch SwiftPM package | Required |
-| Quick Start examples | `swift build` against scratch SwiftPM package | Required |
-| DocC code blocks marked `// docc-test` (or equivalent) | `swift test` via DocC plugin (when available) | Required |
+| Composed example (≥2 ecosystem types) | Real call-site citation per type OR coordinator build against scratch SwiftPM package | Required |
+| Quick Start examples | Coordinator build against scratch SwiftPM package | Required |
+| DocC code blocks marked `// docc-test` (or equivalent) | Coordinator test via DocC plugin (when available) | Required |
 | Skill-rule examples (illustrative code in `[ID]` blocks) | `swiftc -parse` | Required |
 
 **Procedure** (Phase 3 of release-readiness brief / final pre-release scan):

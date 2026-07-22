@@ -139,7 +139,7 @@ One-line hooks for every rule. Load the linked file when the topic is active.
 | [CI-050] | Mass changes across ≥3 repos require per-action authorization; a plan is a roadmap, not a blanket YES |
 | [CI-051] | Surgical commits, dirty-skip discipline — one logical change per commit; skip dirty repos |
 | [CI-052] | Visibility flips / tag ops require explicit "YES DO NOW PUBLIC" / "YES DO NOW TAG" |
-| [CI-056] | Per-package `swift build` verify between a source-modifying transform and push |
+| [CI-056] | Per-package coordinator build verify between a source-modifying transform and push |
 | [CI-111] | Mass rewrite scripts preserve pre-existing transformed forms + require sample diff-inspection |
 | [CI-113] | Toolchain-floor bumps verify every CI execution surface first — workflow updates land before the mass push, one-repo canary before the fleet |
 

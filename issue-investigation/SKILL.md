@@ -147,7 +147,7 @@ the user was never going to accept.
 TOOLCHAINS=swift xcrun swiftc -O reproducer.swift -o /tmp/test 2>&1
 
 # Or via SwiftPM:
-TOOLCHAINS=swift swift build -c release
+TOOLCHAINS=swift /Users/coen/Developer/swift-institute/Scripts/swift-build package build -- -c release
 ```
 
 **If it passes on dev**: Record the finding ("fixed in 6.x-dev"), apply a source-restructuring workaround for current Xcode (never `@_optimize(none)` or other optimization-suppressing attributes — forbidden per [ISSUE-008]), and move on. No issue or PR needed.
@@ -181,7 +181,7 @@ swiftc -O reproducer.swift -o /tmp/test
 
 ### [ISSUE-003] Reduction Protocol
 
-**Statement**: Reduce per [EXP-004] with ONE critical addition: **every reduction step MUST use a clean build**. Verify `rm -rf .build` succeeded (check exit code or confirm directory absence) before trusting any build result.
+**Statement**: Reduce per [EXP-004] with ONE critical addition: **every reduction step MUST use a clean build**. For SwiftPM reproducers, run `swift-build package clean` and verify its exit status before the coordinator-owned build; never delete `.build` directly.
 
 **Reduction order** (remove one element per step, verify crash persists):
 1. Remove async/await, closures, actors
@@ -196,9 +196,9 @@ swiftc -O reproducer.swift -o /tmp/test
 
 **At each step**: If removal eliminates the crash, that element is REQUIRED — restore it and continue reducing other elements.
 
-**Stale build trap**: SwiftPM's `.build` directory can survive `rm -rf` (locked files, nested structures). If a reduction appears to crash but shouldn't, test with `swiftc` directly to rule out cached artifacts.
+**Stale build trap**: If a coordinator-owned clean/build result contradicts the reduction, test the standalone file with `swiftc` directly to separate SwiftPM state from compiler behavior.
 
-**Rationale**: The 2026-03-31 investigation produced multiple false reductions because `rm -rf .build` silently failed, leaving stale artifacts from earlier variants. Every "crash" in the reduction series was actually running against cached SIL from the first successful reproduction.
+**Rationale**: The 2026-03-31 investigation produced multiple false reductions because direct generated-state deletion silently failed, leaving stale artifacts from earlier variants. Every "crash" in the reduction series was actually running against cached SIL from the first successful reproduction. Coordinator-owned cleaning removes that unmanaged failure mode.
 
 ---
 
@@ -471,7 +471,7 @@ for f in Sources/MyTarget/*.swift; do cp "$f" "$f.bak"; echo "" > "$f"; done
 
 # Add files back one at a time, rebuild between each
 cp Sources/MyTarget/Buffer.swift.bak Sources/MyTarget/Buffer.swift
-swift build -c release  # Crash? → Buffer.swift is involved.
+/Users/coen/Developer/swift-institute/Scripts/swift-build package build -- -c release  # Crash? → Buffer.swift is involved.
 ```
 
 **Rationale**: Proved decisive for the LLVM verifier crash investigation (2026-03-20). File-level elimination took minutes and gave definitive answers, while code-level modification consumed hours without progress.
@@ -763,7 +763,7 @@ Without [ISSUE-025], the audit would have shipped a HOLD recommendation on three
 
 ```bash
 # When you see @section attribute errors, surface the actual semantic errors:
-swift test 2>&1 | grep -E "^/Users/.*error:" | head -20
+/Users/coen/Developer/swift-institute/Scripts/swift-build package test 2>&1 | grep -E "^/Users/.*error:" | head -20
 ```
 
 Fix the semantic errors (typically by hoisting the consume out of the macro expression):
@@ -802,15 +802,17 @@ The `@section` errors disappear once the underlying issue is resolved. Do NOT ch
 
 ### [ISSUE-030] Rule Out Stale Dependency / Build State Before Claiming a Compiler Bug
 
-**Statement**: Before diagnosing a "the compiler can't see this overload / picks the wrong one" symptom as a Swift compiler bug, rule out stale LOCAL state first — the cheaper explanation, and the front-loaded check per [ISSUE-001]. When a downstream consumer can't resolve a typed overload / extension / SLI member from an upstream institute package (symptom: "compiler picks the stdlib overload, warns the import is unused, `cannot convert X to Y`"), check the upstream's pinned `revision` in the consumer's `Package.resolved` BEFORE claiming an overload-resolution bug: `Package.resolved` is gitignored per-developer state and can lag the local mirror's `main` HEAD by months, so the typed overload may simply not exist in the resolved module. This is the dependency-pin sibling of the clean-`.build` discipline in [ISSUE-003] (stale artifacts) and [ISSUE-028] (consult the catalog before designing around an apparent limitation).
+**Statement**: Before diagnosing a "the compiler can't see this overload / picks the wrong one" symptom as a Swift compiler bug, rule out stale LOCAL state first — the cheaper explanation, and the front-loaded check per [ISSUE-001]. When a downstream consumer cannot resolve a typed overload, extension, or SLI member from an upstream institute package, verify the dependency requirement and canonical URL in `Package.swift`, the applicable mirror, the upstream repository state, and the resolver diagnostics before claiming an overload-resolution bug. `Package.resolved` is generated and ignored; do not inspect or adjust individual pins as the remediation workflow. This is the dependency-resolution sibling of the isolated-build discipline in [ISSUE-003] and [ISSUE-028].
 
 **Procedure**:
 ```bash
-grep -A3 "<upstream-package>" Package.resolved          # the pinned revision
-git -C <upstream-pkg> rev-parse main                    # the local mirror HEAD
-swift package update                                    # re-resolve against the mirror if stale
+git -C <upstream-pkg> rev-parse main
+/Users/coen/Developer/swift-institute/Scripts/swift-build package resolve \
+  --package-path <consumer-package>
+/Users/coen/Developer/swift-institute/Scripts/swift-build package build \
+  --package-path <consumer-package>
 ```
-A one-line module-scope `@inlinable` probe calling the same overload OUTSIDE any extension disambiguates: if it also fails, the overload genuinely isn't in the resolved module (dep-resolution level, not a compiler bug); if it resolves, the issue is extension-context-specific.
+A one-line module-scope `@inlinable` probe calling the same overload outside any extension disambiguates: if it also fails after a clean-worktree resolve/build, the overload is absent from the resolved dependency graph (dependency level, not a compiler bug); if it resolves, the issue is extension-context-specific.
 
 
 **Cross-references**: [ISSUE-001], [ISSUE-003], [ISSUE-028], [PKG-BUILD-012] (swift-package-build — build-side triage of the same failure)
@@ -819,7 +821,7 @@ A one-line module-scope `@inlinable` probe calling the same overload OUTSIDE any
 
 ### [ISSUE-031] Convention ≠ Type-System Constraint; Probe Before Claiming Impossibility
 
-**Statement**: Before asserting a design is impossible because "the type system forbids it" or "a skill rule says MUST", separate **convention** (a skill SHOULD / idiomatic style rule) from **type-system constraint** (a compiler-enforced rule). A skill "MUST" is a style convention, not a compiler wall. Before stating "X can't be expressed in Swift", write a ~15-line probe and `swiftc` it — and rule out the ADJACENT mechanisms, not just the first spelling: one mechanism failing does NOT generalise to its neighbours (the first failing spelling is not a proof of impossibility). Run the probe in-package when the target package is isolated (nothing depends on it yet) — its own `swift build` / `swift test` is faster and higher-fidelity than a hand-reconstructed `/tmp` probe; reserve `/tmp` probes for consumed packages, in-flight parallel work, destructive checks, or genuinely toolchain-level questions (e.g. stdlib API availability).
+**Statement**: Before asserting a design is impossible because "the type system forbids it" or "a skill rule says MUST", separate **convention** (a skill SHOULD / idiomatic style rule) from **type-system constraint** (a compiler-enforced rule). A skill "MUST" is a style convention, not a compiler wall. Before stating "X can't be expressed in Swift", write a ~15-line probe and `swiftc` it — and rule out the ADJACENT mechanisms, not just the first spelling: one mechanism failing does NOT generalise to its neighbours (the first failing spelling is not a proof of impossibility). Run the probe in-package when the target package is isolated (nothing depends on it yet) — coordinator-owned package build/test actions are faster and higher-fidelity than a hand-reconstructed `/tmp` probe; reserve `/tmp` probes for consumed packages, in-flight parallel work, destructive checks, or genuinely toolchain-level questions (e.g. stdlib API availability).
 
 **Example**: `@_rawLayout(size: N)` rejects a non-literal `N` — TRUE, but stopping there and calling `Memory.Inline<n>` impossible was a false wall; the adjacent `@_rawLayout(likeArrayOf: UInt8, count: n)` accepts a value-generic `count` and built + tested green.
 

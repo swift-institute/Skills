@@ -68,25 +68,25 @@ Performance testing patterns for the Swift Institute ecosystem. Covers benchmark
 
 ---
 
-## Build Cleanup
+## Coordinator-Owned Clean Builds
 
-### [BENCH-002] .build Cleanup Requirement
+### [BENCH-002] Coordinator Clean Requirement
 
-**Statement**: Before running benchmarks, ALWAYS `rm -rf .build` from the benchmark directory (nested `Tests/` or same-package root). Stale build artifacts cause false results and confusing failures.
+**Statement**: Before running benchmarks, ALWAYS run the coordinator's `package clean` action from the benchmark package (nested `Tests/` or same-package root). Never delete `.build` directly. Stale build artifacts cause false results and confusing failures.
 
 ```bash
 # Nested package benchmarks (primitives)
 cd swift-{package}/Tests
-rm -rf .build
-swift test --filter Performance
+/Users/coen/Developer/swift-institute/Scripts/swift-build package clean
+/Users/coen/Developer/swift-institute/Scripts/swift-build package test -- --filter Performance
 
 # Same-package benchmarks (foundations/standards)
 cd swift-{package}
-rm -rf .build
-swift test --filter Performance
+/Users/coen/Developer/swift-institute/Scripts/swift-build package clean
+/Users/coen/Developer/swift-institute/Scripts/swift-build package test -- --filter Performance
 ```
 
-**Rationale**: Incremental builds can produce measurement artifacts. A clean build ensures reproducible benchmark baselines. This was a recurring footgun in swift-io development — with a stale `.build`, the Swift build system leaks memory during benchmark builds (usage ballooned to ~82 GB against io-bench before the cleanup was made mandatory). Separately, for a long-running comparison/throughput suite ([BENCH-005]) that can run for minutes or hang, verify it in-session with `swift build` (compile-check only) and surface the run command to the user rather than executing `swift test` on it.
+**Rationale**: Incremental builds can produce measurement artifacts. A coordinator-owned clean build ensures reproducible benchmark baselines without bypassing machine-wide capacity or manipulating generated state directly. This was a recurring footgun in swift-io development — stale build state caused memory usage to balloon to ~82 GB against io-bench. Separately, for a long-running comparison/throughput suite ([BENCH-005]) that can run for minutes or hang, compile-check it with `swift-build package build` and surface the coordinator-owned run command to the user rather than executing the suite automatically.
 
 ---
 
@@ -96,7 +96,7 @@ swift test --filter Performance
 
 **Statement**: Performance tests MUST use the `.timed()` trait from swift-testing for structured measurement — OR, where the `.timed()` stack is unreachable from the package under measurement (an L1-isolated tree whose dependency closure cannot reach the swift-tests/swift-testing L3 stack), the **executable-target instrument** (the sanctioned variant below).
 
-**The executable-target variant (ratified 2026-06-12; the arc-bench shape)**: a nested `Benchmarks/` package ([BENCH-001] placement, own `.build` for the [BENCH-002] wipe) holding an executable target run directly (`swift build -c release`, then the binary — never `swift test`). Required mechanics: `ContinuousClock` batch timing with per-sample floors (≥ ~0.5 ms); `@inline(never)` opaque sources/sinks with the sink printed at exit; warmup batches + ≥9 timed samples emitting FULL per-sample vectors (`BENCH {json}` lines — variance is never hidden behind a point estimate); every recorded row reports median + worst within-run CV + max cross-run spread over ≥3 process invocations; recorded runs are bracketed (process checks + load) and gated by CROSS-RUN AGREEMENT (uniform inflation across all subjects = environment, excluded); a same-binary drift canary rides each recording window. `.timed()` remains the default wherever it builds; `Lint.Rule.Testing.BenchmarkTimedRequired` carries the exemption as a citation-comment carve (a `[BENCH-003]` mention in the suite's or test's leading trivia exempts — the rule-exemptions citation shape; amended Round M ζ pilot 3, 2026-06-12; receipt `promote-BENCH-003-exemption-validation-2026-06-12.md`).
+**The executable-target variant (ratified 2026-06-12; the arc-bench shape)**: a nested `Benchmarks/` package ([BENCH-001] placement, with its own coordinator-owned clean state per [BENCH-002]) holding an executable target built and run through `swift-build package build -- -c release` and `swift-build package run -- -c release` — never as a test suite. Required mechanics: `ContinuousClock` batch timing with per-sample floors (≥ ~0.5 ms); `@inline(never)` opaque sources/sinks with the sink printed at exit; warmup batches + ≥9 timed samples emitting FULL per-sample vectors (`BENCH {json}` lines — variance is never hidden behind a point estimate); every recorded row reports median + worst within-run CV + max cross-run spread over ≥3 process invocations; recorded runs are bracketed (process checks + load) and gated by CROSS-RUN AGREEMENT (uniform inflation across all subjects = environment, excluded); a same-binary drift canary rides each recording window. `.timed()` remains the default wherever it builds; `Lint.Rule.Testing.BenchmarkTimedRequired` carries the exemption as a citation-comment carve (a `[BENCH-003]` mention in the suite's or test's leading trivia exempts — the rule-exemptions citation shape; amended Round M ζ pilot 3, 2026-06-12; receipt `promote-BENCH-003-exemption-validation-2026-06-12.md`).
 
 | Syntax | Purpose |
 |--------|---------|
@@ -266,18 +266,18 @@ struct `IO Read Benchmark` {
 **Same-package benchmarks** (foundations/standards):
 ```bash
 cd swift-{package}
-rm -rf .build                          # [BENCH-002]
-swift test --filter Performance
-swift test --filter "Benchmark"        # Named benchmarks
+/Users/coen/Developer/swift-institute/Scripts/swift-build package clean
+/Users/coen/Developer/swift-institute/Scripts/swift-build package test -- --filter Performance
+/Users/coen/Developer/swift-institute/Scripts/swift-build package test -- --filter "Benchmark"
 ```
 
 **Nested package benchmarks** (primitives):
 ```bash
 cd swift-{package}/Tests
-rm -rf .build                          # [BENCH-002]
-swift package resolve                  # First run only
-swift test --filter Performance
-swift test --filter "Benchmark"        # Named benchmarks
+/Users/coen/Developer/swift-institute/Scripts/swift-build package clean
+/Users/coen/Developer/swift-institute/Scripts/swift-build package resolve
+/Users/coen/Developer/swift-institute/Scripts/swift-build package test -- --filter Performance
+/Users/coen/Developer/swift-institute/Scripts/swift-build package test -- --filter "Benchmark"
 ```
 
 **Rationale**: The nested package has its own `.build/` directory and dependency graph.
