@@ -52,6 +52,16 @@ reject bypasses; they are not the lock.
 
 # Capacity inspection
 /Users/coen/Developer/swift-institute/Scripts/swift-build status
+
+# Impact analysis and affected-package builds
+/Users/coen/Developer/swift-institute/Scripts/swift-build impact -- \
+  --upstream /absolute/upstream/package \
+  --workspace /Users/coen/Developer
+
+# Machine-readable SwiftPM leaves
+/Users/coen/Developer/swift-institute/Scripts/swift-build package dump-package
+/Users/coen/Developer/swift-institute/Scripts/swift-build package get-mirror -- \
+  --original https://example.invalid/dependency.git
 ```
 
 Defaults are two concurrent build processes and three SwiftPM jobs per process.
@@ -101,6 +111,20 @@ Never use `--ignore-lock`, a machine-global `SWIFTPM_BUILD_DIR`, ad hoc
 background `swift`/`xcodebuild` processes, or a second scheduler. Separate git
 worktrees are separate package roots and are the correct isolation when two
 builds must exercise different source states of one repository.
+
+An orchestrator may submit every independent package in one dependency wave,
+then wait at the wave barrier, but submission fan-out is not capacity
+ownership. The orchestrator MUST NOT retain or reacquire a package-root lock or
+global slot around its lifetime. A coordinator-owned launcher that must build
+the orchestrator first releases both the orchestrator root lock and its global
+slot before executing it; only the subsequently submitted leaf actions acquire
+locks and slots. Operational `swift-impact` runs use `swift-build impact`, not
+a nested `package run` from the swift-impact root.
+
+Manifest and mirror inspection used by an orchestrator are leaf actions too:
+route them through `package dump-package` and `package get-mirror`. Their child
+standard output remains machine-readable because coordinator tracing uses
+standard error.
 
 The default budget is deliberately conservative: `2 × 3` permits concurrency
 without multiplying SwiftPM's usual per-process job count across agents. Any
@@ -188,9 +212,18 @@ first trustworthy failure.
 
 **Statement**: Distinguish dependency resolution, graph planning, compilation,
 linking, and test execution before calling a build hung. Inspect the process and
-log, set a bounded observation window, terminate only the exact owned process,
-and preserve evidence. Never use broad `pkill`, stale PID files, or open-ended
-polling.
+log, and preserve evidence. A bounded SwiftPM leaf uses the coordinator's
+`--timeout-seconds`; its deadline begins only after the package-root lock and a
+global slot have both been acquired. At expiry the coordinator sends TERM to
+the owned process group, waits the configured grace period, escalates to KILL,
+reaps the direct child, and proves the complete process group absent before it
+returns 124 or releases either lock. The caller MUST leave swift-process's own
+timeout nil for coordinator children and MUST NOT kill the coordinator to
+enforce a competing outer deadline.
+
+Never use broad `pkill`, stale PID files, or open-ended polling. A user-requested
+SIGINT or SIGTERM follows the same group-cleanup invariant while preserving the
+signal-derived exit status.
 
 ---
 
@@ -214,8 +247,8 @@ name the un-gated targets and reason explicitly; do not imply green evidence.
 ### [PKG-BUILD-020] Full Error Inventory Uses a Controlled Target Sweep
 
 **Statement**: When a full SwiftPM build halts before sibling targets are
-visited, derive the target list from `swift package dump-package` and run each
-target serially through the coordinator. Deduplicate diagnostics by
+visited, derive the target list from `swift-build package dump-package` and run
+each target serially through the coordinator. Deduplicate diagnostics by
 `file:line:message` and retain each coordinator exit status.
 
 ---
