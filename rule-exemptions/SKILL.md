@@ -1,7 +1,7 @@
 ---
 name: rule-exemptions
 description: |
-  Seven recurring exemption shapes for the linter rule corpus.
+  Eleven recurring exemption shapes for the linter rule corpus.
   Apply when authoring or amending a custom lint rule whose firing
   intersects a deliberate institute or stdlib pattern.
 
@@ -20,12 +20,16 @@ created: 2026-05-12
 
 # Rule Exemptions
 
-Seven exemption shapes — six empirically validated across Wave 2 of the
+Eleven exemption shapes — six empirically validated across Wave 2 of the
 2026-05-11 rule-amendment campaign (see
 `swift-foundations/swift-linter-rules/Research/wave-2-rule-amendments-2026-05-11.md`),
-plus the SwiftSyntax-visitor-subclass shape ([RULE-EXEMPT-7]) added in
+the SwiftSyntax-visitor-subclass shape ([RULE-EXEMPT-7]) added in
 Thread C of the 2026-05-12 rule-pack-dogfeed triage (see
-`swift-foundations/swift-linter-rules/Research/2026-05-12-thread-b-rule-pack-dogfeed-triage.md`).
+`swift-foundations/swift-linter-rules/Research/2026-05-12-thread-b-rule-pack-dogfeed-triage.md`),
+and four shapes ([RULE-EXEMPT-8]..[RULE-EXEMPT-11]) ratified by the #16
+Option C ledger DECISION (2026-07-23,
+`swift-institute/Research/lint-rule-adjudication-ledger-option-c.md`,
+implemented at swift-foundations/swift-institute-linter-rules `ff5efa2`).
 Each shape recurs across multiple rule packs and represents a *structural*
 reason a rule should not fire — not a discretionary opt-out. Rule authors
 MUST cite the shape's `[RULE-EXEMPT-N]` ID at the exemption site and reuse
@@ -50,6 +54,7 @@ if <helperCall(node)> {
 
 - `swift-foundations/swift-linter-rules/Research/wave-2-rule-amendments-2026-05-11.md` — Wave 2 dispatch ledger.
 - `swift-foundations/swift-linter-rules/Research/wave-3-aggregate-2026-05-11.md` — v1.2.0 closeout aggregate.
+- `swift-institute/Research/lint-rule-adjudication-ledger-option-c.md` — #16 Option C adjudication ledger (DECISION 2026-07-23; source of [RULE-EXEMPT-8]..[RULE-EXEMPT-11] and the [RULE-EXEMPT-2] witness-allowlist governance).
 
 ---
 
@@ -64,6 +69,10 @@ if <helperCall(node)> {
 | [RULE-EXEMPT-5] | Protocol-sentinel | `namingIsProtocolSentinelName(_:)` | `Lint.Rule.Naming.UnificationTypealias`, `Lint.Rule.Structure.MinimalTypeBody` |
 | [RULE-EXEMPT-6] | stdlib-shadow | `platformSwiftQualificationIsInsideStdlibExtension(_:)` | `Lint.Rule.Platform.SwiftQualification` |
 | [RULE-EXEMPT-7] | syntax-visitor-subclass | `structureExtendsSyntaxVisitor(_:)` / `namingExtendsSyntaxVisitor(_:)` | `Lint.Rule.Structure.MinimalTypeBody`, `Lint.Rule.Naming.CompoundType` |
+| [RULE-EXEMPT-8] | initializer-boundary reserve | `isDirectlyInsideInitializer(_:)` | `Lint.Rule.Structure.RawValueAccess` |
+| [RULE-EXEMPT-9] | C-library-module availability | `platformPlatformConditionalCLibraryModules` set | `Lint.Rule.Platform.PlatformConditional` |
+| [RULE-EXEMPT-10] | wire-schema/named-options memberwise-init | `namingBoolParameterHasWireSchemaConformance(_:)` + `namingBoolParameterAssignsSelf(_:parameter:)` | `Lint.Rule.Naming.BoolParameter` |
+| [RULE-EXEMPT-11] | brand-token orthography | `namingCompoundTypeBrandTokenCitations` dict | `Lint.Rule.Naming.CompoundType` |
 
 ---
 
@@ -159,13 +168,40 @@ conformance is impossible.
 
 **Dict shape variants**:
 
-- Simple `[String: String]` — the citation IS the value. Used by
-  `namingCompoundProtocolWitnessMethodCitations` in
-  `Lint.Rule.Naming.Compound.swift`.
+- Simple `[String: String]` — the citation IS the value.
 - Tuple-valued — when the same witness key can satisfy multiple
   protocols. Used by `throwsExistentialStdlibProtocolWitnessCitations`
   in `Lint.Rule.Throws.Existential.swift`:
   `[String: (witness: String, protocols: [String])]`.
+- Gated-tuple-valued — when entries need a per-entry conformance gate.
+  Used by `namingCompoundProtocolWitnessMethodCitations` in
+  `Lint.Rule.Naming.Compound.swift` since the #16 Option C Entry III.d
+  DECISION (2026-07-23):
+  `[String: (citation: String, conformanceGated: Bool)]`.
+
+**Witness-allowlist governance (#16 Option C Entry III.d, DECISION
+2026-07-23)** — the witness allowlist the rule's accept-as-warning arm
+refers to IS the citation dict, formalized:
+
+1. **Who adds entries**: entries are proposed in lint drains and
+   ratified by the principal or a session holding delegated
+   adjudication authority, citing the ratifying adjudication.
+2. **Citation**: each entry names its specific `Protocol.requirement`
+   (mandatory) — adding an entry without one is indefensible at review
+   time.
+3. **Effect**: allowlisted witnesses stop firing entirely inside their
+   gate; outside it they still fire.
+4. **Per-entry gate** (`conformanceGated`): conformance-gated by
+   default ([RULE-EXEMPT-3] via `Naming.conformances`). Name-only
+   (`false`) where the one-extension-per-member file convention
+   (`Type+method.swift`) places the witness in a bare extension whose
+   conformance is declared in a SIBLING file, which no same-file AST
+   walk can see — the same structural limitation that made
+   `Naming.Build.methods` name-only. Name-only entries MUST be protocol
+   vocabulary distinctive enough that non-witness reuse is implausible.
+5. **Coverage**: the dict gates the property path as well as the method
+   path (previously method-only — property witnesses such as
+   `displayName` fired ungated).
 
 **Example**:
 
@@ -184,7 +220,10 @@ if namingCompoundProtocolWitnessMethodCitations[name] != nil {
 **Adopting rules**:
 
 - `Lint.Rule.Naming.Compound` —
-  `namingCompoundProtocolWitnessMethodCitations` (3 entries).
+  `namingCompoundProtocolWitnessMethodCitations` (13 entries,
+  gated-tuple-valued, methods + properties; includes the seven
+  `Identity.OAuth.Provider` requirements seeded per Entry III.d and
+  verified against swift-identities-types `Identity.OAuth.swift:52-78`).
 - `Lint.Rule.Throws.Existential` —
   `throwsExistentialStdlibProtocolWitnessCitations` (2 entries,
   tuple-valued).
@@ -194,7 +233,9 @@ if namingCompoundProtocolWitnessMethodCitations[name] != nil {
 
 **Source signal**: swift-either-primitives (6 `flatMap` findings),
 swift-product-primitives (Existential×2), swift-tagged-primitives
-(11 Tagged-init findings).
+(11 Tagged-init findings); governance formalization: #16 Option C
+Entry III.d (7 accepted-as-warning witness sites in
+swift-identities-github `0205e7f`).
 
 ---
 
@@ -541,6 +582,242 @@ visit overrides inside the class body.
 
 ---
 
+## [RULE-EXEMPT-8] initializer-boundary reserve
+
+**Statement**: A rule that fires on raw-value accessor consumption
+(`.rawValue` / `.position` at a call site — the typed-conversion-ladder
+bypass family) MUST NOT fire when the *directly* enclosing
+function-like context is an initializer. The initializer IS the
+typed-conversion boundary the rule's own message reserves: the
+declaring `init(rawValue:)` assigning its stored raw value, and an
+adapter extension init consuming the brand's raw form exactly once.
+Only the direct context counts — a closure or nested function inside an
+initializer is ordinary consumer code and still fires.
+
+**Why**: [PATTERN-017]'s message text reserves the accessors "for
+extension initializers (the brand-newtype's own boundary) and
+same-package implementations", yet the implementation fired inside
+declaring `init(rawValue:)` bodies (swift-iso-9945
+`ISO 9945.Kernel.Process.ID.swift:23`, swift-github-standard
+`GitHub.Owner.ID.swift:6-9`), forcing per-site disables inside the very
+reserve the message grants. Wire-boundary consumption in ordinary
+function bodies deliberately remains accept-as-warning /
+per-site-disable — the wire boundary is exactly where a human REASON
+earns its cost (#16 Option C Entry II.1 DECISION).
+
+**How to apply**:
+
+1. In the accessor visit, after matching a flagged accessor name, call
+   the pack-local helper `isDirectlyInsideInitializer(Syntax(node))`.
+2. The helper walks the parent chain to the FIRST function-like
+   ancestor (function decl, accessor, or closure) and returns true iff
+   that ancestor is an `InitializerDeclSyntax`. Stopping at the first
+   function-like ancestor is what keeps closures/functions nested in
+   inits firing.
+3. If true, return `.visitChildren`.
+
+**Example**:
+
+```swift
+// Exempt per [RULE-EXEMPT-8] (initializer-boundary reserve): the
+// rule's message reserves these accessors for the brand-newtype's own
+// boundary; an initializer IS the typed-conversion boundary the
+// ladder terminates in.
+if isDirectlyInsideInitializer(Syntax(node)) {
+    return .visitChildren
+}
+```
+
+**Adopting rules**:
+
+- `Lint.Rule.Structure.RawValueAccess` (lives in
+  swift-foundations/swift-institute-linter-rules, target
+  `Institute Linter Rule Structure`).
+
+**Source signal**: 2026-07-23 ecosystem lint sweep — 3,153 findings /
+158 repos, sampled firings all in sanctioned shapes (#16 Option C
+Entry II.1). Regression pinned by rule unit test
+`brand rawValue consumption inside adapter extension init is NOT flagged`
+(covers the Entry III.f IPv4-adapter shape).
+
+---
+
+## [RULE-EXEMPT-9] C-library-module availability
+
+**Statement**: A rule that forbids `#if canImport(...)` as a
+platform-identity check MUST exempt conditions naming a raw C-library /
+system-SDK module: `Darwin`, `Glibc`, `Musl`, `Bionic`, `Android`,
+`WASILibc`, `WinSDK`, `ucrt`, `CRT`. On those modules `canImport` IS
+module availability — the shape the skill sanctions — not platform
+identity. The rule keeps firing on institute platform-prefixed modules
+(`Darwin_Kernel_Standard` etc., [PATTERN-004a]'s forbidden shape) and
+on bare `Linux` / `Windows` (not importable modules; an always-false
+`canImport` is platform-identity confusion plus a dead branch).
+
+**Why**: The ecosystem's canonical libc trellis
+`#if canImport(Darwin) || canImport(Glibc) || canImport(Musl)` is
+structurally inexpressible with `#if os(...)`: `os(Linux)` is true for
+both Glibc and Musl, so the trellis cannot be rewritten without losing
+the Musl arm. The platform skill's own determinism table
+(`Skills/platform/compilation.md`) does not condemn it. Before the
+recalibration the rule flagged 926 findings across 25 repos — every
+sampled firing was the sanctioned trellis (#16 Option C Entry II.2).
+
+**How to apply**:
+
+1. Maintain the pack-level set
+   `platformPlatformConditionalCLibraryModules: Set<String>` with the
+   nine modules above (each an importable C-interop module shipped by a
+   toolchain/SDK).
+2. When a `canImport` condition's module name is in the set, do not
+   fire (`return false` from the firing predicate / continue the walk).
+3. Names outside the set — including institute platform-prefixed
+   modules and non-module platform names — check as before.
+
+**Example**:
+
+```swift
+// Exempt per [RULE-EXEMPT-9] (C-library-module availability): gating
+// on a raw C-library module's importability is the sanctioned libc
+// trellis — os(Linux) cannot distinguish Glibc from Musl.
+if platformPlatformConditionalCLibraryModules.contains(name) { return false }
+```
+
+**Adopting rules**:
+
+- `Lint.Rule.Platform.PlatformConditional`.
+
+**Source signal**: 2026-07-23 ecosystem lint sweep — 926 findings /
+25 repos, 82% in swift-iso-9945 alone; all sampled firings were the
+libc trellis (#16 Option C Entry II.2).
+
+---
+
+## [RULE-EXEMPT-10] wire-schema/named-options memberwise-init
+
+**Statement**: A rule that fires on a parameter's *shape* in a public
+signature (currently: `Bool` parameters, [API-IMPL-003]) MUST exempt a
+parameter iff ALL of:
+
+1. the enclosing declaration is an initializer that assigns the
+   parameter memberwise (`self.<param> = <param>` at the body's top
+   level), AND
+2. the enclosing type either conforms — same-file, sibling-extension
+   conformances included — to a wire-schema protocol
+   (`Codable` / `Decodable` / `Encodable`), or is a struct named
+   `Options` (the named-options shape the rule itself prescribes).
+
+A behavioral parameter that feeds logic in the same init still fires,
+as do Bool parameters anywhere else — including elsewhere in wire
+types.
+
+**Why**: Two demonstrated false-positive shapes. (a) Wire-schema types:
+the Bool stored property mirrors the remote provider's schema (Mailgun
+`Recipient.activated`, GitHub REST `Invitation.expired`); an enum
+remedy would misrepresent the wire contract. (b) Named-options structs:
+the rule fired on the memberwise init of the `Options` struct itself
+(swift-iso-9945 `Kernel.File.Copy.Options.swift:36-44`) — its own
+prescribed remedy, prescribing recursion into itself. Package-level
+exemption of `*-types` repos was rejected because it would also silence
+genuine API-design findings (#16 Option C Entry II.3 DECISION).
+
+**How to apply**:
+
+1. In the initializer visit, compute the two type-level gates:
+   `namingBoolParameterHasWireSchemaConformance(Syntax(node))` (leaf
+   check over `Naming.conformances`, which recovers same-file sibling
+   `extension X: Decodable` conformances) and
+   `namingBoolParameterEnclosingTypeName(Syntax(node)) == "Options"`
+   (extension-declared inits resolve the extended type's leaf name).
+2. For each Bool parameter, exempt only when a gate holds AND
+   `namingBoolParameterAssignsSelf(node.body, parameter:)` finds a
+   top-level `self.<param> = <param>` (both the unfolded
+   `SequenceExprSyntax` and folded `InfixOperatorExprSyntax` assignment
+   spellings).
+3. Otherwise emit as usual.
+
+**Example**:
+
+```swift
+// Exempt per [RULE-EXEMPT-10] (wire-schema/named-options
+// memberwise-init): the Bool is dictated by the wire contract (or is
+// the named-options remedy itself) and is assigned memberwise;
+// behavioral Bools in the same init still fire.
+if wireSchema || optionsStruct {
+    let internalName = parameter.secondName?.text ?? parameter.firstName.text
+    if namingBoolParameterAssignsSelf(node.body, parameter: internalName) {
+        continue
+    }
+}
+```
+
+**Adopting rules**:
+
+- `Lint.Rule.Naming.BoolParameter`.
+
+**Source signal**: 2026-07-23 ecosystem lint sweep — 1,189 findings /
+98 repos, dominated by wire-schema `*-types` packages (stripe + mailgun
+= 45%); named-options self-firing verified at swift-iso-9945 (#16
+Option C Entry II.3).
+
+---
+
+## [RULE-EXEMPT-11] brand-token orthography
+
+**Statement**: A rule that derives word boundaries from a type name's
+internal capitals (compound-name detection) MUST exempt names that
+exact-match an entry in the brand-token citation dict
+`namingCompoundTypeBrandTokenCitations` — tokens whose orthography is
+fixed by the brand or specification that owns them. Seeded entries:
+`GitHub`, `OAuth`, `IPv4`, `IPv6`, `PostgreSQL`. Exact-match only: a
+genuine compound embedding a brand token (`GitHubClient`) still fires.
+
+**Why**: A brand token is a SINGLE word whose internal capitals are
+orthography, not word boundaries — `GitHub` is not `Git` + `Hub` any
+more than `OAuth` is `O` + `Auth`. Firing on these forces the
+ecosystem's own canonical naming (`GitHub.Owner.ID`, `GitHub.HTTP.OAuth`)
+into per-site disables, training people to suppress the rule. Entry
+III.a's nested-declaration firing re-attributed to this same defect
+class: the detector checks only the declared token, and the token
+`OAuth`'s internal capitals tripped the acronym word-boundary
+heuristic — one allowlist fix covers both entries.
+
+**How to apply**:
+
+1. Maintain the dict
+   `namingCompoundTypeBrandTokenCitations: [String: String]` next to
+   the rule's other citation dicts
+   (`namingCompoundSwiftNativeIdiomCitations` et al.); each entry cites
+   the authority that fixes the spelling (brand site, RFC, spec).
+   Adding an entry without a citation is indefensible at review time.
+2. Before running the word-boundary heuristic, check the full type-name
+   token against the dict; on exact match, do not fire.
+3. Additions are proposed in lint drains with a citation and ratified
+   per the [RULE-EXEMPT-2] witness-allowlist governance (#16 Option C
+   Entry III.d).
+
+**Example**:
+
+```swift
+// Exempt per [RULE-EXEMPT-11] (brand-token orthography): the token's
+// internal capitals are brand/spec orthography, not word boundaries.
+// Exact-match only — `GitHubClient` still fires.
+if namingCompoundTypeBrandTokenCitations[name] != nil {
+    return false
+}
+```
+
+**Adopting rules**:
+
+- `Lint.Rule.Naming.CompoundType`.
+
+**Source signal**: swift-github-http `759330b` (Entry III.a —
+`GitHub.HTTP.OAuth` disabled per-site, droppable in the drain arc) and
+swift-identities-github `0205e7f` (Entry III.b — 2 brand-name `GitHub`
+accepted-as-warning sites); #16 Option C Entries III.a/III.b DECISION.
+
+---
+
 ## Cross-shape composition
 
 Some declarations are exempt by multiple shapes simultaneously. The
@@ -554,6 +831,7 @@ matters only for readability:
 | [RULE-EXEMPT-3] + [RULE-EXEMPT-5] | `Lint.Rule.Naming.UnificationTypealias` — both gates fire on the typealias |
 | [RULE-EXEMPT-4] (type-level) + [RULE-EXEMPT-4] (member-level) | `Lint.Rule.Structure.MinimalTypeBody` — both the visited type and its nested types' attributes are checked |
 | [RULE-EXEMPT-4] + [RULE-EXEMPT-7] | `Lint.Rule.Structure.MinimalTypeBody` — class-decl visitor short-circuits on `@resultBuilder`/`@Suite` first, then on SwiftSyntax visitor-family inheritance |
+| [RULE-EXEMPT-7] + [RULE-EXEMPT-11] | `Lint.Rule.Naming.CompoundType` — visitor-family inheritance gate and brand-token dict both feed the same name check (`<Subject>Visitor` vs `OAuth`) |
 
 ---
 
@@ -569,6 +847,18 @@ matters only for readability:
   defends.
 - `[PLAT-ARCH-022]` (platform) — the rule [RULE-EXEMPT-6] primarily
   defends.
+- `[PATTERN-017]` (conversions / raw-value discipline) — the rule
+  [RULE-EXEMPT-8] primarily defends.
+- `[PATTERN-004a]` (platform, `compilation.md`) — the rule
+  [RULE-EXEMPT-9] primarily defends.
+- `[API-IMPL-003]` (code-surface) — the rule [RULE-EXEMPT-10] primarily
+  defends.
+- `[API-NAME-001]` (code-surface) — the rule [RULE-EXEMPT-11]
+  additionally defends (brand-token orthography is not a compound name).
 
-**Source dispatch ledger**:
-`swift-foundations/swift-linter-rules/Research/wave-2-rule-amendments-2026-05-11.md`.
+**Source dispatch ledgers**:
+`swift-foundations/swift-linter-rules/Research/wave-2-rule-amendments-2026-05-11.md`
+(shapes 1–6);
+`swift-institute/Research/lint-rule-adjudication-ledger-option-c.md`
+(shapes 8–11 and the [RULE-EXEMPT-2] governance, DECISION 2026-07-23,
+implemented at swift-institute-linter-rules `ff5efa2`).
