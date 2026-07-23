@@ -278,9 +278,11 @@ HEAD move triggers ONE machine-wide rebake; every subsequent lint runs the
 cached binaries with `SWIFT_LINTER_RUNNER` and `SWIFT_LINTER_PATH` provisioned
 by the coordinator.
 
-The lint holds the CONSUMER's package-root lock and a global slot — never the
-swift-linter root — so lints of different repositories parallelize and the
-linter repository is contended only during a rebake. Pure-baked-bundle
+The lint holds the CONSUMER's package-root lock — never the swift-linter
+root — so lints of different repositories parallelize and the linter
+repository is contended only during a rebake. Slot policy follows
+[PKG-BUILD-027]: a fast-path-likely dispatch takes no build slot; only a
+consumer that may route to the eval fallback holds one. Pure-baked-bundle
 consumers lint warm in about a second; eval-fallback consumers (inline rules,
 non-baked bundles, SARIF output) keep the full eval pipeline, and the
 coordinator refreshes a stale `.swift-lint/eval` via `swift package update`
@@ -293,6 +295,29 @@ with them.
 The legacy `swift-build package run --package-path <swift-linter> -- swift-linter
 <consumer>` form remains valid but serializes every lint on the swift-linter
 root and pays the per-repo eval cost; prefer `swift-build lint`.
+
+---
+
+### [PKG-BUILD-027] Prebuilt-Tool Execution Takes No Build Slot
+
+**Statement**: Running a prebuilt binary is not a build — it must not compete
+with builds for machine slots. Slots govern compilation and resolution work
+only; prebuilt-tool execution takes the relevant root lock for correctness
+but no slot. This covers any cached coordinator-owned tool, present and
+future.
+
+**Worked example** (the lint fast path): `swift-build lint` dispatches the
+cached swift-linter binary under the consumer's root lock. A
+fast-path-likely consumer (a pure baked bundle per the dispatcher's
+classifier, conservatively mirrored coordinator-side) runs slot-free — the
+dispatch is a ~1s AST walk that must not queue behind long compiles. A
+consumer that may route to the eval fallback (no readable `Lint.swift`, a
+`// parent:` chain, inline SwiftSyntax rules, manual enables, a non-baked
+bundle) still holds a slot, because the eval genuinely compiles. The bake
+itself and every eval refresh run through `package build`/`update` and are
+slot-governed as ordinary builds. The mirror errs toward TAKING a slot: the
+acceptable residual is an occasional slotted ~1s dispatch, never a routine
+unslotted compile.
 
 ---
 
