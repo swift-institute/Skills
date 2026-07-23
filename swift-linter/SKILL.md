@@ -511,7 +511,29 @@ This skill does NOT duplicate the cohort description. A consumer wiring `Lint.sw
 - [ ] If brand-owner: `.excluding(rules:)` list narrows the bundle per [LINT-EXCLUDE-001]
 - [ ] Each exclusion has a justification comment per [LINT-EXCLUDE-004]
 - [ ] No JSON/YAML config sidecar — all configuration and metadata is Swift per [LINT-SETUP-005]
-- [ ] `/Users/coen/Developer/swift-institute/Scripts/swift-build package run -- swift-linter .` runs clean (or surfaces only intended violations)
+- [ ] `/Users/coen/Developer/swift-institute/Scripts/swift-build lint --package-path <consumer>` runs clean (or surfaces only intended violations)
+
+## Local Invocation
+
+Lint locally through the coordinator's `lint` subcommand
+(`swift-package-build` `[PKG-BUILD-025]`):
+
+```bash
+/Users/coen/Developer/swift-institute/Scripts/swift-build lint \
+  --package-path /absolute/consumer/package
+```
+
+The coordinator caches the dispatcher + standard-runner binaries machine-wide
+(keyed on engine + rule-pack HEADs + compiler) and provisions
+`SWIFT_LINTER_RUNNER` / `SWIFT_LINTER_PATH` per run. Pure-bundle consumers
+([LINT-BUNDLE-001] shapes, with or without `.excluding(rules:)`) lint warm in
+about a second via the baked runner; inline-rule consumers, non-baked bundles,
+and `--format sarif` take the eval fallback, whose `.swift-lint/eval` project
+the coordinator auto-refreshes when the rule sources or `Lint.swift` moved.
+Rule-pack changes must be COMMITTED to be seen (the digest and mirror
+resolution both read HEAD). The legacy
+`swift-build package run --package-path <swift-linter> -- swift-linter <consumer>`
+form remains valid but serializes all lints on the swift-linter root.
 
 ---
 
@@ -523,7 +545,8 @@ This skill does NOT duplicate the cohort description. A consumer wiring `Lint.sw
 - **code-surface** ([API-IMPL-006]) — file-naming enforcement uses `validate-file-naming.py`, a workflow validator that runs alongside `Lint.swift` in CI.
 - **code-surface** ([API-NAME-001c]) — capability-marker protocol; [LINT-EXCLUDE-002] cites it for protocol-form brand-owner exclusion cardinality.
 - **swift-package** ([PKG-DEP-*]) — `path:` vs `url:` form rotation for `Lint.run(dependencies:)`.
-- **ci-cd-workflows** ([CI-*]) — per-package CI invokes the linter executable against the consumer's `Lint.swift`; local reproduction uses `swift-build package run`.
+- **ci-cd-workflows** ([CI-*]) — per-package CI invokes the linter executable against the consumer's `Lint.swift`; local reproduction uses `swift-build lint`.
+- **swift-package-build** ([PKG-BUILD-025]) — the coordinator's `lint` subcommand: machine-wide binary cache, consumer-root locking, eval auto-refresh.
 - **implementation/style.md** ([IMPL-104]) — leading-dot inference at top-level result-builder positions (relevant to advanced `Lint/` shape).
 
 ### Related research

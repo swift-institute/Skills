@@ -58,6 +58,10 @@ reject bypasses; they are not the lock.
   --upstream /absolute/upstream/package \
   --workspace /Users/coen/Developer
 
+# Consumer lint via the cached dispatcher + standard runner (preferred)
+/Users/coen/Developer/swift-institute/Scripts/swift-build lint \
+  --package-path /absolute/consumer/package
+
 # Machine-readable SwiftPM leaves
 /Users/coen/Developer/swift-institute/Scripts/swift-build package dump-package
 /Users/coen/Developer/swift-institute/Scripts/swift-build package get-mirror -- \
@@ -259,6 +263,50 @@ each target serially through the coordinator. Deduplicate diagnostics by
 or unexplained compiler termination, inspect free disk, memory pressure, and
 the coordinator's active-slot state before concluding the source or compiler
 is defective.
+
+---
+
+### [PKG-BUILD-025] Consumer Lint Runs Through the Coordinator's Binary Cache
+
+**Statement**: Local consumer lints use `swift-build lint --package-path
+<consumer>`. The coordinator maintains a machine-wide cache of the
+`swift-linter` dispatcher and the standard-runner binary, keyed on a composite
+digest over the local HEADs of the engine and the five standard rule-pack
+repositories plus the compiler banner — the same coordinate CI's
+`publish-ci-binaries.yml` keys the rolling `ci-binaries` release on. A keyed
+HEAD move triggers ONE machine-wide rebake; every subsequent lint runs the
+cached binaries with `SWIFT_LINTER_RUNNER` and `SWIFT_LINTER_PATH` provisioned
+by the coordinator.
+
+The lint holds the CONSUMER's package-root lock and a global slot — never the
+swift-linter root — so lints of different repositories parallelize and the
+linter repository is contended only during a rebake. Pure-baked-bundle
+consumers lint warm in about a second; eval-fallback consumers (inline rules,
+non-baked bundles, SARIF output) keep the full eval pipeline, and the
+coordinator refreshes a stale `.swift-lint/eval` via `swift package update`
+(never by touching its `Package.resolved`) whenever the composite digest or
+the consumer's `Lint.swift` moved. `--rebuild` forces a rebake; `--clean-eval`
+discards the eval project outright. Uncommitted rule-pack edits are invisible
+to the digest (mirror resolution clones HEAD): commit rule changes to lint
+with them.
+
+The legacy `swift-build package run --package-path <swift-linter> -- swift-linter
+<consumer>` form remains valid but serializes every lint on the swift-linter
+root and pays the per-repo eval cost; prefer `swift-build lint`.
+
+---
+
+### [PKG-BUILD-026] Toolchain-Change Staleness Is Reconciled, Scoped, and Stamped
+
+**Statement**: For `package build|test|run` the coordinator records the
+compiler banner in `.build/coordinator-compiler-version` after each successful
+action. When the recorded banner differs from the current compiler, it removes
+every `.build/**/Modules-tool` tree before the action — host-tool swiftmodules
+are compiler-version-locked and otherwise fail with "compiled by an older
+compiler" on SwiftSyntax/SwiftDiagnostics, forcing full cleans. A missing
+stamp is a strict no-op: first contact never cleans. If a version-lock failure
+survives the scoped clean, escalate to `swift-build package clean` on that
+root rather than deleting artifacts by hand.
 
 ---
 
