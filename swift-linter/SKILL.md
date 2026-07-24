@@ -439,6 +439,17 @@ retain the ability to specialize parameters and exclusions for their context.
 Allowing a child to turn a warning into an error would make the consumer config
 a second policy source and bypass the objective graduation evidence gate.
 
+> ⚠️ **The "objective graduation evidence gate" this rationale invokes DOES NOT EXIST (verified 2026-07-24).** This skill defines 19 rule IDs — BUNDLE ×3, COHORT ×1, EXCLUDE ×4, PARENT ×5, SETUP ×5, SUPPRESS ×1 — and **not one governs severity graduation.** Severity is centralised to protect a mechanism that was never written.
+>
+> ⚠️ **Related defect: `Lint.run.swift` documents `Lint.Rule.Configuration.override(_:severity:)` with a worked example, and no such API exists** — no `override` function, no `Configuration` type (positive-controlled). The engine ships a copy-pasteable snippet that cannot compile. Either implement it or delete the doc comment.
+>
+> **Ruling in force, given both of the above — the ratchet runs over the RULE corpus, not the package corpus:**
+> - ⛔ **Never flip a rule to `.error` while it has outstanding violations.** It does not get fixed; it gets suppressed per-package, converting a measurable debt into an invisible one — strictly worse than the warning.
+> - ✅ **Flip a rule canonically to `.error` once its ECOSYSTEM-WIDE count is zero.** A rule at zero cannot regress, locking it in costs nothing, and this is exactly what `[LINT-PARENT-004]` permits: canonical severity, canonically decided. Rules carrying debt stay `.warning` until drained.
+> - ⛔ **Do not route around it with `.excluding(rules:)`.** `[LINT-EXCLUDE-004]` requires an in-file comment asserting the surface is *legitimate-by-construction*, **which a debt exclusion cannot truthfully carry.** Corrupting a working check to route around a missing one is worse than the slower path.
+> - ⚠️ **Fix a rule's PREDICATE before its severity.** Widening the Foundation rule to its full module family made 48 previously-invisible lines visible, so **a package at zero only because the rule could not see its imports must not be ratcheted on that false zero.** Sequence: predicate → re-measure → determine the true zero-set → flip.
+> - ⚠️ **A per-rule count must cover `Sources/` AND `Tests/`,** and must not filter package directories by a `swift-` prefix. Either omission produces a false zero, and neither is visible in the output. **A rule measured zero over `Sources/` only, then flipped, breaks every build the moment lint reaches `Tests/`.**
+
 **Cross-references**: [LINT-PARENT-001], [LINT-PARENT-005].
 
 ---

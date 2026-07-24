@@ -127,6 +127,16 @@ same-layer edge does not merge the packages' missions or change either package's
 
 **Why**: The Foundation-free guarantee at L1/L2 is hard; extending it upward propagates the no-Foundation property through the entire stack. Consumers get predictable deployment profiles (Embedded-viable, Linux-portable without corelibs-Foundation) and explicit opt-in when they want Foundation-adjacent interop.
 
+> ⚠️ **Only three of the five layers are realised (2026-07-24).** L1 Primitives, L2 Standards and L3 Foundations are populated; **Components (L4) and Applications (L5) are aspirational.** Measured independently by two lanes: `swift-components` holds **25 directories and 1 `Package.swift`** (only one is a git repository at all), `swift-applications` **40 directories and 0** — and its entries hold a `README.md` describing an **executable**, so L5 as intended is a *different kind of artifact*, not a deeper library layer.
+>
+> Consequences for anyone applying this rule or `[ARCH-LAYER-001]`:
+> - **L3 is the top realised library layer.** Extractions land in Foundations unless a layer is deliberately being stood up.
+> - **A `swift-components/*` name records an intention, not a decision in force.** Do not cite one as precedent. The backend-split family most often quoted as the model is four empty reservations; the real precedent is `swift-sql` at L3.
+> - **Any document assigning a package to L4/L5 may be describing the same aspiration** — including `[ARCH-LAYER-001]`'s own layer table, which names "HTTP" as the Components example. **Read such placements as intentions to be confirmed, not residences.**
+> - ⚠️ **Directory counts are not package counts.** Count `Package.swift`, not `ls`, and report **realised vs reserved separately**. A figure of "65 packages" for these two roots circulated three times before anyone counted manifests; the true figure is 4 across three roots.
+>
+> The rule itself is unchanged: the discipline applies at whatever layers exist. **Measured baseline 2026-07-24: 38 packages / 1314 core-target import lines**, against a previously-tracked figure of 4. A census of a live workspace is a measurement with a timestamp, not a fact.
+
 **How to apply**:
 - L3+ packages that need Foundation-adjacent interop ship a `* Foundation Integration` subtarget; their main target stays Foundation-free.
 - When pitching the ecosystem externally, Foundation-freedom is a design feature across ALL layers, not just L1/L2.
