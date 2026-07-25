@@ -92,9 +92,25 @@ selection is mechanical from the class.
 | Org `.github` | `Organization-level community-health defaults for «OrgName».` |
 | Namespace-reservation scaffold | `Namespace reserved for «domain phrase» in Swift.` |
 | Institute meta repo | `«Corpus purpose» for the Swift Institute ecosystem («Normativity»).` |
+| Vendor / platform authority package (implements no numbered spec) | `«Content phrase» for Swift.` — identical to the L1/L3 row. See the non-spec-implementation clause below. |
 
-The `sync-metadata.yml` workflow validates the rendered description matches
-its template; descriptions that don't match are a defect.
+Template conformance is enforced by review, not by CI. **No workflow validates
+that a rendered description matches its template** (measured 2026-07-25:
+`sync-metadata.yml` contains no template or spec-title validation pass). Do not
+cite `sync-metadata.yml` as the gate for this rule.
+
+**Non-spec-implementation packages (added 2026-07-25)**: residence in an
+authority org does NOT make a package an L2 class. A package that implements
+**no numbered specification** — an instruction-set surface, a platform ABI, a
+vendor API — takes the **content-phrase** template and MUST NOT use
+`Swift implementation of …`. Current instances: `swift-arm-standard`,
+`swift-x86-standard`, `swift-windows-32`, `swift-riscv-standard`. Such
+packages get **no `spec-titles.yaml` entry**, and their org MUST NOT be added
+to the authority map in `generate-metadata.sh`: the generator would then match
+its own naming pattern against the repo name and emit a placeholder such as
+`Swift implementation of ARM TODO-standard-name.` The distinguishing test is
+"does a numbered specification exist that this package implements?", not
+"which org holds it?".
 
 **Content-phrase richness (added 2026-07-02)**: the `«Content phrase»` slot
 MUST name the package's distinctive capability, not merely restate the repo
@@ -120,14 +136,33 @@ Syntax Specifications."
 ### [GH-REPO-014] Spec-title lookup table
 **Statement**: The canonical spec-title source for L2 single-spec
 descriptions is `swift-institute/.github/spec-titles.yaml`. Schema is a
-two-level map keyed on authority code (`rfc`, `iso`, `ieee`, `iec`, `w3c`,
-`whatwg`, `ecma`, `incits`) then spec-id (`'5234'`, `'8601'`, `'4-1986'`,
-etc.) → spec title string. Maintainer adds an entry whenever a new spec-id
-package enters the ecosystem; the entry lands in the same PR that creates
-the new repo's `.github/metadata.yaml`. The `generate-metadata.yml`
-workflow reads the table and renders descriptions automatically. Drift
-between a YAML's rendered description and the table is a defect surfaced
-by `sync-metadata.yml`'s validation pass.
+two-level map keyed on authority code (`rfc`, `bcp`, `iso`, `iso-iec`,
+`ieee`, `iec`, `w3c`, `whatwg`, `ecma`, `incits`) then spec-id (`'5234'`,
+`'8601'`, `'4-1986'`, etc.) → spec title string. (`bcp` and `iso-iec` are
+real sections with dedicated generator branches; both were omitted from
+this list until 2026-07-25.) Maintainer adds an entry whenever a new
+spec-id package enters the ecosystem; the entry lands in the same PR that
+creates the new repo's `.github/metadata.yaml`.
+
+**The table is a default seed, not an equality constraint (clarified
+2026-07-25).** Its sole consumer is `generate-metadata.sh`, invoked by
+`generate-metadata.yml`, which renders a **draft** description only for
+repos that do not yet have a `.github/metadata.yaml` — it never rewrites an
+existing one, and `sync-metadata.yml` does not read the table at all.
+Consequently:
+
+- A repo's description MAY diverge from the rendered title once authored,
+  and such divergence is **not** a defect. Descriptions legitimately
+  **narrow** (`swift-ieee-1003` implements only POSIX Chapter 12) and
+  legitimately **elaborate** (`swift-rfc-6066` enumerates the six TLS
+  extensions it covers). Equality cannot hold as a general rule, so it MUST
+  NOT be asserted as one.
+- The defect the table actually prevents is a **missing entry**, which makes
+  the generator emit a literal `TODO add title to spec-titles.yaml`
+  placeholder into a generated draft. That placeholder is the thing to fix.
+- Because entries for already-authored repos are documentary rather than
+  operational, adding one is a low-risk registry completion, not a
+  behavioural change to any live repo.
 
 ### [GH-REPO-013] README ↔ description mirroring
 **Statement**: When a repo has both a README and a GitHub
