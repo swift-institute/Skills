@@ -23,7 +23,7 @@ created: 2026-05-03
 All local Swift build-capable work crosses one boundary:
 
 ```text
-/Users/coen/Developer/swift-institute/Scripts/swift-build
+~/Developer/swift-institute/Scripts/swift-build
 ```
 
 The coordinator owns machine-wide capacity, same-root serialization, workspace
@@ -34,37 +34,37 @@ reject bypasses; they are not the lock.
 
 ```bash
 # SwiftPM, from the package root
-/Users/coen/Developer/swift-institute/Scripts/swift-build package build
-/Users/coen/Developer/swift-institute/Scripts/swift-build package test
-/Users/coen/Developer/swift-institute/Scripts/swift-build package resolve
+~/Developer/swift-institute/Scripts/swift-build package build
+~/Developer/swift-institute/Scripts/swift-build package test
+~/Developer/swift-institute/Scripts/swift-build package resolve
 
 # SwiftPM, from elsewhere
-/Users/coen/Developer/swift-institute/Scripts/swift-build package build \
+~/Developer/swift-institute/Scripts/swift-build package build \
   --package-path /absolute/package/path -- --target TargetName
 
 # The sole local Xcode workspace
-/Users/coen/Developer/swift-institute/Scripts/swift-build workspace build \
+~/Developer/swift-institute/Scripts/swift-build workspace build \
   --scheme ProductName
-/Users/coen/Developer/swift-institute/Scripts/swift-build workspace test \
+~/Developer/swift-institute/Scripts/swift-build workspace test \
   --scheme TestTargetName
-/Users/coen/Developer/swift-institute/Scripts/swift-build workspace resolve \
+~/Developer/swift-institute/Scripts/swift-build workspace resolve \
   --scheme ProductName
 
 # Capacity inspection
-/Users/coen/Developer/swift-institute/Scripts/swift-build status
+~/Developer/swift-institute/Scripts/swift-build status
 
 # Impact analysis and affected-package builds
-/Users/coen/Developer/swift-institute/Scripts/swift-build impact -- \
+~/Developer/swift-institute/Scripts/swift-build impact -- \
   --upstream /absolute/upstream/package \
-  --workspace /Users/coen/Developer
+  --workspace ~/Developer
 
 # Consumer lint via the cached dispatcher + standard runner (preferred)
-/Users/coen/Developer/swift-institute/Scripts/swift-build lint \
+~/Developer/swift-institute/Scripts/swift-build lint \
   --package-path /absolute/consumer/package
 
 # Machine-readable SwiftPM leaves
-/Users/coen/Developer/swift-institute/Scripts/swift-build package dump-package
-/Users/coen/Developer/swift-institute/Scripts/swift-build package get-mirror -- \
+~/Developer/swift-institute/Scripts/swift-build package dump-package
+~/Developer/swift-institute/Scripts/swift-build package get-mirror -- \
   --original https://example.invalid/dependency.git
 ```
 
@@ -78,7 +78,7 @@ evidence on the target machine.
 ### [PKG-BUILD-023] One Workspace, Concurrent Coordinator-Owned Invocations
 
 **Statement**: The only local Xcode integration surface is
-`/Users/coen/Developer/swift-institute/Internal/institute.xcworkspace`.
+`~/Developer/swift-institute/Internal/institute.xcworkspace`.
 Invoke it only through `swift-build workspace build|test|resolve`. Every
 workspace action requires a concrete scheme before dependency resolution. The
 coordinator:

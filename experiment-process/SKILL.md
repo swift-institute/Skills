@@ -343,10 +343,10 @@ The canonical human-browsable view of a public experiments corpus is the [Experi
 ```bash
 cd Experiments/sendable-closure-test
 mkdir -p Outputs
-/Users/coen/Developer/swift-institute/Scripts/swift-build package clean
-/Users/coen/Developer/swift-institute/Scripts/swift-build package build 2>&1 | tee Outputs/build.txt
-/Users/coen/Developer/swift-institute/Scripts/swift-build package build -- -c release 2>&1 | tee Outputs/build-release.txt
-/Users/coen/Developer/swift-institute/Scripts/swift-build package run 2>&1 | tee Outputs/run.txt
+~/Developer/swift-institute/Scripts/swift-build package clean
+~/Developer/swift-institute/Scripts/swift-build package build 2>&1 | tee Outputs/build.txt
+~/Developer/swift-institute/Scripts/swift-build package build -- -c release 2>&1 | tee Outputs/build-release.txt
+~/Developer/swift-institute/Scripts/swift-build package run 2>&1 | tee Outputs/run.txt
 ```
 
 Output files are working artifacts, NOT committed by default. The main.swift header is the primary evidence record.
@@ -728,7 +728,7 @@ Template: Purpose, hypothesis, baseline measurement â†’ current implementation â
 
 **Procedure additions to [EXP-003]**:
 
-1. Add a `release-mode-pass.txt` receipt file capturing `/Users/coen/Developer/swift-institute/Scripts/swift-build package build -- -c release` output.
+1. Add a `release-mode-pass.txt` receipt file capturing `~/Developer/swift-institute/Scripts/swift-build package build -- -c release` output.
 2. Add a `cross-module-pass.txt` receipt file capturing build output from a sibling target that imports the experimental API.
 3. Only upon both passing does the experiment advance to CONFIRMED.
 

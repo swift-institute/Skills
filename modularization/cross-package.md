@@ -114,7 +114,7 @@ Naïve "no `import X` in source ⇒ drop X" misclassifies the kitchen-sink → s
 2. Compute per-module provider sets by following `@_exported public import` chains in each target's source.
 3. For each declared dep `i` in each package, compute coverage and classify (REQUIRED / UNUSED / TS-SPINE).
 4. For each UNUSED finding, cross-check against [MOD-024] — if it's a TS-spine dep with a missing re-export, reclassify as spine-completion gap.
-5. For each true UNUSED finding, propose the edit, then run `/Users/coen/Developer/swift-institute/Scripts/swift-build package clean`, `package build`, and `package test` after applying. Only commit on green.
+5. For each true UNUSED finding, propose the edit, then run `~/Developer/swift-institute/Scripts/swift-build package clean`, `package build`, and `package test` after applying. Only commit on green.
 6. Audit-completion check: re-run the audit post-cleanup; remaining UNUSED findings MUST all be either stub packages or TS-spine candidates already routed to [MOD-024].
 
 **Rationale**: Dep cleanup is high-leverage but its failure modes are silent (a dropped uniquely-providing dep breaks downstream consumers weeks later); the procedure's safety properties collectively eliminate the class of failure where a dep looks unused at source level but is load-bearing for re-export chains. Sweep evidence + provenance: rationale archive §[MOD-025].

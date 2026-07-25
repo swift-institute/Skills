@@ -77,13 +77,13 @@ Performance testing patterns for the Swift Institute ecosystem. Covers benchmark
 ```bash
 # Nested package benchmarks (primitives)
 cd swift-{package}/Tests
-/Users/coen/Developer/swift-institute/Scripts/swift-build package clean
-/Users/coen/Developer/swift-institute/Scripts/swift-build package test -- --filter Performance
+~/Developer/swift-institute/Scripts/swift-build package clean
+~/Developer/swift-institute/Scripts/swift-build package test -- --filter Performance
 
 # Same-package benchmarks (foundations/standards)
 cd swift-{package}
-/Users/coen/Developer/swift-institute/Scripts/swift-build package clean
-/Users/coen/Developer/swift-institute/Scripts/swift-build package test -- --filter Performance
+~/Developer/swift-institute/Scripts/swift-build package clean
+~/Developer/swift-institute/Scripts/swift-build package test -- --filter Performance
 ```
 
 **Rationale**: Incremental builds can produce measurement artifacts. A coordinator-owned clean build ensures reproducible benchmark baselines without bypassing machine-wide capacity or manipulating generated state directly. This was a recurring footgun in swift-io development — stale build state caused memory usage to balloon to ~82 GB against io-bench. Separately, for a long-running comparison/throughput suite ([BENCH-005]) that can run for minutes or hang, compile-check it with `swift-build package build` and surface the coordinator-owned run command to the user rather than executing the suite automatically.
@@ -266,18 +266,18 @@ struct `IO Read Benchmark` {
 **Same-package benchmarks** (foundations/standards):
 ```bash
 cd swift-{package}
-/Users/coen/Developer/swift-institute/Scripts/swift-build package clean
-/Users/coen/Developer/swift-institute/Scripts/swift-build package test -- --filter Performance
-/Users/coen/Developer/swift-institute/Scripts/swift-build package test -- --filter "Benchmark"
+~/Developer/swift-institute/Scripts/swift-build package clean
+~/Developer/swift-institute/Scripts/swift-build package test -- --filter Performance
+~/Developer/swift-institute/Scripts/swift-build package test -- --filter "Benchmark"
 ```
 
 **Nested package benchmarks** (primitives):
 ```bash
 cd swift-{package}/Tests
-/Users/coen/Developer/swift-institute/Scripts/swift-build package clean
-/Users/coen/Developer/swift-institute/Scripts/swift-build package resolve
-/Users/coen/Developer/swift-institute/Scripts/swift-build package test -- --filter Performance
-/Users/coen/Developer/swift-institute/Scripts/swift-build package test -- --filter "Benchmark"
+~/Developer/swift-institute/Scripts/swift-build package clean
+~/Developer/swift-institute/Scripts/swift-build package resolve
+~/Developer/swift-institute/Scripts/swift-build package test -- --filter Performance
+~/Developer/swift-institute/Scripts/swift-build package test -- --filter "Benchmark"
 ```
 
 **Rationale**: The nested package has its own `.build/` directory and dependency graph.

@@ -42,7 +42,7 @@ Umbrella skill for test organization across the Swift Institute ecosystem. Route
 Local test runs go through the coordinator and the sole workspace ([PKG-BUILD-023]):
 
 ```bash
-/Users/coen/Developer/swift-institute/Scripts/swift-build workspace test \
+~/Developer/swift-institute/Scripts/swift-build workspace test \
     --scheme "<Test Target>"
 ```
 

@@ -150,7 +150,7 @@ After the coordinator-owned build and test:
 
 1. Run `swift-format lint --strict --recursive Sources/`. Record exit code and violation count.
 2. Run `swiftlint lint --strict` (full scope, including Tests/). Record exit code and violation count.
-3. For L1 packages, run `TOOLCHAINS=<6.4-dev-bundle-id> /Users/coen/Developer/swift-institute/Scripts/swift-build package build -- -Xswiftc -enable-experimental-feature -Xswiftc Embedded` per [PKG-BUILD-008]. Record exit code and any unguarded-stdlib-surface findings.
+3. For L1 packages, run `TOOLCHAINS=<6.4-dev-bundle-id> ~/Developer/swift-institute/Scripts/swift-build package build -- -Xswiftc -enable-experimental-feature -Xswiftc Embedded` per [PKG-BUILD-008]. Record exit code and any unguarded-stdlib-surface findings.
 
 **Cross-references**: [RELEASE-001] (parent), [RELEASE-001a] (substitution shape this extends), [PKG-BUILD-007] (Embedded source-guard pattern), [PKG-BUILD-008] (Embedded build invocation), [CI-054] (developer contract for lint), `[PRIM-FOUND-001]` (Foundation-free invariant).
 
@@ -166,7 +166,7 @@ After the coordinator-owned build and test:
 
 ```bash
 # At Phase 0 start, after confirming the git worktree is clean:
-/Users/coen/Developer/swift-institute/Scripts/swift-build package clean
+~/Developer/swift-institute/Scripts/swift-build package clean
 # If consumers depend on this package, invoke the same coordinator action in
 # each consumer package; never manipulate their generated state directly.
 ```

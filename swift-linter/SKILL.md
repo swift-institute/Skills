@@ -522,7 +522,7 @@ This skill does NOT duplicate the cohort description. A consumer wiring `Lint.sw
 - [ ] If brand-owner: `.excluding(rules:)` list narrows the bundle per [LINT-EXCLUDE-001]
 - [ ] Each exclusion has a justification comment per [LINT-EXCLUDE-004]
 - [ ] No JSON/YAML config sidecar — all configuration and metadata is Swift per [LINT-SETUP-005]
-- [ ] `/Users/coen/Developer/swift-institute/Scripts/swift-build lint --package-path <consumer>` runs clean (or surfaces only intended violations)
+- [ ] `~/Developer/swift-institute/Scripts/swift-build lint --package-path <consumer>` runs clean (or surfaces only intended violations)
 
 ## Local Invocation
 
@@ -530,7 +530,7 @@ Lint locally through the coordinator's `lint` subcommand
 (`swift-package-build` `[PKG-BUILD-025]`):
 
 ```bash
-/Users/coen/Developer/swift-institute/Scripts/swift-build lint \
+~/Developer/swift-institute/Scripts/swift-build lint \
   --package-path /absolute/consumer/package
 ```
 

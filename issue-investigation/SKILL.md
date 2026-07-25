@@ -147,7 +147,7 @@ the user was never going to accept.
 TOOLCHAINS=swift xcrun swiftc -O reproducer.swift -o /tmp/test 2>&1
 
 # Or via SwiftPM:
-TOOLCHAINS=swift /Users/coen/Developer/swift-institute/Scripts/swift-build package build -- -c release
+TOOLCHAINS=swift ~/Developer/swift-institute/Scripts/swift-build package build -- -c release
 ```
 
 **If it passes on dev**: Record the finding ("fixed in 6.x-dev"), apply a source-restructuring workaround for current Xcode (never `@_optimize(none)` or other optimization-suppressing attributes — forbidden per [ISSUE-008]), and move on. No issue or PR needed.
@@ -471,7 +471,7 @@ for f in Sources/MyTarget/*.swift; do cp "$f" "$f.bak"; echo "" > "$f"; done
 
 # Add files back one at a time, rebuild between each
 cp Sources/MyTarget/Buffer.swift.bak Sources/MyTarget/Buffer.swift
-/Users/coen/Developer/swift-institute/Scripts/swift-build package build -- -c release  # Crash? → Buffer.swift is involved.
+~/Developer/swift-institute/Scripts/swift-build package build -- -c release  # Crash? → Buffer.swift is involved.
 ```
 
 **Rationale**: Proved decisive for the LLVM verifier crash investigation (2026-03-20). File-level elimination took minutes and gave definitive answers, while code-level modification consumed hours without progress.
@@ -763,7 +763,7 @@ Without [ISSUE-025], the audit would have shipped a HOLD recommendation on three
 
 ```bash
 # When you see @section attribute errors, surface the actual semantic errors:
-/Users/coen/Developer/swift-institute/Scripts/swift-build package test 2>&1 | grep -E "^/Users/.*error:" | head -20
+~/Developer/swift-institute/Scripts/swift-build package test 2>&1 | grep -E "^/Users/.*error:" | head -20
 ```
 
 Fix the semantic errors (typically by hoisting the consume out of the macro expression):
@@ -807,9 +807,9 @@ The `@section` errors disappear once the underlying issue is resolved. Do NOT ch
 **Procedure**:
 ```bash
 git -C <upstream-pkg> rev-parse main
-/Users/coen/Developer/swift-institute/Scripts/swift-build package resolve \
+~/Developer/swift-institute/Scripts/swift-build package resolve \
   --package-path <consumer-package>
-/Users/coen/Developer/swift-institute/Scripts/swift-build package build \
+~/Developer/swift-institute/Scripts/swift-build package build \
   --package-path <consumer-package>
 ```
 A one-line module-scope `@inlinable` probe calling the same overload outside any extension disambiguates: if it also fails after a clean-worktree resolve/build, the overload is absent from the resolved dependency graph (dependency level, not a compiler bug); if it resolves, the issue is extension-context-specific.

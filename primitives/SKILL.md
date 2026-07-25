@@ -281,7 +281,7 @@ let settings: [SwiftSetting] = [
 Parent skill: **swift-institute** (all those rules apply here)
 
 For detailed documentation:
-- `/Users/coen/Developer/swift-primitives/Documentation.docc/Primitives Requirements.md`
-- `/Users/coen/Developer/swift-primitives/Documentation.docc/Primitives Tiers.md`
-- `/Users/coen/Developer/swift-primitives/Documentation.docc/Primitives Layering.md`
-- `/Users/coen/Developer/swift-primitives/Documentation.docc/Reference/Collection Primitives Architecture.md`
+- `~/Developer/swift-primitives/Documentation.docc/Primitives Requirements.md`
+- `~/Developer/swift-primitives/Documentation.docc/Primitives Tiers.md`
+- `~/Developer/swift-primitives/Documentation.docc/Primitives Layering.md`
+- `~/Developer/swift-primitives/Documentation.docc/Reference/Collection Primitives Architecture.md`

@@ -79,7 +79,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 ```text
 For each target package P in the mass-rollout scope:
   1. Apply transform locally to P's source.
-  2. Run `/Users/coen/Developer/swift-institute/Scripts/swift-build package build -- -c release` (or equivalent coordinator-owned compile verification).
+  2. Run `~/Developer/swift-institute/Scripts/swift-build package build -- -c release` (or equivalent coordinator-owned compile verification).
   3. If build succeeds: commit + push P. Continue to next package.
   4. If build fails:
      a. Preserve P's working tree exactly; do not reset, restore, stash, or clean it.

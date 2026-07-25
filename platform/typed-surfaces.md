@@ -369,7 +369,7 @@ The source-level path *looks like* it's authoring package-A-resident code; the c
 **Pre-flight grep** (per sub-cycle plan stage of L3-policy build-out cycles):
 
 ```bash
-grep -rn 'public typealias.*= ISO_9945\.Kernel\.' /Users/coen/Developer/swift-foundations/swift-posix/Sources/
+grep -rn 'public typealias.*= ISO_9945\.Kernel\.' ~/Developer/swift-foundations/swift-posix/Sources/
 ```
 
 Each typealiased parent's existing L2 sub-namespaces are out-of-Option-(ii) scope — flag in the plan's empirical-state section so the principal disposition is bounded upfront.

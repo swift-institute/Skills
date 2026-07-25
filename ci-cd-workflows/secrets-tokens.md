@@ -76,9 +76,9 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 **Local-equivalent substitution shape**:
 
 ```bash
-/Users/coen/Developer/swift-institute/Scripts/swift-build package build
-/Users/coen/Developer/swift-institute/Scripts/swift-build package test
-/Users/coen/Developer/swift-institute/Scripts/swift-build package run \
+~/Developer/swift-institute/Scripts/swift-build package build
+~/Developer/swift-institute/Scripts/swift-build package test
+~/Developer/swift-institute/Scripts/swift-build package run \
   -- <linter>                                  # if CI runs a linter step
 ```
 

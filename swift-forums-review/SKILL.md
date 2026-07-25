@@ -224,7 +224,7 @@ similar non-identifying tags. Never reuse the username strings from `archetypes.
 
 ```bash
 # One-time setup (already done for the corpus repo):
-cd /Users/coen/Developer/swift-institute/Engagement/swift-forums-review-corpus
+cd ~/Developer/swift-institute/Engagement/swift-forums-review-corpus
 python3 -m venv .venv && .venv/bin/pip install numpy scikit-learn beautifulsoup4
 .venv/bin/python scripts/ingest.py --category evolution/proposal-reviews --id 21 --all
 .venv/bin/python scripts/ingest.py --category evolution/pitches --id 5 --max-topics 400 --min-posts 5
@@ -233,7 +233,7 @@ python3 -m venv .venv && .venv/bin/pip install numpy scikit-learn beautifulsoup4
 .venv/bin/python scripts/analyze.py
 
 # Per-package use:
-.venv/bin/python scripts/characterize_package.py /Users/coen/Developer/swift-primitives/swift-algebra-group-primitives
+.venv/bin/python scripts/characterize_package.py ~/Developer/swift-primitives/swift-algebra-group-primitives
 ```
 
 The skill itself is invoked by the agent: given a package path, follow rules

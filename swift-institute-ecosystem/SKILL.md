@@ -181,7 +181,7 @@ swift-{authority}/swift-{spec-id}           ← spec-direct packages
 | Select a data structure (Memory / Storage / Buffer / Collection) | **ecosystem-data-structures** ([DS-*]) |
 | Reuse existing typed infrastructure (boundary overloads, Tagged functors, Ratio scaling) | **existing-infrastructure** ([INFRA-*]) |
 | Ownership, copyability, lifetime, sendability | **memory-safety** ([MEM-*]) |
-| Skill index, harness bets, package locations on disk | **swift-institute-core** ([BET-*]); `/Users/coen/Developer/CLAUDE.md` |
+| Skill index, harness bets, package locations on disk | **swift-institute-core** ([BET-*]); `~/Developer/CLAUDE.md` |
 | Public-facing layer descriptions (outside readers) | `swift-institute.org/Swift Institute.docc/{Layers,Swift Primitives,Swift Standards,Swift Foundations,FAQ}.md` |
 | Public framing in user's own voice | `swift-institute.org/Swift Institute.docc/Blog/Restarting-the-Blog.md` and the `Introducing-*` series |
 | Fork heritage decisions | **swift-package-heritage** ([HERITAGE-*]) |
@@ -218,6 +218,6 @@ swift-{authority}/swift-{spec-id}           ← spec-direct packages
 - **modularization** — Intra-package target decomposition, import precision
 - `swift-institute.org/Swift Institute.docc/` — Public layer descriptions
 - `swift-primitives/Documentation.docc/` — Primitives Tiers, Layering, Requirements
-- `/Users/coen/Developer/CLAUDE.md` — Workspace-level routing, package locations, package resolution
+- `~/Developer/CLAUDE.md` — Workspace-level routing, package locations, package resolution
 
-**Related-ecosystem cross-reference**: a parallel legal-domain ecosystem lives under [rule-institute](https://github.com/rule-institute) — out of scope for this skill; see `/Users/coen/Developer/CLAUDE.md` § Legal Skills.
+**Related-ecosystem cross-reference**: a parallel legal-domain ecosystem lives under [rule-institute](https://github.com/rule-institute) — out of scope for this skill; see `~/Developer/CLAUDE.md` § Legal Skills.

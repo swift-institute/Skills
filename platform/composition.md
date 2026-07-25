@@ -237,7 +237,7 @@ Together the three rules enforce strict downward composition: L1 → L2 → L3-p
 | (c) Sub-namespace on L2 | Expose L2 under a dedicated sub-namespace (`Raw`, `IO.Read`, `IO.Write`) so the unifier's intent name doesn't collide | Call sites want both surfaces; neither side can reasonably be renamed |
 | (d) Package-level separation | Split L2 and L3 into visibility-separate packages (the socket precedent) | The collision is pervasive across many names in the family |
 
-**Verification requirement**: `/Users/coen/Developer/swift-institute/Scripts/swift-build package build -- --build-tests` MUST be clean before the unifier lands. Test-target compilation catches import-level ambiguity that source-target compilation misses.
+**Verification requirement**: `~/Developer/swift-institute/Scripts/swift-build package build -- --build-tests` MUST be clean before the unifier lands. Test-target compilation catches import-level ambiguity that source-target compilation misses.
 
 **Example (defect)**: A `swift-kernel` unifier landed `Kernel.File.Read.read(...)` / `Kernel.File.Write.write(...)` where L2's ISO 9945 package had already defined the same names at the same paths via the `Kernel_Primitives.Kernel` alias. The commit passed a source-only package build in isolation; the downstream `swift-file-system` build hit ambiguous-overload errors at every call site.
 
@@ -520,11 +520,11 @@ The rule predates the [PLAT-ARCH-019] supersession; the shadow concern persists 
 
 ```bash
 # At the L2 typed-form's namespace path Kernel.X.Y:
-find /Users/coen/Developer/swift-foundations/swift-kernel/Sources -name "Kernel.X.Y*.swift"
-grep -rn "extension Kernel\.X\.Y" /Users/coen/Developer/swift-foundations/swift-kernel/Sources
+find ~/Developer/swift-foundations/swift-kernel/Sources -name "Kernel.X.Y*.swift"
+grep -rn "extension Kernel\.X\.Y" ~/Developer/swift-foundations/swift-kernel/Sources
 
 # Also check sibling L3-unifier packages:
-grep -rn "extension Kernel\.X\.Y" /Users/coen/Developer/swift-foundations/{swift-strings,swift-paths,swift-systems,swift-io,swift-threads}/Sources
+grep -rn "extension Kernel\.X\.Y" ~/Developer/swift-foundations/{swift-strings,swift-paths,swift-systems,swift-io,swift-threads}/Sources
 ```
 
 If any grep returns a match, the L2 typed form is L3-unifier-shadowed. Without `@_disfavoredOverload` on the L2 typed forms, both layers' typed overloads become equally-ranked candidates → ambiguity errors at every site importing `Kernel`.

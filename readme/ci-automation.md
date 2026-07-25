@@ -382,7 +382,7 @@ section structural rule this workflow targets), [README-160]
 
 1. At README authoring time, identify each code block's composition class.
 2. For composed examples, before declaring the README "validated," locate each composed type's nearest real call site in the ecosystem (`grep -rn "<typename>(" <ecosystem>/Sources/`) and verify the README's invocation shape matches the call site's shape.
-3. For Quick Start examples, additionally extract the example to a scratch SwiftPM package whose `Package.swift` declares deps on every composed type's owning package; run `/Users/coen/Developer/swift-institute/Scripts/swift-build package build`.
+3. For Quick Start examples, additionally extract the example to a scratch SwiftPM package whose `Package.swift` declares deps on every composed type's owning package; run `~/Developer/swift-institute/Scripts/swift-build package build`.
 4. Document the validation report in the commit message or PR description: list each composed type + its cited real call-site OR the extracted scratch-package path + coordinator build result.
 
 **Rationale**: Per-example call-site discipline catches non-compiling examples at authoring time, composing with [RELEASE-007]'s publication-gate check; the 30-second grep per composed type is strictly cheaper than post-publication rework (full text, origin incident, and the 4-of-5 swift-linter cohort finding: rationale archive §[README-170]).
