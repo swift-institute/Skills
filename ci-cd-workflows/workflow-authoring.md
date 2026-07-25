@@ -55,7 +55,7 @@ The pattern holds even within the calling repository — the cross-repo form avo
 
 **Enforcement**: Mechanical — `validate-composite-action-descriptions.py` + `validate-composite-action-descriptions.yml` (pilot 25 of `/promote-rule` 2026-05-14). Single-repo multi-file integrity check on `<repo>/.github/actions/*/action.yml`; PyYAML walks `description` at three positions (top-level, `inputs.<name>.description`, `outputs.<name>.description`) and fires on `${{` substring. Expression syntax in non-description positions (`runs.steps[*].env`, `outputs.<name>.value`, `if:`) is permitted and silent. Baseline 0; self-firing ACTIVE. Discipline: an internal audit record. [VERIFICATION: WF validate-composite-action-descriptions.py]
 
-**Cross-references**: [CI-070], [CI-103]; memory `feedback_composite_action_description_no_expressions.md`.
+**Cross-references**: [CI-070], [CI-103]; an internal memory note.
 
 ---
 
@@ -65,7 +65,7 @@ The pattern holds even within the calling repository — the cross-repo form avo
 
 **Enforcement**: Mechanical — `validate-env-context.py` + `validate-env-context.yml` (pilot 21 of `/promote-rule` 2026-05-14). Single-repo multi-file integrity check; per-job PyYAML inspection of `runs-on:` (string or list) and `container:` (string or dict with `image:`) for `${{ env.X }}` substring. Other contexts (`inputs.*`, `vars.*`, `matrix.*`, `github.*`) are permitted and not flagged; step-level `env.*` references (in `run:` blocks, `with:` blocks, etc.) are out of scope (env: binds before step execution). Baseline 0/4 wrapper-host repos; self-firing ACTIVE. Discipline: an internal audit record. [VERIFICATION: WF validate-env-context.py]
 
-**Cross-references**: [CI-102], [CI-104]; memory `feedback_env_invalid_in_runs_on_container.md`.
+**Cross-references**: [CI-102], [CI-104]; an internal memory note.
 
 ---
 
@@ -146,7 +146,7 @@ The pattern holds even within the calling repository — the cross-repo form avo
 
 **Enforcement**: Mechanical — `validate-swiftlint-rules.py` + `validate-swiftlint-rules.yml` (pilot 22 of `/promote-rule` 2026-05-14). Centralized-config integrity check on single canonical `swift-institute/.github/.swiftlint.yml`; PyYAML inspection scans enable-position keys (`opt_in_rules`, `analyzer_rules`, `enabled_rules`) for forbidden rule name; explicit-disable position (`disabled_rules`) and absence-from-config (default off) are correctly silent. Baseline 0; self-firing ACTIVE. Discipline: an internal audit record. [VERIFICATION: WF validate-swiftlint-rules.py]
 
-**Cross-references**: [CI-057], [CI-101]; memory `feedback_no_toggle_bool_rule.md`.
+**Cross-references**: [CI-057], [CI-101]; an internal memory note.
 
 ---
 

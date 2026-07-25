@@ -158,7 +158,7 @@ A paragraph earns its place when it answers the family's evaluation question. Co
 
 **Rationale**: Section-level rules admit content that satisfies their local form but dilutes the reader's evaluation; the lens catches errors no section-level rule can (full text: rationale archive §[README-023]).
 
-**Cross-references**: [README-026]; per-family Voice sections; [README-016] and [README-024] in `sub-package.md`; `feedback_readme_evaluator_audience.md`.
+**Cross-references**: [README-026]; per-family Voice sections; [README-016] and [README-024] in `sub-package.md`; an internal feedback note.
 
 ---
 
@@ -383,4 +383,4 @@ Three org tiers within one family file; the tier determines which subset of rule
 - Research: `swift-institute/Research/package-readme-standard.md` (Tier 2, 2026-04-21) — ecosystem audit.
 - Research: `swift-institute/Research/cohort-readme-evaluator-pass.md` (2026-05-01) — audience-inversion convergence.
 - Research: `swift-institute/Research/readme-skill-design.md` (SUPERSEDED) — original v1.0 design.
-- Memory: `feedback_readme_evaluator_audience.md` — six audience-inversion patterns + canonical rewrites.
+- Memory: an internal feedback note — six audience-inversion patterns + canonical rewrites.

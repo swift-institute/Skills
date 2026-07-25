@@ -603,7 +603,7 @@ Additional first-principles companions (consistent with — not exceptions to �
 
 - `[ARCH-LAYER-008]` — correctness / architectural merit is the sole driver of split / reshape / extraction decisions, at any phase.
 - `[RES-020a]` — total-taxonomy packages justify their types by lattice-cell merit.
-- `feedback_correctness_and_evergreen` — adoption of `~Copyable` / `~Escapable` / ownership-model changes on existing types is judged on structural correctness + evergreen.
+- an internal feedback note — adoption of `~Copyable` / `~Escapable` / ownership-model changes on existing types is judged on structural correctness + evergreen.
 
 - **Original direction (over-promotion)**: an internal-to-one-package need misclassified as cross-cutting, producing an unjustified new top-level primitive package whose shape no other domain actually shares. Long tails — maintenance surface, review cost on adjacent changes, "absorb or add?" decision forks — accrue against the ecosystem.
 - **Newly recognized direction (under-pull-down)**: a layer-agnostic need misclassified as originating-package-specific, leaving the implementation trapped inside the L2/L3 package where it surfaced. Future consumers must then either depend on the originating package (wrong: pulls a JSON/HTTP/etc. dep through unrelated code) or re-derive (worse: parallel divergent re-implementations). The "no second consumer yet" objection inverts the architecture's intent — L1 *creates* the conditions for future consumers by making the type discoverable at the right layer.
@@ -625,8 +625,8 @@ The classification is structural: (a) genuinely cross-cutting → the shape is d
 5. If case (d): demonstrate spec fidelity per `[API-NAME-003]`. No further hurdle.
 
 - 2026-04-16-chase-lev-spike-and-premature-primitive-trap.md (original anti-pattern)
-- 2026-05-14 amendment: cross-cutting scope made operational; case (c) layer-agnostic pull-down carve-out added; case (b) domain-owned vocabulary carve-out made structural rather than phase-bounded. Anchors: `feedback_correctness_and_evergreen.md`, principal-stated five-layer architectural rule ("L2 standards-impl maximize re-use of L1; L3 composition maximize re-use of L1; L1 modularization per domain — each domain owns its vocabulary").
-- 2026-06-09 BREAKING: removed the consumer-demand gate (the case-(a) "name a second-domain consumer / cross-domain-fit" hurdle) and retitled the rule; case (a) is now gated by the composition check plus a *structural* cross-cutting judgment. Consumer / adoption count is no longer a decision driver. Principal direction (first-principles MO, not YAGNI); anchors `feedback_correctness_and_evergreen.md`.
+- 2026-05-14 amendment: cross-cutting scope made operational; case (c) layer-agnostic pull-down carve-out added; case (b) domain-owned vocabulary carve-out made structural rather than phase-bounded. Anchors: an internal feedback note, principal-stated five-layer architectural rule ("L2 standards-impl maximize re-use of L1; L3 composition maximize re-use of L1; L1 modularization per domain — each domain owns its vocabulary").
+- 2026-06-09 BREAKING: removed the consumer-demand gate (the case-(a) "name a second-domain consumer / cross-domain-fit" hurdle) and retitled the rule; case (a) is now gated by the composition check plus a *structural* cross-cutting judgment. Consumer / adoption count is no longer a decision driver. Principal direction (first-principles MO, not YAGNI); anchors an internal feedback note.
 
 **Cross-references**: [RES-005], [RES-020], [RES-020a], [MOD-DOMAIN], [MOD-RENT], [ARCH-LAYER-001], [ARCH-LAYER-008], [API-NAME-003]
 

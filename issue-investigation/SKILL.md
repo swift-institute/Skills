@@ -599,7 +599,7 @@ enum Request: ~Copyable {
 // WORKAROUND: Wrap continuation in class to sidestep MoveOnlyAddressChecker
 // WHY: Swift 6.3 SIL verifier incorrectly flags sibling `load [take]` as leak
 //      when CheckedContinuation<Result<...>, Never> is in a ~Copyable enum
-// TRACKING: revisit on Swift 6.4+ (per feedback_toolchain_versions.md)
+// TRACKING: revisit on Swift 6.4+ (per an internal feedback note)
 // WHEN TO REMOVE: when the verifier handles the pattern directly
 ```
 

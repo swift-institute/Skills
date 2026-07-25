@@ -14,7 +14,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Enforcement**: Mechanical — `validate-visibility-gate.py` + `validate-visibility-gate.yml` (pilot 13 of `/promote-rule` 2026-05-14). Single-repo multi-file integrity check. Carve-outs: pure `uses:`-only routing jobs (structural — job-level `uses:` with no `steps:`/`runs-on:`; mirrors [CI-080]), `if: false` disabled jobs, non-`workflow_call:` workflows (out of scope). Self-firing ACTIVE; post-carve-out the true baseline of genuinely-ungated jobs is 0 on `swift-institute/.github`. Provenance: the 18 findings that surfaced 2026-07-03 were pure-routing `scan:` jobs in the `validate-*.yml` thin callers (each routes to `validate-base.yml`, whose real work job carries the gate), un-masked when the Slice-A `validate-base.yml` aggregation fix (`12c9d5a`) restored real finding counts. They were routing-job artifacts, not gate violations, and are resolved by the routing carve-out added here. Discipline: an internal audit record. [VERIFICATION: WF validate-visibility-gate.py]
 
-**Cross-references**: [CI-031], [CI-060], [CI-080]; memory `feedback_no_public_or_tag_without_explicit_yes.md`.
+**Cross-references**: [CI-031], [CI-060], [CI-080]; an internal memory note.
 
 ---
 

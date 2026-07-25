@@ -25,7 +25,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Enforcement**: Architectural — canonical reusable hardcodes pins (`swift-ci.yml` default 6.3 + hardcoded nightly); [CI-031] forbids consumer override (`validate-thin-callers.py`); branch protection on `swift-institute/.github`. Discipline: an internal audit record § [CI-011]. [VERIFICATION: ARCH]
 
-**Cross-references**: [CI-010], [CI-012], [CI-031]; memory `feedback_toolchain_versions.md`.
+**Cross-references**: [CI-010], [CI-012], [CI-031]; an internal memory note.
 
 ---
 
@@ -180,7 +180,7 @@ Selection mechanics: the `plan` job classifies (forced `tier` input > tag ref > 
 
 **Enforcement**: Mechanical — `validate-ci-matrix.py` + `validate-ci-matrix.yml` (pilot 20 of `/promote-rule` 2026-05-14, compose-in-script with [CI-010]). Centralized-config integrity check (single canonical file: `swift-institute/.github/.github/workflows/swift-ci.yml`); PyYAML inspection of `jobs.windows-release.continue-on-error` — fires if `is True`. Inverse-of-[CI-010] posture check: where [CI-010] asserts `linux-nightly` HAS `continue-on-error: true` (toolchain-noise scope), this rule asserts `windows-release` does NOT (target-shipped-to scope). Baseline 0; self-firing ACTIVE (inherits pilot 10's workflow triggers). Discipline: an internal audit record. [VERIFICATION: WF validate-ci-matrix.py]
 
-**Cross-references**: [CI-010], [CI-096], [CI-105], [CI-114]; memory `feedback_windows_first_class_ci_gating.md`.
+**Cross-references**: [CI-010], [CI-096], [CI-105], [CI-114]; an internal memory note.
 
 ---
 

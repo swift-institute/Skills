@@ -366,7 +366,7 @@ shape is not a fallback — it is the *correct* shape for these cases:
 **Statement**: Executing the fork-as-heritage workflow ([HERITAGE-001]
 fires + [HERITAGE-002] applies) involves at least three destructive
 GitHub-side operations, each requiring its own explicit per-action
-authorization per `feedback_no_public_or_tag_without_explicit_yes`:
+authorization per an internal feedback note:
 
 | Step | Operation | Authorization required |
 |---|---|---|
@@ -386,7 +386,7 @@ bound to the new URL* — once external consumers have updated their
 `Package.swift` to the new URL, unwinding requires consumer-side
 coordination.
 
-**Cross-references**: `feedback_no_public_or_tag_without_explicit_yes`
+**Cross-references**: an internal feedback note
 (memory entry); `release-readiness` skill `[RELEASE-004]`.
 
 

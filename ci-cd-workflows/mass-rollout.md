@@ -22,7 +22,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Rationale**: Mass operations on shared infrastructure have non-trivial blast radius; even reversible operations consume reviewer attention to verify post-state. The per-action discipline prevents "the user said proceed once, so I'll chain everything" failures.
 
-**Cross-references**: [CI-051], [CI-052]; memory `feedback_user_plan_is_roadmap_not_authorization.md`.
+**Cross-references**: [CI-051], [CI-052]; an internal memory note.
 
 ---
 
@@ -64,7 +64,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Rationale**: Visibility flips are externally-observable instantly (the repo appears in/disappears from public listings) and partially irreversible (caches, mirrors, search indexes may persist the public view). Tags are partially-immutable references that downstream consumers may pin to. The stricter authorization barrier prevents "good intent + ambiguous wording" failures.
 
-**Cross-references**: [CI-050]; memory `feedback_no_public_or_tag_without_explicit_yes.md`; memory `feedback_blog_publish_two_steps.md` (analogous discipline for swift-institute.org publication).
+**Cross-references**: [CI-050]; two internal memory notes (analogous discipline for swift-institute.org publication).
 
 ---
 

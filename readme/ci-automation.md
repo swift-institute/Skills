@@ -321,7 +321,7 @@ A mismatch (e.g., 1-liner says 129, opening says 130, table has 137 rows) MUST f
 - The reporting workflow MUST NOT email or chat-notify by default. Tracking issues are the canonical channel.
 - High-severity findings (e.g., a leaf-tier org profile is a 1-line stub) MAY be flagged with the `priority/high` label; the label drives no automated action but informs human triage.
 
-**Cross-references**: existing `sync-metadata-nightly.yml`, `link-check-weekly.yml`; `feedback_engagement_test_only_phase.md` (related discipline: drafts only, no auto-publish).
+**Cross-references**: existing `sync-metadata-nightly.yml`, `link-check-weekly.yml`; an internal feedback note (related discipline: drafts only, no auto-publish).
 
 ---
 
@@ -418,6 +418,6 @@ Each entry corresponds to a real workflow file path under `swift-institute/.gith
   - `swift-institute/.github/.github/workflows/generate-metadata.yml` (reusable)
   - `swift-institute/.github/.github/workflows/link-check.yml` (reusable)
   - `swift-institute/.github/.github/workflows/link-check-weekly.yml` (orchestrator)
-- Memory: `feedback_latest_versions_only.md` — workflow action/runner-image pin discipline that any new workflow MUST follow.
+- Memory: an internal feedback note — workflow action/runner-image pin discipline that any new workflow MUST follow.
 - Memory: `project_per_repo_vs_centralized_ci.md` — partition rule (per-repo workflow vs centralized orchestrator); README workflows are centralized per the partition.
 - Memory: `project_lychee_orchestrator_tuning.md` — non-obvious tuning lessons from the link-check orchestrator that the README workflows should reuse.

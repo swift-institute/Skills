@@ -46,7 +46,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Enforcement**: Mechanical — `validate-permissions-shape.py` + `validate-permissions-shape.yml` (pilot 27 of `/promote-rule` 2026-05-14, paired with [CI-097]). Single-repo multi-file integrity check; PyYAML inspects `on:` trigger shape + top-level `permissions:` state. Fires CI-097 for the specific deny-all-on-reusable case (the M2 incident shape) and CI-090 for the broader top-perms-on-reusable / missing-floor-on-standalone cases. Combined workflows treated as reusable per the workflow_call intersection rule. Baseline 0; self-firing ACTIVE — the batch-fix landed (`5161e33..74ae3d0`, the permission-floor sweep across the standalone weekly orchestrators; prior baseline 9/1: 1 reusable with top-perms + 8 standalone missing floor) (synced 2026-07-03 per CI-REVIEW dossier F10). Discipline: an internal audit record. [VERIFICATION: WF validate-permissions-shape.py]
 
-**Cross-references**: [CI-051], [CI-080], [CI-097], [CI-106]; `swift-institute/Research/Reflections/2026-05-06-ci-reviewer-feedback-rollout-permissions-pitfall-and-doctrines.md`; memory `feedback_top_level_permissions_on_reusables.md`.
+**Cross-references**: [CI-051], [CI-080], [CI-097], [CI-106]; `swift-institute/Research/Reflections/2026-05-06-ci-reviewer-feedback-rollout-permissions-pitfall-and-doctrines.md`; an internal memory note.
 
 ---
 
@@ -56,7 +56,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Enforcement**: Mechanical — `validate-permissions-shape.py` + `validate-permissions-shape.yml` (pilot 27 of `/promote-rule` 2026-05-14, paired with [CI-090]). Compose-in-script: validator inspects `on:` trigger shape and fires CI-097 for the specific deny-all-on-reusable case; CI-090 covers the broader top-perms-on-reusable case. Combined workflows treated as reusable. Baseline 0 wrapper-host (the M2 incident was reverted within minutes; current ecosystem state has no `permissions: {}` on reusables); self-firing ACTIVE — inherits CI-090, whose batch-fix `5161e33..74ae3d0` landed (synced 2026-07-03 per CI-REVIEW dossier F10). Discipline: an internal audit record. [VERIFICATION: WF validate-permissions-shape.py]
 
-**Cross-references**: [CI-051], [CI-090], [CI-106]; memory `feedback_top_level_permissions_on_reusables.md`.
+**Cross-references**: [CI-051], [CI-090], [CI-106]; an internal memory note.
 
 ---
 
@@ -134,13 +134,13 @@ This is a permission and a preference, NOT a universal digest-pin mandate: benig
 | Action refs | Current major floating tag (e.g., `actions/checkout@v6`) for benign refs; digest-pin at latest (full commit SHA + `# vX.Y.Z`) for credential-minting / privileged / security-sensitive refs — PREFERRED there, permitted anywhere | `gh api repos/<owner>/<repo>/releases/latest --jq .tag_name`; for the digest form, dereference the tag to its **commit** SHA (`git/ref/tags/<tag>` → if `type: tag`, deref via `git/tags/<sha>.object.sha`; a tag-object SHA is not a valid action ref) |
 | Runner images | Highest available (e.g., `macos-26`, not `macos-15`) | `gh api repos/actions/runner-images/releases --jq '.[0:5][].tag_name'` |
 | Curl-fetched binaries | Latest release tag + re-locked SHA-256 per [CI-082] | Per-binary release page |
-| Swift toolchain | Per memory `feedback_toolchain_versions.md` (6.3 stable + Swift main nightly) | Toolchain memory overrides "latest" |
+| Swift toolchain | Per an internal memory note (6.3 stable + Swift main nightly) | Toolchain memory overrides "latest" |
 
 **Floating-tag rule**: if a floating tag (e.g., `@v3`) points to a pre-release that is more recent than the latest stable release tag, the floating tag wins — that is the "latest" intended.
 
 **Exceptions**:
 
-- Swift toolchain pins follow `feedback_toolchain_versions.md`, not "latest"; only Swift 6.3 stable and Swift main nightly (`swiftlang/swift:nightly-main-jammy`) are permitted.
+- Swift toolchain pins follow an internal feedback note, not "latest"; only Swift 6.3 stable and Swift main nightly (`swiftlang/swift:nightly-main-jammy`) are permitted.
 - Do not silently bump version pins deliberately chosen to match other infrastructure (e.g., a specific toolchain a downstream project requires). If unsure, ask.
 - Harden-runner is SHA-pinned per [CI-080], NOT major-tag-pinned — security action exception.
 

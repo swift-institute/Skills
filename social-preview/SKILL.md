@@ -67,7 +67,7 @@ maintainer's machine, never in CI. The vendored Playwright uploader at
 `user_session`-cookie-based authentication that is password-equivalent
 and MUST NOT be stored in shared CI secrets.
 
-**Cross-references**: `feedback_no_gh_cli_admin_scope`,
+**Cross-references**: an internal feedback note,
 `Research/social-preview-cards-ecosystem-strategy.md` § Capability finding.
 
 ---
@@ -201,7 +201,7 @@ non-deterministic order, leading to incorrect picks (e.g. picking
 `Carrier Primitives Standard Library Integration` instead of
 `Carrier Primitives`).
 
-**Cross-references**: `feedback_namespace_implicit_prefix_removal`,
+**Cross-references**: an internal feedback note,
 `API-NAME-001`.
 
 ---

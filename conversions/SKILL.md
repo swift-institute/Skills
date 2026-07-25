@@ -767,7 +767,7 @@ struct Cursor<Base: RandomAccessCollection> {
 - `Int(bitPattern:)` conversion encapsulated in single `rawIndex` getter
 - No dual tracking needed
 
-**Line / column instance**: this discipline is why line + column pairs use text-primitives' typed forms — `Text.Line.Number`, `Text.Line.Column`, and the composed `Text.Location` — as the primary representation (storage, pass-through), NOT `Int` or stringified forms (`Source.Location.line` already returns `Text.Line.Number`). Both conform to `CustomStringConvertible`, so stringify at the **output formatter** (`"\(line):\(column)"`), never at storage; drop to `Int(bitPattern:)` only at a stdlib `Int`-typed boundary (e.g. SwiftSyntax `SourceLocationConverter.position(ofLine:column:)`), never at intermediate hops. Provenance: memory `feedback_typed_line_column_text_primitives.md`.
+**Line / column instance**: this discipline is why line + column pairs use text-primitives' typed forms — `Text.Line.Number`, `Text.Line.Column`, and the composed `Text.Location` — as the primary representation (storage, pass-through), NOT `Int` or stringified forms (`Source.Location.line` already returns `Text.Line.Number`). Both conform to `CustomStringConvertible`, so stringify at the **output formatter** (`"\(line):\(column)"`), never at storage; drop to `Int(bitPattern:)` only at a stdlib `Int`-typed boundary (e.g. SwiftSyntax `SourceLocationConverter.position(ofLine:column:)`), never at intermediate hops. Provenance: an internal memory note.
 
 ---
 
