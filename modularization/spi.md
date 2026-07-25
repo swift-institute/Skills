@@ -36,7 +36,7 @@ let fd = descriptor._rawValue  // ❌ Compile error: _rawValue is not accessible
 
 **Rationale**: Each `.swift` file is an independent compilation unit for SPI purposes; the per-file ceremony makes the SPI boundary auditable (`grep @_spi(Syscall)` identifies all boundary code). Full text + provenance: rationale archive §[MOD-016].
 
-**Lint enforcement (DEFERRED, mechanization attempted 2026-05-13)**: AST-only detection cannot distinguish the institute's intra-module `_storage`/`_base` private-storage convention from cross-module SPI access (module-of-origin semantic info is not surfaced by SwiftSyntax); rule artifacts reverted, outcome record `swift-institute/Audits/PROMOTE-MOD-016-2026-05-13.md`. Deferred pending a semantic-aware linter pass or a build-diagnostics workflow validator. Detail: rationale archive §[MOD-016].
+**Lint enforcement (DEFERRED, mechanization attempted 2026-05-13)**: AST-only detection cannot distinguish the institute's intra-module `_storage`/`_base` private-storage convention from cross-module SPI access (module-of-origin semantic info is not surfaced by SwiftSyntax); rule artifacts reverted, outcome record an internal audit record. Deferred pending a semantic-aware linter pass or a build-diagnostics workflow validator. Detail: rationale archive §[MOD-016].
 
 **Cross-references**: [MOD-002], [MOD-005]
 

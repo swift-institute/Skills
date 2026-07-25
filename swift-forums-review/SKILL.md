@@ -28,7 +28,7 @@ Two modes grounded in a corpus of real forums.swift.org review activity:
 2. **Predict objections** — given a package, rank which critique angles are most likely
    to land hard in real community review.
 
-Corpus location (public repo): `swift-institute/Engagement/swift-forums-review-corpus/`.
+Corpus location (private repo): `swift-institute/Engagement/swift-forums-review-corpus/`.
 Analysis artifacts the skill consumes live at `…/analysis/`:
 
 | File | Purpose |
@@ -473,7 +473,7 @@ refresh item alongside the corpus refresh cadence.
 4. **Amplification scoring**: score only new probes against the prior corpus's archetype calibration; do not re-score every angle from scratch.
 5. **Output**: a single `## Forums-review delta re-simulation — {DATE}` section in the package's `Audits/audit.md`.
 
-**Why "amplification" is a separate axis**: a commit that introduces a public-API decision relevant to a Mid-tier critique angle doesn't necessarily change the angle's score — it amplifies the angle's anchor coverage. Mixing amplification into score conflates "more anchors" with "stronger reception likelihood"; keeping them separate preserves the score-vs-substance distinction documented in `swift-institute/Engagement/swift-forums-review-corpus/analysis/calibration/score-vs-substance-divergence-2026-04-25.md`.
+**Why "amplification" is a separate axis**: a commit that introduces a public-API decision relevant to a Mid-tier critique angle doesn't necessarily change the angle's score — it amplifies the angle's anchor coverage. Mixing amplification into score conflates "more anchors" with "stronger reception likelihood"; keeping them separate preserves the score-vs-substance distinction documented in an internal calibration note.
 
 **Worked example (the origin incident)**:
 

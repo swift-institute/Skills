@@ -94,7 +94,7 @@ agent noun as its namespace — the 2026-06-12 domain-over-object proposal
 (`swift-iteration-primitives`-class renames) was evaluated and REJECTED; see
 [PKG-NAME-017] and `package-naming-domain-vs-object.md` v2.0.0.
 
-**Lint enforcement (DEFERRED, 2026-05-14 pilot 8 of `/promote-rule`)**: sound principle with live FAIL instances (`swift-translating`, `swift-numeric-formatting-standard`, `swift-standards/Sources/Parsing/Parsing.swift:65 enum Parsing {}`), but the `-ing`-suffix boundary is unbounded — legitimate `-ing` nouns (`Ring`, `Semiring`, `String`) and external-compat names (`swift-testing` per `[PKG-NAME-003]`) must be discriminated from gerunds. Re-promotable once a curated gerund denylist is authored OR the 3 candidate live violations are dispositioned. Outcome: `swift-institute/Audits/PROMOTE-PKG-NAME-001-2026-05-14.md`.
+**Lint enforcement (DEFERRED, 2026-05-14 pilot 8 of `/promote-rule`)**: sound principle with live FAIL instances (`swift-translating`, `swift-numeric-formatting-standard`, `swift-standards/Sources/Parsing/Parsing.swift:65 enum Parsing {}`), but the `-ing`-suffix boundary is unbounded — legitimate `-ing` nouns (`Ring`, `Semiring`, `String`) and external-compat names (`swift-testing` per `[PKG-NAME-003]`) must be discriminated from gerunds. Re-promotable once a curated gerund denylist is authored OR the 3 candidate live violations are dispositioned. Outcome: an internal audit record.
 
 **Cross-references**: [PKG-NAME-002], [PKG-NAME-005], [PKG-NAME-017], [API-NAME-001]
 

@@ -24,7 +24,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Enforcement**: Architectural — current ecosystem has zero instances of caller-supplied shell into token-holding reusables. The canonical pre-2026-05-14 instance (`cron-audit-base.yml`'s `run: ${{ inputs.audit-step }}` interpolating bash from 3 layer-wrapper-resident callers into a job holding a cross-org App-installation token) was refactored to a structured-input contract in Phase C of the 2026-05-14 CI review per Q2=B sealed adjudication; the runner (`cron-audit-runner.py`) consumes a JSON-decoded `audit-runner-args` config dict inside Python with no shell expansion of caller content. Branch protection on layer-wrapper repos (where applicable; this workspace currently runs no-branch-protection) is defense-in-depth that catches review-level reintroduction; the structural floor holds regardless of branch-protection state. Discipline: `Audits/PROMOTE-ci-corpus-sweep-2026-05-14.md` § [CI-081]; Phase C execution: `Audits/Outcome-CI-REVIEW-Phase-C-2026-05-14.md`. [VERIFICATION: ARCH]
 
-**Cross-references**: [CI-001], [CI-004a], [CI-070], [CI-080]. Source authority: `swift-institute/Research/ci-cd-security-review.md`; `swift-institute/Audits/CI-REVIEW-OPEN-QUESTIONS-2026-05-14.md` § Open Q2 Option B (the Phase C adjudication brief).
+**Cross-references**: [CI-001], [CI-004a], [CI-070], [CI-080]. Source authority: `swift-institute/Research/ci-cd-security-review.md`; an internal audit record § Open Q2 Option B (the Phase C adjudication brief).
 
 ---
 

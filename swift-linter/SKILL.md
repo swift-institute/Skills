@@ -572,5 +572,5 @@ form remains valid but serializes all lints on the swift-linter root.
 
 ### Audit / handoff
 
-- `swift-institute/Audits/2026-05-07-swift-linter-cohort-independent-audit.md` — cohort independent audit synthesis
-- `swift-institute/Audits/COHORT-TRIAGE-POST-ENGINE-FIX-2026-05-15.md` — per-package exclusion vocabulary empirical data
+- an internal audit record — cohort independent audit synthesis
+- an internal audit record — per-package exclusion vocabulary empirical data
