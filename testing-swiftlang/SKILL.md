@@ -167,7 +167,7 @@ extension Index<Int> {
 
 **Rationale**: Two distinct failure modes with one workaround. The parallel namespace sidesteps the generic context entirely — `Tests` is top-level and non-generic, so `@section` is accepted and the test function body is non-generic.
 
-**Additional host classes that force the parallel-namespace form** (fleet-verified 2026-07-11, t002 lane B; each is a hard constraint of the language or the build model, not author preference):
+**Additional host classes that force the parallel-namespace form** (verified 2026-07-11; each is a hard constraint of the language or the build model, not author preference):
 
 | Host class | Why the [SWIFT-TEST-002] extension pattern fails | Handling |
 |---|---|---|
