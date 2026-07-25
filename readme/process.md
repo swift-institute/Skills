@@ -297,7 +297,7 @@ This repository is private; no public license. See organization terms.
 
 **Statement**: Process READMEs MUST NOT include an Installation block, any badge (development status, CI, or SPI), a Quick Start section, or other software-product-shaped sections (Architecture, Platform Support, Performance, Error Handling, Stability) — process repos are not software products.
 
-**Enforcement**: Mechanical — `validate-readme.py:190,194,198` (flags a literal `## Installation` section, any badge line, or a `## Quick Start` section; the remaining forbidden sections are not yet mechanically checked). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family C. Discipline: `Audits/PROMOTE-readme-annotations-2026-07-06.md`. [VERIFICATION: WF validate-readme.py:190]
+**Enforcement**: Mechanical — `validate-readme.py:190,194,198` (flags a literal `## Installation` section, any badge line, or a `## Quick Start` section; the remaining forbidden sections are not yet mechanically checked). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family C. Discipline: an internal audit record. [VERIFICATION: WF validate-readme.py:190]
 
 **Cross-references**: [README-003], [README-004], [README-005], [README-009], [README-010], [README-011], [README-013]
 
@@ -307,7 +307,7 @@ This repository is private; no public license. See organization terms.
 
 **Statement**: Process READMEs SHOULD be 30–50 lines; exceeding 80 lines flags content that belongs in a governing skill, a DocC article, or `Research/`.
 
-**Enforcement**: Mechanical — `validate-readme.py:204` (flags READMEs exceeding 80 lines). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family C. Discipline: `Audits/PROMOTE-readme-annotations-2026-07-06.md`. [VERIFICATION: WF validate-readme.py:204]
+**Enforcement**: Mechanical — `validate-readme.py:204` (flags READMEs exceeding 80 lines). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family C. Discipline: an internal audit record. [VERIFICATION: WF validate-readme.py:204]
 
 ---
 

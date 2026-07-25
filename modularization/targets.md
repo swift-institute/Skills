@@ -336,7 +336,7 @@ A `{Domain} {X} Primitives` target owns the entire sub-namespace, including:
 
 ---
 
-**Enforcement**: Mechanical (existing) — `validate-package-structure.py` [MOD-017]/[MOD-012] checks cover this rule's shape (pre-check collapse, /promote-rule 2026-07-06): `Audits/PROMOTE-MOD-031-2026-07-06.md`. [VERIFICATION: WF]
+**Enforcement**: Mechanical (existing) — `validate-package-structure.py` [MOD-017]/[MOD-012] checks cover this rule's shape (pre-check collapse, /promote-rule 2026-07-06): an internal audit record. [VERIFICATION: WF]
 
 ### [MOD-012] Target Naming Convention
 

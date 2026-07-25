@@ -227,7 +227,7 @@ same-layer edge does not merge the packages' missions or change either package's
 2. **Pragmatic (accepted with caveat)**: leave the violating dep in the L2 tests with an explicit `// swiftlint:disable` + comment citing the structural constraint — a marked, known exception (e.g. Codable-round-trip tests whose coverage mostly exercises Foundation anyway, with the load-bearing wire-shape coverage living in real-data tests elsewhere).
 3. **Forbidden**: silently adding the L3 dep to the L2 test target.
 
-**Enforcement**: Mechanical — `validate-test-target-layers.py` (+ `validate-test-target-layers.yml` org sweep; /promote-rule 2026-07-06): dump-package manifest check flagging institute-org test-target deps strictly above the host's layer; sanctioned option-2 exceptions in the sibling `.test-target-layer-allowlist`. Discipline: `Audits/PROMOTE-ARCH-LAYER-012-2026-07-06.md`. [VERIFICATION: WF]
+**Enforcement**: Mechanical — `validate-test-target-layers.py` (+ `validate-test-target-layers.yml` org sweep; /promote-rule 2026-07-06): dump-package manifest check flagging institute-org test-target deps strictly above the host's layer; sanctioned option-2 exceptions in the sibling `.test-target-layer-allowlist`. Discipline: an internal audit record. [VERIFICATION: WF]
 
 **Cross-references**: [ARCH-LAYER-001] (the rule this extends), [ARCH-LAYER-002] (L3→L2 import cascade), [ARCH-LAYER-007] (no-Foundation across layers), [PATTERN-061] (`JSON.Serializable` — the canonical institute JSON pattern that informs when the sibling-L3 path is worth authoring).
 

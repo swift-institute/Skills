@@ -96,7 +96,7 @@ public struct Channel.Reader<Element: ~Copyable & Sendable>: ~Copyable, @uncheck
 
 **Scope**: the compiler-limitation keyword-match is scoped to Category D only — Categories A/B/C are semantic-responsibility cases ([MEM-SAFE-024]'s scheme) and out of scope for this rule. *(Clause hoisted from the 2026-05-15 changelog entry.)*
 
-**Enforcement**: Mechanical — `Lint.Rule.Memory.UncheckedSendableRevalidationAnchor` in `swift-foundations/swift-linter-rules`, target `Linter Rule Memory` (universal tier; pilot 2 of AST-domain pivot of `/promote-rule` 2026-05-15). Discipline: `Audits/PROMOTE-MEM-SEND-006-2026-05-15.md`. [VERIFICATION: AST]
+**Enforcement**: Mechanical — `Lint.Rule.Memory.UncheckedSendableRevalidationAnchor` in `swift-foundations/swift-linter-rules`, target `Linter Rule Memory` (universal tier; pilot 2 of AST-domain pivot of `/promote-rule` 2026-05-15). Discipline: an internal audit record. [VERIFICATION: AST]
 
 **Cross-references**: [MEM-SEND-001], [MEM-SEND-004], [MEM-SEND-005], [MEM-SAFE-024], [DOC-045]
 

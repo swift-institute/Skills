@@ -43,7 +43,7 @@ The remaining four rules ([API-BYTE-003] through [API-BYTE-006]) encode the W2 c
 
 **Statement**: `UInt8` MUST NOT conform to `Byte.\`Protocol\``. The stdlib raw arithmetic carrier (`UInt8`) and the institute byte-domain twin (`Byte`) are sibling-form per `byte-protocol-capability-marker.md` v1.1.0 RECOMMENDATION (2026-05-15), NOT refinement-form. Adding the conformance dissolves the separation, shadows operators (`<` / `==` / `hash`), broadens the API surface, and pollutes `Tagged<_, UInt8>` composition.
 
-**Enforcement**: Mechanical — `Lint.Rule.Byte.UInt8ConformsToByteProtocol` in `swift-foundations/swift-institute-linter-rules`, target `Institute Linter Rule Byte` (pilot 1 of Post-W2 swift-linter arc 2026-05-19). Discipline: `Audits/PROMOTE-API-BYTE-001-2026-05-19.md`. [VERIFICATION: AST]
+**Enforcement**: Mechanical — `Lint.Rule.Byte.UInt8ConformsToByteProtocol` in `swift-foundations/swift-institute-linter-rules`, target `Institute Linter Rule Byte` (pilot 1 of Post-W2 swift-linter arc 2026-05-19). Discipline: an internal audit record. [VERIFICATION: AST]
 
 **Cross-references**: [API-NAME-001c] (capability-marker protocol recipe), [API-BYTE-002] (sibling Q3 rule), [API-BYTE-005] (W5 UInt8.ascii guard).
 
@@ -53,7 +53,7 @@ The remaining four rules ([API-BYTE-003] through [API-BYTE-006]) encode the W2 c
 
 **Statement**: `Byte` MUST NOT conform to any stdlib arithmetic protocol: `AdditiveArithmetic`, `Numeric`, `SignedNumeric`, `BinaryInteger`, `FixedWidthInteger`, `SignedInteger`, `UnsignedInteger`, `Strideable`. The arithmetic surface lives on `UInt8` only. Per `byte-arithmetic-conformance.md` v1.0.0 RECOMMENDATION ζ (2026-05-19).
 
-**Enforcement**: Mechanical — `Lint.Rule.Byte.ByteConformsToArithmetic` in `swift-foundations/swift-institute-linter-rules`, target `Institute Linter Rule Byte`. Discipline: `Audits/PROMOTE-API-BYTE-002-2026-05-19.md`. [VERIFICATION: AST]
+**Enforcement**: Mechanical — `Lint.Rule.Byte.ByteConformsToArithmetic` in `swift-foundations/swift-institute-linter-rules`, target `Institute Linter Rule Byte`. Discipline: an internal audit record. [VERIFICATION: AST]
 
 **Allowed conformances on Byte** (non-arithmetic): `Equatable`, `Hashable`, `Comparable`, `Sendable`, `Codable`, `CustomStringConvertible`, `ExpressibleByIntegerLiteral`, bitwise operations via `Byte.\`Protocol\`+Bitwise`.
 
@@ -81,7 +81,7 @@ Stdlib-interop forwarders carrying `@_disfavoredOverload` are exempt across both
 
 All six live in `swift-binary-primitives` and carry `@_disfavoredOverload`. The rule's exemption is mechanical (attribute presence), not file-path-based.
 
-**Enforcement**: Mechanical — `Lint.Rule.Byte.BinarySerializableUInt8Witness` in `swift-foundations/swift-institute-linter-rules`, target `Institute Linter Rule Byte`. Detection covers both shapes: the gate fires when EITHER (a) the extension's inheritance clause names `Binary.Serializable` / `Binary.Parseable` (conformer-extension), OR (b) the extended type IS the protocol (default-impl-extension). Default-impl-extension coverage landed 2026-05-20 (Arc G Phase 7 addendum). Discipline: `Audits/PROMOTE-API-BYTE-003-2026-05-19.md`. [VERIFICATION: AST]
+**Enforcement**: Mechanical — `Lint.Rule.Byte.BinarySerializableUInt8Witness` in `swift-foundations/swift-institute-linter-rules`, target `Institute Linter Rule Byte`. Detection covers both shapes: the gate fires when EITHER (a) the extension's inheritance clause names `Binary.Serializable` / `Binary.Parseable` (conformer-extension), OR (b) the extended type IS the protocol (default-impl-extension). Default-impl-extension coverage landed 2026-05-20 (Arc G Phase 7 addendum). Discipline: an internal audit record. [VERIFICATION: AST]
 
 **Cross-references**: [API-BYTE-004] (rawValue:UInt8 conformer companion), [API-BYTE-006] (@_disfavoredOverload forwarder rule).
 
@@ -91,7 +91,7 @@ All six live in `swift-binary-primitives` and carry `@_disfavoredOverload`. The 
 
 **Statement**: Conformers to `Binary.Serializable` / `Binary.Parseable` with `rawValue: UInt8` storage MUST be classified per the W2 discrimination rubric below. The rule fires at every such site; per-site disposition is the writer's.
 
-**Enforcement**: Mechanical — `Lint.Rule.Byte.BinarySerializableRawValueUInt8` in `swift-foundations/swift-institute-linter-rules`, target `Institute Linter Rule Byte`. Discipline: `Audits/PROMOTE-API-BYTE-004-2026-05-19.md`. [VERIFICATION: AST]
+**Enforcement**: Mechanical — `Lint.Rule.Byte.BinarySerializableRawValueUInt8` in `swift-foundations/swift-institute-linter-rules`, target `Institute Linter Rule Byte`. Discipline: an internal audit record. [VERIFICATION: AST]
 
 #### W2 discrimination rubric — the load-bearing principle
 
@@ -263,7 +263,7 @@ Before assigning a substrate in a `UInt8 → typed` cohort migration, classify E
 | `extension UInt8 { static var ascii }` | `extension ASCII.Code { ... }` |
 | `[UInt8](ascii: ...)` | `[ASCII.Code](...)` or BSLI bridge |
 
-**Enforcement**: Mechanical — `Lint.Rule.Byte.UInt8AsciiExtension` in `swift-foundations/swift-institute-linter-rules`, target `Institute Linter Rule Byte`. Discipline: `Audits/PROMOTE-API-BYTE-005-2026-05-19.md`. [VERIFICATION: AST]
+**Enforcement**: Mechanical — `Lint.Rule.Byte.UInt8AsciiExtension` in `swift-foundations/swift-institute-linter-rules`, target `Institute Linter Rule Byte`. Discipline: an internal audit record. [VERIFICATION: AST]
 
 **Cross-references**: [API-BYTE-001] (sibling Q1 rule — UInt8/Byte sibling-form identity); `byte-protocol-capability-marker.md` v1.1.0; `byte-arithmetic-conformance.md` v1.0.0.
 
@@ -293,7 +293,7 @@ extension Array where Element == UInt8 {
 
 Without `@_disfavoredOverload` on the second extension, an unannotated `Array(s)` call site cannot decide between `[Byte](s)` and `[UInt8](s)` and Swift will sometimes prefer the UInt8 form, breaking the Byte-typing the W2 cascade established.
 
-**Enforcement**: Mechanical — `Lint.Rule.Byte.UInt8ForwarderMissingDisfavored` in `swift-foundations/swift-institute-linter-rules`, target `Institute Linter Rule Byte`. Discipline: `Audits/PROMOTE-API-BYTE-006-2026-05-19.md`. [VERIFICATION: AST]
+**Enforcement**: Mechanical — `Lint.Rule.Byte.UInt8ForwarderMissingDisfavored` in `swift-foundations/swift-institute-linter-rules`, target `Institute Linter Rule Byte`. Discipline: an internal audit record. [VERIFICATION: AST]
 
 **Cross-references**: [API-BYTE-003] (witness `where`-clause rule with the same `@_disfavoredOverload` exemption shape), [API-BYTE-004] (rawValue domain disposition; the arithmetic-domain bridge often produces UInt8 forwarders that need this attribute).
 
@@ -314,7 +314,7 @@ Without `@_disfavoredOverload` on the second extension, an unannotated `Array(s)
 | `extension Byte.Input { @_disfavoredOverload init<Bytes: Swift.Collection>(_:) where Bytes.Element == UInt8 }` | **PRIMARY** (extension on institute type) |
 | `extension RFC_4122.UUID { @_disfavoredOverload init(_:[UInt8]) }` | **PRIMARY** |
 
-**Enforcement**: Mechanical — `Lint.Rule.Byte.StdlibForwarderOutsideSLI` in `swift-foundations/swift-institute-linter-rules`, target `Institute Linter Rule Byte` (pilot of Post-W2 Arc F SLI consolidation 2026-05-20; narrowed 2026-05-21 to fire only on stdlib-type extension subjects after binary-input-view arc surfaced false positives on `extension Byte.Input` UInt8-convenience inits). The detector walks parent nodes from each `@_disfavoredOverload` function/init up to the enclosing `ExtensionDeclSyntax` and checks the extended type's leaf-name against a curated stdlib-type allowlist (or explicit `Swift.<X>` qualifier). Discipline: `Audits/PROMOTE-API-BYTE-007-2026-05-20.md`. [VERIFICATION: AST]
+**Enforcement**: Mechanical — `Lint.Rule.Byte.StdlibForwarderOutsideSLI` in `swift-foundations/swift-institute-linter-rules`, target `Institute Linter Rule Byte` (pilot of Post-W2 Arc F SLI consolidation 2026-05-20; narrowed 2026-05-21 to fire only on stdlib-type extension subjects after binary-input-view arc surfaced false positives on `extension Byte.Input` UInt8-convenience inits). The detector walks parent nodes from each `@_disfavoredOverload` function/init up to the enclosing `ExtensionDeclSyntax` and checks the extended type's leaf-name against a curated stdlib-type allowlist (or explicit `Swift.<X>` qualifier). Discipline: an internal audit record. [VERIFICATION: AST]
 
 **Cross-references**: [API-BYTE-003] (witness-signature rule — Binary.Serializable forwarders relocated to `Binary Primitives Standard Library Integration` per this rule), [API-BYTE-006] (`@_disfavoredOverload` attribute requirement — this rule constrains the host module), [API-BYTE-004] (arithmetic-domain exception preserves UInt8-stays-UInt8 storage in primary modules), [API-BYTE-002] (stdlib-protocol corollary preserves `OptionSet.RawValue: UInt8` in primary modules). Nested-type lookup at SLI extension boundary requires fully-qualified parameter / throws types (rfc-8446 + rfc-768 class-c reveal).
 

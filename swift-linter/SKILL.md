@@ -504,7 +504,7 @@ This skill does NOT duplicate the cohort description. A consumer wiring `Lint.sw
 
 **Statement**: A `swift-linter:` suppression directive MUST be written as `// swift-linter:disable:next <rule-id>` or `// swift-linter:disable:line <rule-id>` with a non-empty rule id; no block form and no `enable` form exist — malformed forms are silently inert (the targeted finding is NOT suppressed).
 
-**Enforcement**: Mechanical — `Lint.Rule.Suppression.Malformed` (`malformed suppression directive`, universal tier; /promote-rule 2026-07-07). Scope is the engine's own `swift-linter:` namespace only; `swiftlint:` directive validity (unknown-rule / blanket forms) is SwiftLint's own concern (`superfluous_disable_command` / `blanket_disable_command`), and rule-id existence needs the run registry — both out of the per-file AST rule's scope. Discipline: `Audits/PROMOTE-malformed-suppression-directive-2026-07-07.md`. [VERIFICATION: AST]
+**Enforcement**: Mechanical — `Lint.Rule.Suppression.Malformed` (`malformed suppression directive`, universal tier; /promote-rule 2026-07-07). Scope is the engine's own `swift-linter:` namespace only; `swiftlint:` directive validity (unknown-rule / blanket forms) is SwiftLint's own concern (`superfluous_disable_command` / `blanket_disable_command`), and rule-id existence needs the run registry — both out of the per-file AST rule's scope. Discipline: an internal audit record. [VERIFICATION: AST]
 
 **Cross-references**: [LINT-BUNDLE-001] (universal bundle activation).
 

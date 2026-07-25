@@ -157,7 +157,7 @@ dependencies: [
 <!-- ❌ swift-institute is not a package; this URL is wrong by construction -->
 ```
 
-**Enforcement**: Mechanical — `validate-readme.py:238` (flags a literal `## Installation` section in the org-profile README). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family G. Discipline: `Audits/PROMOTE-readme-annotations-2026-07-06.md`. [VERIFICATION: WF validate-readme.py:238]
+**Enforcement**: Mechanical — `validate-readme.py:238` (flags a literal `## Installation` section in the org-profile README). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family G. Discipline: an internal audit record. [VERIFICATION: WF validate-readme.py:238]
 
 **Cross-references**: [README-008] in `sub-package.md`.
 

@@ -134,7 +134,7 @@ Naïve "no `import X` in source ⇒ drop X" misclassifies the kitchen-sink → s
 1. Before authoring any new `.package(path: "../X")` declaration in `Package.swift`, grep the target package's `Package.swift` for a back-dependency on the proposed dependent. If present, the new declaration completes a package-level cycle and MUST NOT land.
 2. After any cohort extraction that adds new deps, run the graph validator over the org roots and resolve any non-baselined finding before the next push.
 
-**Enforcement**: Mechanical — `validate-package-graph.py` (swift-institute/.github scripts; /promote-rule 2026-07-06): full Tarjan-SCC cycle detection over all org manifests (the earlier in-rule 2-cycle audit under-detected longer cycles), multi-root union for cross-org edges, prune-only `.package-graph-baseline`. Landing sweep 2026-07-06: ZERO live cycles across all five org roots. Discipline: `Audits/PROMOTE-MOD-032-2026-07-06.md`. [VERIFICATION: Script]
+**Enforcement**: Mechanical — `validate-package-graph.py` (swift-institute/.github scripts; /promote-rule 2026-07-06): full Tarjan-SCC cycle detection over all org manifests (the earlier in-rule 2-cycle audit under-detected longer cycles), multi-root union for cross-org edges, prune-only `.package-graph-baseline`. Landing sweep 2026-07-06: ZERO live cycles across all five org roots. Discipline: an internal audit record. [VERIFICATION: Script]
 
 **Worked example (the origin incident, 2026-05-22 Cohort I — six reverts)**: rationale archive §[MOD-032].
 

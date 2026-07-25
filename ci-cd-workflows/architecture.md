@@ -12,7 +12,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: CI/CD is organized in three tiers — per-package consumer thin caller, layer wrapper, universal reusable.
 
-**Enforcement**: Mechanical — Tier 3 via `validate-thin-callers.py` ([GH-REPO-074], pilot 7); Tier 2 wrapper-file presence via `lint-org-bot-coverage.yml` axis 3; Tier 1 is single-target structural (canonical `swift-institute/.github/.github/workflows/swift-ci.yml` under branch protection). Discipline: `Audits/PROMOTE-ci-corpus-sweep-2026-05-14.md` § [CI-001]. [VERIFICATION: WF validate-thin-callers.py + WF lint-org-bot-coverage.yml axis 3]
+**Enforcement**: Mechanical — Tier 3 via `validate-thin-callers.py` ([GH-REPO-074], pilot 7); Tier 2 wrapper-file presence via `lint-org-bot-coverage.yml` axis 3; Tier 1 is single-target structural (canonical `swift-institute/.github/.github/workflows/swift-ci.yml` under branch protection). Discipline: an internal audit record § [CI-001]. [VERIFICATION: WF validate-thin-callers.py + WF lint-org-bot-coverage.yml axis 3]
 
 **Cross-references**: [CI-002], [CI-003], [CI-004]; `swift-institute/Research/ci-centralization-strategy.md`.
 
@@ -43,7 +43,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: Layer-specific verifications (e.g., L1 embedded buildability) live as jobs in the layer's `swift-ci.yml` wrapper, NOT the universal reusable.
 
-**Enforcement**: Architectural — subsumed by [CI-004] (layer-wrapper presence enforced by `lint-org-bot-coverage.yml` axis 3) + [CI-002]'s inverse (universal MUST NOT carry layer-specific jobs). Discipline: `Audits/PROMOTE-ci-corpus-sweep-2026-05-14.md` § [CI-003]. [VERIFICATION: ARCH]
+**Enforcement**: Architectural — subsumed by [CI-004] (layer-wrapper presence enforced by `lint-org-bot-coverage.yml` axis 3) + [CI-002]'s inverse (universal MUST NOT carry layer-specific jobs). Discipline: an internal audit record § [CI-003]. [VERIFICATION: ARCH]
 
 **Cross-references**: [CI-001], [CI-002], [CI-020].
 
@@ -53,7 +53,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: Each layer org (swift-primitives, swift-standards, swift-foundations) hosts a `swift-ci.yml` wrapper as a structural anchor mirroring the org hierarchy.
 
-**Enforcement**: Mechanical — `lint-org-bot-coverage.yml` axis 3 (anonymous-public-API check via `gh api /repos/<org>/.github/contents/.github/workflows/swift-ci.yml`); sub-org repos excluded per [CI-004b]. Discipline: `Audits/PROMOTE-ci-corpus-sweep-2026-05-14.md` § [CI-004]. [VERIFICATION: WF lint-org-bot-coverage.yml axis 3]
+**Enforcement**: Mechanical — `lint-org-bot-coverage.yml` axis 3 (anonymous-public-API check via `gh api /repos/<org>/.github/contents/.github/workflows/swift-ci.yml`); sub-org repos excluded per [CI-004b]. Discipline: an internal audit record § [CI-004]. [VERIFICATION: WF lint-org-bot-coverage.yml axis 3]
 
 **Cross-references**: [CI-001], [CI-003], [CI-004a], [CI-004b]; `swift-institute/Research/ci-cd-cross-ecosystem-reuse.md` v1.1.1.
 
@@ -78,7 +78,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: Per-authority sub-org `.github` repos MUST NOT host `swift-ci.yml` — the `workflow_call` 4-level chain limit would push the universal's advisory-linter sub-dispatches to level 5 (parse failure). Sub-orgs route through their parent layer wrapper. Sunsets when GitHub raises the chain limit OR universal inlines advisory linters.
 
-**Enforcement**: Mechanical — `validate-sub-org-wrappers.py` + `validate-sub-org-wrappers.yml` (pilot 28 of `/promote-rule` 2026-05-14). Negative-existence check per named sub-org `.github` repo; workflow matrix iterates 11 L2 + 2 L3 sub-orgs (`swift-ietf`, `swift-iso`, `swift-w3c`, `swift-whatwg`, `swift-ecma`, `swift-incits`, `swift-ieee`, `swift-iec`, `swift-arm-ltd`, `swift-intel`, `swift-riscv`, `swift-linux-foundation`, `swift-microsoft`). Validator clones each sub-org's `.github` repo via gh App token; fires if `.github/workflows/swift-ci.yml` exists. Test fixtures use `.github-as-sub-org` marker to simulate sub-org context. Baseline 0 ecosystem-wide; self-firing ACTIVE (weekly schedule). Discipline: `Audits/PROMOTE-CI-004b-2026-05-14.md`. [VERIFICATION: WF validate-sub-org-wrappers.py]
+**Enforcement**: Mechanical — `validate-sub-org-wrappers.py` + `validate-sub-org-wrappers.yml` (pilot 28 of `/promote-rule` 2026-05-14). Negative-existence check per named sub-org `.github` repo; workflow matrix iterates 11 L2 + 2 L3 sub-orgs (`swift-ietf`, `swift-iso`, `swift-w3c`, `swift-whatwg`, `swift-ecma`, `swift-incits`, `swift-ieee`, `swift-iec`, `swift-arm-ltd`, `swift-intel`, `swift-riscv`, `swift-linux-foundation`, `swift-microsoft`). Validator clones each sub-org's `.github` repo via gh App token; fires if `.github/workflows/swift-ci.yml` exists. Test fixtures use `.github-as-sub-org` marker to simulate sub-org context. Baseline 0 ecosystem-wide; self-firing ACTIVE (weekly schedule). Discipline: an internal audit record. [VERIFICATION: WF validate-sub-org-wrappers.py]
 
 **Cross-references**: [CI-004], [CI-001]; `swift-institute/Research/ci-cd-cross-ecosystem-reuse.md` v1.1.1 §Q2; `swift-institute/Research/ci-centralization-strategy.md` (4-level limit citation).
 
@@ -90,7 +90,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: Caller `uses:` references to intra-Institute reusable workflows MUST pin to `@main` during active dev; tag pins (`@v1`, `@v1.0.0`) and SHA pins are forbidden until the surface stabilizes at `@v1`.
 
-**Enforcement**: Mechanical — `validate-thin-callers.py` + `validate-thin-callers.yml` (pilot 17 of `/promote-rule` 2026-05-14, compose-in-script with [GH-REPO-074] and [CI-059]). Intra-Institute path discriminator is the `.github/.github/workflows/` double-infix shape (third-party action refs use a different shape and are exempt per [CI-107]). Baseline 0/240 consumer repos; self-firing DEFERRED — `validate-thin-callers.yml` is `workflow_call`-only (no `push`/`pull_request` trigger), so the caller family is validated via the weekly `lint-validators-weekly` sweep only (manifest `self-firing: deferred`), not per-push (corrected 2026-07-03 per CI-REVIEW dossier F8 — the prior "self-firing ACTIVE" annotation was doc-drift). Discipline: `Audits/PROMOTE-CI-030-CI-059-2026-05-14.md`. [VERIFICATION: WF validate-thin-callers.py]
+**Enforcement**: Mechanical — `validate-thin-callers.py` + `validate-thin-callers.yml` (pilot 17 of `/promote-rule` 2026-05-14, compose-in-script with [GH-REPO-074] and [CI-059]). Intra-Institute path discriminator is the `.github/.github/workflows/` double-infix shape (third-party action refs use a different shape and are exempt per [CI-107]). Baseline 0/240 consumer repos; self-firing DEFERRED — `validate-thin-callers.yml` is `workflow_call`-only (no `push`/`pull_request` trigger), so the caller family is validated via the weekly `lint-validators-weekly` sweep only (manifest `self-firing: deferred`), not per-push (corrected 2026-07-03 per CI-REVIEW dossier F8 — the prior "self-firing ACTIVE" annotation was doc-drift). Discipline: an internal audit record. [VERIFICATION: WF validate-thin-callers.py]
 
 **Cross-references**: [CI-031], [CI-059], [CI-107]; `swift-institute/Research/ci-centralization-strategy.md`.
 
@@ -100,7 +100,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: Per-package consumer `ci.yml` contains only workflow name + `on:` + `concurrency:` + thin `uses:` jobs with `secrets: inherit` ([CI-059]). No inline build/test logic, caching, matrices, or toolchain overrides.
 
-**Enforcement**: Mechanical — `validate-thin-callers.py` + `validate-thin-callers.yml` (pilot 7 of `/promote-rule` 2026-05-14, extended at pilot 17 with [CI-030] + [CI-059] compose-in-script). [GH-REPO-074] checks (no inline `runs-on:`, no inline `steps:`, ≥1 `uses:` job; standalone `swift-format.yml`/`swiftlint.yml` forbidden) plus [CI-030] @main pinning and [CI-059] `secrets: inherit` co-presence. Discipline: `Audits/PROMOTE-ci-corpus-sweep-2026-05-14.md` § [CI-031]; pilot-17 outcome `Audits/PROMOTE-CI-030-CI-059-2026-05-14.md`. [VERIFICATION: WF validate-thin-callers.py (GH-REPO-074, CI-030, CI-059)]
+**Enforcement**: Mechanical — `validate-thin-callers.py` + `validate-thin-callers.yml` (pilot 7 of `/promote-rule` 2026-05-14, extended at pilot 17 with [CI-030] + [CI-059] compose-in-script). [GH-REPO-074] checks (no inline `runs-on:`, no inline `steps:`, ≥1 `uses:` job; standalone `swift-format.yml`/`swiftlint.yml` forbidden) plus [CI-030] @main pinning and [CI-059] `secrets: inherit` co-presence. Discipline: an internal audit record § [CI-031]; pilot-17 outcome an internal audit record. [VERIFICATION: WF validate-thin-callers.py (GH-REPO-074, CI-030, CI-059)]
 
 **Cross-references**: [CI-030], [CI-032], [CI-053], [CI-054], [CI-058], [CI-059], [CI-060]; memory `project_per_repo_vs_centralized_ci.md`.
 
@@ -110,7 +110,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: `swift-docs.yml` derives umbrella module / display name / bundle id / catalog path from `${{ github.event.repository.name }}` per the `swift-{kebab}-primitives` → `{Title}_Primitives` convention; per-package overrides accepted.
 
-**Enforcement**: Architectural — derivation logic IS in `swift-institute/.github/.github/workflows/swift-docs.yml`; every consumer routes through this reusable per [CI-031]; reviewer discipline via branch protection. Discipline: `Audits/PROMOTE-ci-corpus-sweep-2026-05-14.md` § [CI-053]. [VERIFICATION: ARCH]
+**Enforcement**: Architectural — derivation logic IS in `swift-institute/.github/.github/workflows/swift-docs.yml`; every consumer routes through this reusable per [CI-031]; reviewer discipline via branch protection. Discipline: an internal audit record § [CI-053]. [VERIFICATION: ARCH]
 
 **Cross-references**: [CI-031], [CI-002].
 
@@ -122,7 +122,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Note (2026-07-03, clarifying per CI-REVIEW dossier F33; advisory mechanics corrected 2026-07-05, Phase-3 review)**: `format`/`lint` are the gating quality jobs but not the only quality jobs the universal runs — it also dispatches 7 advisory, non-gating linters (`swift-linter` + nested `lint-yaml`/`broken-symlink`/`license-header`/`test-support-spine`/`api-breakage`/`pr-title`), enumerated in [CI-002]'s Permitted list, plus an `advisory-summary` job that renders their results to the run summary. Only `swift-linter` (a real `steps:`-bearing job) carries `continue-on-error: true`; the six nested linters are `uses:` reusable-workflow jobs and CANNOT carry `continue-on-error` per [CI-105] (the Actions parser rejects the co-presence with `startup_failure`) — each instead takes an `advisory: bool` input, and their non-gating status comes from exclusion from `ci-ok`'s `needs:` list, not from `continue-on-error`. Those are soak, not merge gates.
 
-**Enforcement**: Mechanical + architectural — (a) `format` and `lint` jobs ARE in `swift-ci.yml`; every consumer routes through them via [CI-031]. (b) `validate-thin-callers.py` forbids standalone per-repo `swift-format.yml`/`swiftlint.yml` files (post-2026-05-10 consolidation). Discipline: `Audits/PROMOTE-ci-corpus-sweep-2026-05-14.md` § [CI-054]. [VERIFICATION: ARCH + WF validate-thin-callers.py]
+**Enforcement**: Mechanical + architectural — (a) `format` and `lint` jobs ARE in `swift-ci.yml`; every consumer routes through them via [CI-031]. (b) `validate-thin-callers.py` forbids standalone per-repo `swift-format.yml`/`swiftlint.yml` files (post-2026-05-10 consolidation). Discipline: an internal audit record § [CI-054]. [VERIFICATION: ARCH + WF validate-thin-callers.py]
 
 **Cross-references**: [CI-002], [CI-031], [CI-057].
 
@@ -132,7 +132,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: Local invocations of toolchain-version-sensitive Swift tooling (currently `swift-format`) resolve to a wrapper script at `swift-institute/Scripts/<tool>` that exec's the same toolchain CI uses; direct `$PATH` invocation forbidden.
 
-**Enforcement**: Script — file-presence at `swift-institute/Scripts/swift-format`; auto-tracks highest installed `swift-6.3.*-RELEASE.xctoolchain`; hard-fail with install URL if missing (no `$PATH` fallback). Developer setup prepends `Scripts/` to `$PATH` per `CONTRIBUTING.md`. Discipline: `Audits/PROMOTE-ci-corpus-sweep-2026-05-14.md` § [CI-093]. [VERIFICATION: Script Scripts/swift-format]
+**Enforcement**: Script — file-presence at `swift-institute/Scripts/swift-format`; auto-tracks highest installed `swift-6.3.*-RELEASE.xctoolchain`; hard-fail with install URL if missing (no `$PATH` fallback). Developer setup prepends `Scripts/` to `$PATH` per `CONTRIBUTING.md`. Discipline: an internal audit record § [CI-093]. [VERIFICATION: Script Scripts/swift-format]
 
 **Cross-references**: [CI-054], [CI-092], [PKG-BUILD-001], [PKG-BUILD-004].
 

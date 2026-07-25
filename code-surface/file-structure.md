@@ -252,13 +252,13 @@ extension Swift.Optional: Serializable where Wrapped: Serializable {
 
 ---
 
-**Enforcement**: TEXT-ONLY (cross-module associatedtype knowledge — the [MOD-016] per-file-AST class; /promote-rule 2026-07-06): `Audits/PROMOTE-API-IMPL-019-2026-07-06.md`.
+**Enforcement**: TEXT-ONLY (cross-module associatedtype knowledge — the [MOD-016] per-file-AST class; /promote-rule 2026-07-06): an internal audit record.
 
 ### [API-IMPL-020] Explicit `Body = Never` Typealias on Generic Parser/Serializer Leaf Conformers
 
 **Statement**: Generic types conforming to `Parser.Protocol` / `Serializer.Protocol` / `Coder.Protocol` as leaf conformers (no `body` property delegating to another Parser/Serializer body) MUST declare `public typealias Body = Never` explicitly; without it, witness-table emission for generic conformers fails at link time with `Undefined symbols ... protocol witness for body.getter`.
 
-**Enforcement**: Mechanical — `Lint.Rule.Conformance.LeafBodyTypealias` in `swift-foundations/swift-institute-linter-rules`, target `Linter Rule Conformance` (institute tier; first AST-domain pivot promotion of `/promote-rule` 2026-05-15). Discipline: `Audits/PROMOTE-API-IMPL-020-2026-05-15.md`. [VERIFICATION: AST]
+**Enforcement**: Mechanical — `Lint.Rule.Conformance.LeafBodyTypealias` in `swift-foundations/swift-institute-linter-rules`, target `Linter Rule Conformance` (institute tier; first AST-domain pivot promotion of `/promote-rule` 2026-05-15). Discipline: an internal audit record. [VERIFICATION: AST]
 
 **Cross-references**: [API-IMPL-009] (hoisted-protocol patterns); [API-IMPL-018], [API-IMPL-019] (sibling rules from the same W4c/W5b Coder/Serializer modeling arc).
 
@@ -280,7 +280,7 @@ extension Swift.Optional: Serializable where Wrapped: Serializable {
 
 **Statement**: Public STORED value types in the storage tower ship `@frozen` from birth; views/iterators/snapshots (`~Escapable` types and the curated `Checkpoint`/`Scalar`/`Segments`/`Walk` class) stay unfrozen until cross-module partial consumption is demonstrated.
 
-**Enforcement**: Mechanical — `Lint.Rule.Tower.FrozenTowerType` (`frozen tower type`, primitives tier, pack `Primitives Linter Rule Tower`; ζ pilot of /promote-rule 2026-06-12). Discipline: `Audits/PROMOTE-API-IMPL-022-2026-06-12.md`. [VERIFICATION: AST Lint.Rule.Tower.FrozenTowerType] **ADT Tower rider (2026-07-02)**: the tower carriers (`__X<S: ~Copyable>`) are stored value types ⇒ `@frozen` from birth ([DS-025]; `Experiments/adt-tower-worked-example` complies); front-door aliases carry no storage of their own (generic-instantiation aliases, [DS-028]) so the `@frozen` obligation lands on the carrier (`Research/adt-tower.md` §4.7).
+**Enforcement**: Mechanical — `Lint.Rule.Tower.FrozenTowerType` (`frozen tower type`, primitives tier, pack `Primitives Linter Rule Tower`; ζ pilot of /promote-rule 2026-06-12). Discipline: an internal audit record. [VERIFICATION: AST Lint.Rule.Tower.FrozenTowerType] **ADT Tower rider (2026-07-02)**: the tower carriers (`__X<S: ~Copyable>`) are stored value types ⇒ `@frozen` from birth ([DS-025]; `Experiments/adt-tower-worked-example` complies); front-door aliases carry no storage of their own (generic-instantiation aliases, [DS-028]) so the `@frozen` obligation lands on the carrier (`Research/adt-tower.md` §4.7).
 
 **Cross-references**: [API-IMPL-021]; **memory-safety** [MEM-COPY-016]; **rule-exemptions** (exemption shapes); **ecosystem-data-structures** [DS-025] (frozen carriers), [DS-028] (aliases hold no storage).
 

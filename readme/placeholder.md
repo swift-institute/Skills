@@ -78,7 +78,7 @@ Without explicit Family F rules, two anti-patterns emerge in production: **silen
 > **Status: Unnecessary**
 ```
 
-**Enforcement**: Mechanical — `validate-readme.py:218` (flags any `##` section beyond an allowed `## License` exception). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family F. Discipline: `Audits/PROMOTE-readme-annotations-2026-07-06.md`. [VERIFICATION: WF validate-readme.py:218]
+**Enforcement**: Mechanical — `validate-readme.py:218` (flags any `##` section beyond an allowed `## License` exception). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family F. Discipline: an internal audit record. [VERIFICATION: WF validate-readme.py:218]
 
 ---
 
@@ -86,7 +86,7 @@ Without explicit Family F rules, two anti-patterns emerge in production: **silen
 
 **Statement**: The status value MUST be one of `Pre-implementation`, `Namespace-reservation`, `Unnecessary`, or `Archived`, title-cased, directly after the colon (e.g. `> **Status: Unnecessary**`).
 
-**Enforcement**: Mechanical — `validate-readme.py:227` (status value MUST be a member of the canonical set). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family F. Discipline: `Audits/PROMOTE-readme-annotations-2026-07-06.md`. [VERIFICATION: WF validate-readme.py:227]
+**Enforcement**: Mechanical — `validate-readme.py:227` (status value MUST be a member of the canonical set). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family F. Discipline: an internal audit record. [VERIFICATION: WF validate-readme.py:227]
 
 **Cross-references**: [README-162] in `ci-automation.md`.
 

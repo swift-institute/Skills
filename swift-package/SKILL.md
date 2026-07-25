@@ -173,7 +173,7 @@ gerund-typealias layer is strictly additive: it gives a grammatical English
 reading at conformance sites without losing the noun discipline of the
 namespace or the generic-constraint clarity of the nested protocol name.
 
-**Enforcement**: TEXT-ONLY (linguistically unbounded, /promote-rule 2026-07-06) — the gerund-alias mandate is conditional on gerund existence (24 of 30 live `\`Protocol\`` namespaces are nouns with no gerund form); re-promotable via the curated gerund list [PKG-NAME-001] also awaits: `Audits/PROMOTE-PKG-NAME-002-2026-07-06.md`.
+**Enforcement**: TEXT-ONLY (linguistically unbounded, /promote-rule 2026-07-06) — the gerund-alias mandate is conditional on gerund existence (24 of 30 live `\`Protocol\`` namespaces are nouns with no gerund form); re-promotable via the curated gerund list [PKG-NAME-001] also awaits: an internal audit record.
 
 **Cross-references**: [PKG-NAME-001], [PKG-NAME-006], [API-NAME-001],
 [API-NAME-002], [PKG-NAME-015]
@@ -238,7 +238,7 @@ swiftc 6.3.2.
 witness convention (`Parse` / `Iterate` / `Sequence<E>`). Authorized by the
 principal 2026-05-26.
 
-**Enforcement**: TEXT-ONLY (judgment alias gates; nesting slice uncalibrated — zero live top-level-Witness violations, compound shapes covered by `Lint.Rule.Naming.CompoundType`; /promote-rule 2026-07-06): `Audits/PROMOTE-PKG-NAME-015-2026-07-06.md`.
+**Enforcement**: TEXT-ONLY (judgment alias gates; nesting slice uncalibrated — zero live top-level-Witness violations, compound shapes covered by `Lint.Rule.Naming.CompoundType`; /promote-rule 2026-07-06): an internal audit record.
 
 **Cross-references**: [PKG-NAME-002], [PKG-NAME-006], [API-NAME-004a],
 **code-surface** [API-IMPL-023] / [API-IMPL-009] (generic tower nests),
@@ -804,7 +804,7 @@ variable isolation in negative experiments.
 - Do NOT package the canonical as a Swift package; do NOT propose returning to that design.
 
 
-**Enforcement**: TEXT-ONLY (insufficient empirical grounding, /promote-rule 2026-07-06) — one live org→org `// parent:` edge, zero per-package directive consumers (inheritance runs through Bundle composition); no mechanical source for the owning-org set. Re-promotable at the directive rollout or a ratified owning-org list: `Audits/PROMOTE-PKG-DEP-006-2026-07-06.md`.
+**Enforcement**: TEXT-ONLY (insufficient empirical grounding, /promote-rule 2026-07-06) — one live org→org `// parent:` edge, zero per-package directive consumers (inheritance runs through Bundle composition); no mechanical source for the owning-org set. Re-promotable at the directive rollout or a ratified owning-org list: an internal audit record.
 
 **Cross-references**: [PKG-DEP-005], [CI-094]
 
@@ -823,7 +823,7 @@ variable isolation in negative experiments.
 4. The determination is per-package and empirical — a workflow's aggregate LLM pass is not a substitute for the per-consumer grep.
 
 
-**Enforcement**: SwiftPM-native — a full coordinator-owned package build emits `warning: '<pkg>': dependency 'X' is not used by any target` for exactly the unused-dependency case (verified 2026-07-01; note it surfaces only on a full build, not during resolve or package dump). Since pruning is done after a green build, that native warning is the authoritative signal — no custom validator is needed. Act on it per How-to-apply above: remove the declaration, or ADD the `.product` if a source imports the module. A regex static validator was piloted then removed as redundant with SwiftPM's own diagnostic — see `Audits/PROMOTE-PKG-DEP-007-2026-07-01.md`. [VERIFICATION: Native tooling]
+**Enforcement**: SwiftPM-native — a full coordinator-owned package build emits `warning: '<pkg>': dependency 'X' is not used by any target` for exactly the unused-dependency case (verified 2026-07-01; note it surfaces only on a full build, not during resolve or package dump). Since pruning is done after a green build, that native warning is the authoritative signal — no custom validator is needed. Act on it per How-to-apply above: remove the declaration, or ADD the `.product` if a source imports the module. A regex static validator was piloted then removed as redundant with SwiftPM's own diagnostic — see an internal audit record. [VERIFICATION: Native tooling]
 
 **Cross-references**: [PKG-DEP-003], [PKG-DEP-004], [MOD-024]
 
@@ -839,7 +839,7 @@ variable isolation in negative experiments.
 .product(name: "Windows", package: "swift-windows-32")         // ❌ off-machine: unknown package 'swift-windows-32'
 ```
 
-**Enforcement**: Mechanical — `validate-package-identity.py` (+ `validate-package-identity.yml` org sweep; /promote-rule 2026-07-06). Discipline: `Audits/PROMOTE-PKG-DEP-008-2026-07-06.md`. [VERIFICATION: WF]
+**Enforcement**: Mechanical — `validate-package-identity.py` (+ `validate-package-identity.yml` org sweep; /promote-rule 2026-07-06). Discipline: an internal audit record. [VERIFICATION: WF]
 
 **Cross-references**: [PKG-DEP-001], [RELEASE-015], [CI-112].
 
@@ -942,7 +942,7 @@ Both greps run against the FULL workspace (not just the renamed package's repo) 
 .target(name: "Linter Rule Memory", ...)            // ❌ collides with the base pack — consumer graph refused
 ```
 
-**Enforcement**: Mechanical — `validate-package-naming.py` [PKG-NAME-014] check (/promote-rule 2026-07-06): non-test target names intersected against every locally-resolvable direct dependency's; SwiftPM's own duplicate-module rejection fires only at consumer compile time, this is the authoring-time pre-check. Ecosystem sweep at landing: 0 collisions. Full procedure + scope notes displaced to the discipline record: `Audits/PROMOTE-PKG-NAME-014-2026-07-06.md`. [VERIFICATION: WF]
+**Enforcement**: Mechanical — `validate-package-naming.py` [PKG-NAME-014] check (/promote-rule 2026-07-06): non-test target names intersected against every locally-resolvable direct dependency's; SwiftPM's own duplicate-module rejection fires only at consumer compile time, this is the authoring-time pre-check. Ecosystem sweep at landing: 0 collisions. Full procedure + scope notes displaced to the discipline record: an internal audit record. [VERIFICATION: WF]
 - The prefix MUST be a single word identifying the layer (e.g., `Institute`, `Primitives`) — NOT a multi-word qualifier. Multi-word prefixes create awkward module names (e.g., `Institute_Layer_Linter_Rule_Memory`) and obscure the prefix's role.
 - Order of words: `<Prefix> <BaseVocabulary>` (prefix first, base vocabulary last). Convention parallels the noun-first ordering of `Linter Rule X` (where `Linter Rule` is the vocabulary stem); prefix adds tier context without disrupting the stem's grammar.
 
@@ -1014,7 +1014,7 @@ A field word (`serialization`, `iteration`) is *reserved for* the L3+ register a
 
 **Rationale**: package names are `-primitives`-headed compounds whose modifier is classificatory — the object noun already supplies the domain reading (Levi 1978 FOR-relation); agent nominals are participant-denoting and unambiguous where deverbal nominals are event/result-ambiguous (Rappaport Hovav & Levin 1992; Grimshaw 1990); every surveyed ecosystem places field words at grouping nodes and object nouns at cells (Go `encoding/json`, Python `email.parser`, Rust `std::iter` → `Iterator`, Java `java.util.concurrent` → `Executor`); the root namespace is the package's only time-invariant property — content character is a phase that migrations change; 221-cell derivability and the 9,906-line stem-identity surface. Domain-naming at L1 was evaluated and REJECTED 2026-06-12, cancelling the suspended `iterator→iteration` rename class with it.
 
-**Enforcement**: Mechanical — `validate-package-naming.py` [PKG-NAME-017] check (/promote-rule 2026-07-06): root detection via `X[.Y].{Protocol,Witness}.swift` filenames (conformance `+`-files excluded), ancestor-path kebab match; family-label (no-root) packages skip. Three live findings, all tower-terrain, adjudication tower-gated: `Audits/PROMOTE-PKG-NAME-017-2026-07-06.md`. [VERIFICATION: WF]
+**Enforcement**: Mechanical — `validate-package-naming.py` [PKG-NAME-017] check (/promote-rule 2026-07-06): root detection via `X[.Y].{Protocol,Witness}.swift` filenames (conformance `+`-files excluded), ancestor-path kebab match; family-label (no-root) packages skip. Three live findings, all tower-terrain, adjudication tower-gated: an internal audit record. [VERIFICATION: WF]
 
 **Backward compatibility**: ADDITIVE — ratifies the live census (no package violates; the would-have-been rename class is CANCELLED, not migrated).
 

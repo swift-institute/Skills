@@ -53,7 +53,7 @@ The pattern holds even within the calling repository — the cross-repo form avo
 
 **Statement**: Composite-action description fields (top-level, per-input, per-output) MUST NOT contain `${{ ... }}` expressions — Actions evaluates expressions at composite-action parse time and rejects with HTTP 422.
 
-**Enforcement**: Mechanical — `validate-composite-action-descriptions.py` + `validate-composite-action-descriptions.yml` (pilot 25 of `/promote-rule` 2026-05-14). Single-repo multi-file integrity check on `<repo>/.github/actions/*/action.yml`; PyYAML walks `description` at three positions (top-level, `inputs.<name>.description`, `outputs.<name>.description`) and fires on `${{` substring. Expression syntax in non-description positions (`runs.steps[*].env`, `outputs.<name>.value`, `if:`) is permitted and silent. Baseline 0; self-firing ACTIVE. Discipline: `Audits/PROMOTE-CI-102-2026-05-14.md`. [VERIFICATION: WF validate-composite-action-descriptions.py]
+**Enforcement**: Mechanical — `validate-composite-action-descriptions.py` + `validate-composite-action-descriptions.yml` (pilot 25 of `/promote-rule` 2026-05-14). Single-repo multi-file integrity check on `<repo>/.github/actions/*/action.yml`; PyYAML walks `description` at three positions (top-level, `inputs.<name>.description`, `outputs.<name>.description`) and fires on `${{` substring. Expression syntax in non-description positions (`runs.steps[*].env`, `outputs.<name>.value`, `if:`) is permitted and silent. Baseline 0; self-firing ACTIVE. Discipline: an internal audit record. [VERIFICATION: WF validate-composite-action-descriptions.py]
 
 **Cross-references**: [CI-070], [CI-103]; memory `feedback_composite_action_description_no_expressions.md`.
 
@@ -63,7 +63,7 @@ The pattern holds even within the calling repository — the cross-repo form avo
 
 **Statement**: Workflow-level `env:` MUST NOT be referenced from `runs-on:` or `container:` fields — Actions resolves these fields before workflow-level `env:` is bound, producing parse-time HTTP 422. Use `inputs.*`, `vars.*`, or literal hardcode.
 
-**Enforcement**: Mechanical — `validate-env-context.py` + `validate-env-context.yml` (pilot 21 of `/promote-rule` 2026-05-14). Single-repo multi-file integrity check; per-job PyYAML inspection of `runs-on:` (string or list) and `container:` (string or dict with `image:`) for `${{ env.X }}` substring. Other contexts (`inputs.*`, `vars.*`, `matrix.*`, `github.*`) are permitted and not flagged; step-level `env.*` references (in `run:` blocks, `with:` blocks, etc.) are out of scope (env: binds before step execution). Baseline 0/4 wrapper-host repos; self-firing ACTIVE. Discipline: `Audits/PROMOTE-CI-103-2026-05-14.md`. [VERIFICATION: WF validate-env-context.py]
+**Enforcement**: Mechanical — `validate-env-context.py` + `validate-env-context.yml` (pilot 21 of `/promote-rule` 2026-05-14). Single-repo multi-file integrity check; per-job PyYAML inspection of `runs-on:` (string or list) and `container:` (string or dict with `image:`) for `${{ env.X }}` substring. Other contexts (`inputs.*`, `vars.*`, `matrix.*`, `github.*`) are permitted and not flagged; step-level `env.*` references (in `run:` blocks, `with:` blocks, etc.) are out of scope (env: binds before step execution). Baseline 0/4 wrapper-host repos; self-firing ACTIVE. Discipline: an internal audit record. [VERIFICATION: WF validate-env-context.py]
 
 **Cross-references**: [CI-102], [CI-104]; memory `feedback_env_invalid_in_runs_on_container.md`.
 
@@ -73,7 +73,7 @@ The pattern holds even within the calling repository — the cross-repo form avo
 
 **Statement**: `continue-on-error: true` MUST NOT co-exist with `uses:` at the same job level. The Actions parser rejects the shape with `Unexpected value 'continue-on-error'` causing `startup_failure` across the entire chain; use the `inputs.advisory: bool` pattern instead.
 
-**Enforcement**: Mechanical — `validate-continue-on-error.py` + `validate-continue-on-error.yml` (pilot 19 of `/promote-rule` 2026-05-14). Single-repo multi-file integrity check; per-job YAML inspection of co-presence of `continue-on-error: true` and `uses:`. Step-level `continue-on-error` and `continue-on-error` on regular `runs-on:`/`steps:` jobs are out of scope (rule applies to workflow_call'd jobs only). Baseline 0/4 wrapper-host repos; self-firing ACTIVE. Discipline: `Audits/PROMOTE-CI-105-2026-05-14.md`. [VERIFICATION: WF validate-continue-on-error.py]
+**Enforcement**: Mechanical — `validate-continue-on-error.py` + `validate-continue-on-error.yml` (pilot 19 of `/promote-rule` 2026-05-14). Single-repo multi-file integrity check; per-job YAML inspection of co-presence of `continue-on-error: true` and `uses:`. Step-level `continue-on-error` and `continue-on-error` on regular `runs-on:`/`steps:` jobs are out of scope (rule applies to workflow_call'd jobs only). Baseline 0/4 wrapper-host repos; self-firing ACTIVE. Discipline: an internal audit record. [VERIFICATION: WF validate-continue-on-error.py]
 
 **Cross-references**: [CI-099], [CI-106]; `swift-institute/Research/centralized-swift-ci-and-spine-gate.md` §3.5.1.
 
@@ -144,7 +144,7 @@ The pattern holds even within the calling repository — the cross-repo form avo
 
 **Statement**: The SwiftLint opt-in rule `toggle_bool` MUST NOT be enabled in the canonical Tier 1 `.swiftlint.yml`; user-direction prefers `x = !x` over `x.toggle()`.
 
-**Enforcement**: Mechanical — `validate-swiftlint-rules.py` + `validate-swiftlint-rules.yml` (pilot 22 of `/promote-rule` 2026-05-14). Centralized-config integrity check on single canonical `swift-institute/.github/.swiftlint.yml`; PyYAML inspection scans enable-position keys (`opt_in_rules`, `analyzer_rules`, `enabled_rules`) for forbidden rule name; explicit-disable position (`disabled_rules`) and absence-from-config (default off) are correctly silent. Baseline 0; self-firing ACTIVE. Discipline: `Audits/PROMOTE-CI-100-2026-05-14.md`. [VERIFICATION: WF validate-swiftlint-rules.py]
+**Enforcement**: Mechanical — `validate-swiftlint-rules.py` + `validate-swiftlint-rules.yml` (pilot 22 of `/promote-rule` 2026-05-14). Centralized-config integrity check on single canonical `swift-institute/.github/.swiftlint.yml`; PyYAML inspection scans enable-position keys (`opt_in_rules`, `analyzer_rules`, `enabled_rules`) for forbidden rule name; explicit-disable position (`disabled_rules`) and absence-from-config (default off) are correctly silent. Baseline 0; self-firing ACTIVE. Discipline: an internal audit record. [VERIFICATION: WF validate-swiftlint-rules.py]
 
 **Cross-references**: [CI-057], [CI-101]; memory `feedback_no_toggle_bool_rule.md`.
 

@@ -124,7 +124,7 @@ public macro Observable() = #externalMacro(
 )
 ```
 
-**Enforcement**: Mechanical — `validate-package-naming.py` [MOD-023] check (/promote-rule 2026-07-06): source `#externalMacro(module:)` cites vs dump-package macro-target names normalized spaces→underscores (dump-package resolves constant-named targets); near-misses of the package's OWN macro targets fire, external-package cites pass. Rationale + displaced detail: rationale archive §[MOD-023] + `Audits/PROMOTE-MOD-023-2026-07-06.md`. [VERIFICATION: WF]
+**Enforcement**: Mechanical — `validate-package-naming.py` [MOD-023] check (/promote-rule 2026-07-06): source `#externalMacro(module:)` cites vs dump-package macro-target names normalized spaces→underscores (dump-package resolves constant-named targets); near-misses of the package's OWN macro targets fire, external-package cites pass. Rationale + displaced detail: rationale archive §[MOD-023] + an internal audit record. [VERIFICATION: WF]
 
 **Cross-references**: [PATTERN-004b], [MOD-012]
 
@@ -192,7 +192,7 @@ This clarifies `[MOD-004]`'s "What Core excludes: any API whose signature requir
 
 **Naming + umbrella shape of the split**: the lean type module is named `{Domain} {Variant} Primitive` (SINGULAR); the conformances ops module is `{Domain} {Variant} Primitives` (PLURAL). The base plural `{Domain} Primitives` doubles as the `[MOD-005]` umbrella (re-exports the base type + all variant ops) — no separate pure-umbrella target, no "Base" token. Acyclicity: variant ops depend on the base/variant TYPE singular, never on the base ops plural. Full naming table in `[MOD-012]`; umbrella + acyclicity + dual-role exception in `[MOD-005]`.
 
-**Lint enforcement (TEXT-ONLY — synthetic build-probe attempted + retracted 2026-05-24)**: the violation triggers only in a real consumer's **whole-module** context — synthetic build-probes all build clean and AST detection is out (cross-module access-level resolution, `[MOD-016]`) — so enforcement is **incidental consumer CI** (optionally made deterministic by a producer-side "canary consumer build"); re-promotable only with a representative real-consumer fixture. Outcome record: `Audits/PROMOTE-MOD-036-2026-05-24.md`; detail: rationale archive §[MOD-036].
+**Lint enforcement (TEXT-ONLY — synthetic build-probe attempted + retracted 2026-05-24)**: the violation triggers only in a real consumer's **whole-module** context — synthetic build-probes all build clean and AST detection is out (cross-module access-level resolution, `[MOD-016]`) — so enforcement is **incidental consumer CI** (optionally made deterministic by a producer-side "canary consumer build"); re-promotable only with a representative real-consumer fixture. Outcome record: an internal audit record; detail: rationale archive §[MOD-036].
 
 **Cross-references**: [MOD-004] (the conformance isolation that motivates the split; this rule clarifies its Copyable-exclusion scope), [MOD-008] (cross-target `@inlinable` tradeoff), [MOD-009] (satellite→heap delegation), [MOD-016] (AST-can't-resolve-cross-module — and why a synthetic build-probe can't detect it either; enforcement is incidental consumer CI), [MOD-027] (`internal import` + `@inlinable` incompatibility — sibling access-level rule), [MOD-037] (cross-variant flip), [MOD-005] (base-plural-as-umbrella shape), [MOD-012] (type/ops-split naming table)
 
@@ -219,7 +219,7 @@ This clarifies `[MOD-004]`'s "What Core excludes: any API whose signature requir
 
 **Relationship to the neighbor rules**: [MOD-006] is the upper bound (declare nothing a target doesn't use); this rule is the lower bound (declare everything its sources import). Together: `dependencies:` ≡ the import set, modulo the toolchain carve above and the [PKG-DEP-004] test-support-spine carve on the [MOD-006] side. [MOD-015] picks WHICH module to import; this rule says whichever module is imported, declare the edge. [PKG-DEP-003] is the package-level analog of the upper bound.
 
-**Enforcement**: Mechanical — `validate-target-imports.py` (/promote-rule 2026-07-06): per-target import census (dump-package target/product/byName edges; dep manifests resolved via org mirrors, soft-skip when unresolvable; documented toolchain-module carve). Ladder found 2 live undeclared edges (tagged, ordinal) — fixed same-day. Symptom reminder stands: nondeterministic `no such module` on fresh/sanitizer plans = candidate undeclared edge before suspecting the toolchain. Discipline: `Audits/PROMOTE-MOD-038-2026-07-06.md`. [VERIFICATION: WF]
+**Enforcement**: Mechanical — `validate-target-imports.py` (/promote-rule 2026-07-06): per-target import census (dump-package target/product/byName edges; dep manifests resolved via org mirrors, soft-skip when unresolvable; documented toolchain-module carve). Ladder found 2 live undeclared edges (tagged, ordinal) — fixed same-day. Symptom reminder stands: nondeterministic `no such module` on fresh/sanitizer plans = candidate undeclared edge before suspecting the toolchain. Discipline: an internal audit record. [VERIFICATION: WF]
 
 **Cross-references**: [MOD-006] (the complement bound — no unused deps), [MOD-015] (import precision — which module; this rule — declare it), [PKG-DEP-003] (package-level used-only declarations), [PKG-DEP-004] (test-support spine carve)
 

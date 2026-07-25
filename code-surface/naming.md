@@ -186,7 +186,7 @@ public struct Property<Tag, Base: ~Copyable>: ~Copyable { /* … */ }     // ❌
 
 **Non-breaking**: widening `~Copyable` (or bare) → `~Copyable & ~Escapable` strictly enlarges the admissible tag domain; every previously-valid instantiation stays valid (no site keys on a phantom's Copyable/Escapable-ness). Surfacing a missed phantom site later is a *completeness* fix, not a *safety* fix.
 
-**Lint enforcement**: shipped, UNBUNDLED (fires nowhere; Phase 7 deferred — see Audits/PROMOTE-API-NAME-010b-2026-06-01.md) — flags a `typealias`/`struct`/`enum`/`func` generic param used only in `Tagged<P,…>`/`Property<P,…>`/`Index<P>` positions (never in a stored-property/by-value type) whose bound lacks `& ~Escapable`. Will promote to GATING (bundled at `.warning`, then `.error`) after the ecosystem sweep is green.
+**Lint enforcement**: shipped, UNBUNDLED (fires nowhere; Phase 7 deferred — see an internal audit record) — flags a `typealias`/`struct`/`enum`/`func` generic param used only in `Tagged<P,…>`/`Property<P,…>`/`Index<P>` positions (never in a stored-property/by-value type) whose bound lacks `& ~Escapable`. Will promote to GATING (bundled at `.warning`, then `.error`) after the ecosystem sweep is green.
 
 **Cross-references**: [API-NAME-010] No `*Tag` Suffix, [API-NAME-010a] No Nested `.Tag` Sub-Name, [API-NAME-001c] Per-Domain Capability-Marker Protocol, [IDX-001] Index as Tagged Ordinal, [MEM-LIFE-001], [IMPL-INTENT]
 

@@ -12,7 +12,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: The universal CI matrix consists of four hardcoded gating jobs — `macos-release`, `linux-release`, `linux-nightly` (continue-on-error), `windows-release` — plus the advisory `apple-simulator-build` leg: a macOS-runner job with a `strategy.matrix.platform` over the four Apple simulator platforms (`iOS`, `tvOS`, `watchOS`, `visionOS`), carrying `continue-on-error: true` during the soak window per [CI-021]/[CI-091]. The Apple-simulator leg exists because `xcodebuild` against a simulator destination exercises the resource-bundle CodeSign phase that `swift build` / `swift test` never run — the step that catches resource bundles that fail iOS codesign. (The trigger: a SwiftPM resource bundle containing a top-level directory named `Resources` — from `.copy("Resources")` — collides with the reserved bundle layout and fails with `bundle format unrecognized, invalid, or unsuitable` on the simulator, invisible to the macOS/Linux/Windows `swift test` legs. Origin: swift-iso/swift-iso-639#3; fixed by renaming the copied dir, e.g. `.copy("Data")`.) Promote to gating (drop `continue-on-error`, add to `ci-ok` `needs:`) once the legs are green ecosystem-wide.
 
-**Enforcement**: Mechanical — `validate-ci-matrix.py` + `validate-ci-matrix.yml` (pilot 10 of `/promote-rule` 2026-05-14, extended at pilot 20 with [CI-099] windows-release gating-posture check compose-in-script; extended 2026-06-08 with the `apple-simulator-build` presence + advisory-posture + uniform-platform-matrix checks). Centralized-config integrity check (single canonical file: `swift-institute/.github/.github/workflows/swift-ci.yml`). Discipline: `Audits/PROMOTE-CI-010-2026-05-14.md`; pilot-20 outcome `Audits/PROMOTE-CI-099-2026-05-14.md`. [VERIFICATION: WF validate-ci-matrix.py (CI-010, CI-099)]
+**Enforcement**: Mechanical — `validate-ci-matrix.py` + `validate-ci-matrix.yml` (pilot 10 of `/promote-rule` 2026-05-14, extended at pilot 20 with [CI-099] windows-release gating-posture check compose-in-script; extended 2026-06-08 with the `apple-simulator-build` presence + advisory-posture + uniform-platform-matrix checks). Centralized-config integrity check (single canonical file: `swift-institute/.github/.github/workflows/swift-ci.yml`). Discipline: an internal audit record; pilot-20 outcome an internal audit record. [VERIFICATION: WF validate-ci-matrix.py (CI-010, CI-099)]
 
 
 **Cross-references**: [CI-011], [CI-012], [CI-013], [CI-091], [CI-099].
@@ -23,7 +23,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: CI workflows pin to exactly Swift 6.3 stable + Swift main nightly (currently 6.5-dev; floats as main moves through dev versions).
 
-**Enforcement**: Architectural — canonical reusable hardcodes pins (`swift-ci.yml` default 6.3 + hardcoded nightly); [CI-031] forbids consumer override (`validate-thin-callers.py`); branch protection on `swift-institute/.github`. Discipline: `Audits/PROMOTE-ci-corpus-sweep-2026-05-14.md` § [CI-011]. [VERIFICATION: ARCH]
+**Enforcement**: Architectural — canonical reusable hardcodes pins (`swift-ci.yml` default 6.3 + hardcoded nightly); [CI-031] forbids consumer override (`validate-thin-callers.py`); branch protection on `swift-institute/.github`. Discipline: an internal audit record § [CI-011]. [VERIFICATION: ARCH]
 
 **Cross-references**: [CI-010], [CI-012], [CI-031]; memory `feedback_toolchain_versions.md`.
 
@@ -33,7 +33,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: Linux jobs run in `swift:6.3` stable + `swiftlang/swift:nightly-main-jammy` nightly containers; bare-runner installation forbidden.
 
-**Enforcement**: Architectural — canonical reusable hardcodes `container:` (`swift-ci.yml` parameterized via `inputs.swift-version` default 6.3; hardcoded nightly); [CI-031] forbids consumer override; branch protection. Discipline: `Audits/PROMOTE-ci-corpus-sweep-2026-05-14.md` § [CI-012]. [VERIFICATION: ARCH]
+**Enforcement**: Architectural — canonical reusable hardcodes `container:` (`swift-ci.yml` parameterized via `inputs.swift-version` default 6.3; hardcoded nightly); [CI-031] forbids consumer override; branch protection. Discipline: an internal audit record § [CI-012]. [VERIFICATION: ARCH]
 
 **Cross-references**: [CI-010], [CI-011], [CI-031]; **swift-package-build** [PKG-BUILD-*].
 
@@ -43,7 +43,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: macOS uses `runs-on: macos-26` + Xcode 26.6; Windows uses `runs-on: windows-latest` + `SwiftyLab/setup-swift` (SHA-pinned per [CI-107]). The Xcode pin is floor-coupled: its bundled Swift MUST be ≥ the fleet's `swift-tools-version` floor, or every macOS/simulator leg fails at manifest load ("package is using Swift tools version X but the installed version is Y") — verify the coupling per [CI-113] before any fleet toolchain bump.
 
-**Enforcement**: Architectural — canonical reusable hardcodes runner + action (`swift-ci.yml` `macos-runner` default `macos-26`; `XCODE_VERSION` workflow-env `26.6`, bumped from 26.4 at the 2026-07-10 tools-6.3.3 fleet normalization, `.github` `c540822`; Windows `SwiftyLab/setup-swift`, SHA-pinned per [CI-107]); [CI-031] forbids consumer override; branch protection. Discipline: `Audits/PROMOTE-ci-corpus-sweep-2026-05-14.md` § [CI-013]. [VERIFICATION: ARCH]
+**Enforcement**: Architectural — canonical reusable hardcodes runner + action (`swift-ci.yml` `macos-runner` default `macos-26`; `XCODE_VERSION` workflow-env `26.6`, bumped from 26.4 at the 2026-07-10 tools-6.3.3 fleet normalization, `.github` `c540822`; Windows `SwiftyLab/setup-swift`, SHA-pinned per [CI-107]); [CI-031] forbids consumer override; branch protection. Discipline: an internal audit record § [CI-013]. [VERIFICATION: ARCH]
 
 **Cross-references**: [CI-010], [CI-031]; [CI-107], [CI-113].
 
@@ -145,7 +145,7 @@ Selection mechanics: the `plan` job classifies (forced `tier` input > tag ref > 
 
 **Statement**: Every L1 primitives package must build under `-enable-experimental-feature Embedded` against Swift main nightly.
 
-**Enforcement**: Architectural — `embedded` job in `swift-primitives/.github/.github/workflows/swift-ci.yml` (L1 layer wrapper); every L1 consumer routes through this wrapper via [CI-001]; wrapper-file presence enforced by `lint-org-bot-coverage.yml` axis 3 per [CI-004]. Discipline: `Audits/PROMOTE-ci-corpus-sweep-2026-05-14.md` § [CI-020]. [VERIFICATION: ARCH]
+**Enforcement**: Architectural — `embedded` job in `swift-primitives/.github/.github/workflows/swift-ci.yml` (L1 layer wrapper); every L1 consumer routes through this wrapper via [CI-001]; wrapper-file presence enforced by `lint-org-bot-coverage.yml` axis 3 per [CI-004]. Discipline: an internal audit record § [CI-020]. [VERIFICATION: ARCH]
 
 **Cross-references**: [CI-021], [CI-003], [CI-004]; **primitives** [PRIM-FOUND-001]; **swift-package-build** [PKG-BUILD-007], [PKG-BUILD-008].
 
@@ -155,7 +155,7 @@ Selection mechanics: the `plan` job classifies (forced `tier` input > tag ref > 
 
 **Statement**: When any layer-wrapper `swift-ci.yml` declares a job named `embedded`, that job MUST carry `continue-on-error: true` while Swift main is the active development branch (currently 6.5-dev; floats as main moves). Sunsets via skill amendment when the embedded gate moves to a stable-toolchain pin.
 
-**Enforcement**: Mechanical — `validate-embedded-job.py` + `validate-embedded-job.yml` (pilot 23 of `/promote-rule` 2026-05-14). Centralized-config integrity check on `<repo_root>/.github/workflows/swift-ci.yml`; PyYAML inspects `jobs.embedded.continue-on-error` and fires if not literally `True`. Silent when no embedded job exists. Currently the only target is `swift-primitives/.github` (L1 wrapper). Baseline 0; self-firing ACTIVE. Discipline: `Audits/PROMOTE-CI-021-2026-05-14.md`. [VERIFICATION: WF validate-embedded-job.py]
+**Enforcement**: Mechanical — `validate-embedded-job.py` + `validate-embedded-job.yml` (pilot 23 of `/promote-rule` 2026-05-14). Centralized-config integrity check on `<repo_root>/.github/workflows/swift-ci.yml`; PyYAML inspects `jobs.embedded.continue-on-error` and fires if not literally `True`. Silent when no embedded job exists. Currently the only target is `swift-primitives/.github` (L1 wrapper). Baseline 0; self-firing ACTIVE. Discipline: an internal audit record. [VERIFICATION: WF validate-embedded-job.py]
 
 **Cross-references**: [CI-020]; linux-nightly precedent in `swift-institute/.github/.github/workflows/swift-ci.yml`.
 
@@ -165,7 +165,7 @@ Selection mechanics: the `plan` job classifies (forced `tier` input > tag ref > 
 
 **Statement**: Main targets in primitives/standards/foundations packages MUST NOT import Foundation; interop is opt-in via a `* Foundation Integration` subtarget.
 
-**Enforcement**: Mechanical — SwiftLint custom rule pair `no_foundation_import_*` at `swift-primitives/.github/.swiftlint.yml` (Tier 2 ruleset; migrated 2026-05-05 from the advisory `lint-foundation-family-import` workflow). Fires on every PR via the universal `lint` job. Discipline: `Audits/PROMOTE-ci-corpus-sweep-2026-05-14.md` § [CI-022]. [VERIFICATION: SwiftLint no_foundation_import_*]
+**Enforcement**: Mechanical — SwiftLint custom rule pair `no_foundation_import_*` at `swift-primitives/.github/.swiftlint.yml` (Tier 2 ruleset; migrated 2026-05-05 from the advisory `lint-foundation-family-import` workflow). Fires on every PR via the universal `lint` job. Discipline: an internal audit record § [CI-022]. [VERIFICATION: SwiftLint no_foundation_import_*]
 
 **Cross-references**: [CI-020]; **primitives** [PRIM-FOUND-001]; **readme/ci-automation** [README-167].
 
@@ -177,7 +177,7 @@ Selection mechanics: the `plan` job classifies (forced `tier` input > tag ref > 
 
 **Statement**: The `windows-release` job in the canonical `swift-ci.yml` MUST stay gating; `continue-on-error: true` is forbidden — Windows is a first-class target platform whose visibility outweighs upstream-driven noise. A platform-identity declaration per [CI-114] skips the leg entirely for a package that does not target Windows; it never weakens the leg's gating posture — for every package that targets Windows the leg runs and gates exactly as before.
 
-**Enforcement**: Mechanical — `validate-ci-matrix.py` + `validate-ci-matrix.yml` (pilot 20 of `/promote-rule` 2026-05-14, compose-in-script with [CI-010]). Centralized-config integrity check (single canonical file: `swift-institute/.github/.github/workflows/swift-ci.yml`); PyYAML inspection of `jobs.windows-release.continue-on-error` — fires if `is True`. Inverse-of-[CI-010] posture check: where [CI-010] asserts `linux-nightly` HAS `continue-on-error: true` (toolchain-noise scope), this rule asserts `windows-release` does NOT (target-shipped-to scope). Baseline 0; self-firing ACTIVE (inherits pilot 10's workflow triggers). Discipline: `Audits/PROMOTE-CI-099-2026-05-14.md`. [VERIFICATION: WF validate-ci-matrix.py]
+**Enforcement**: Mechanical — `validate-ci-matrix.py` + `validate-ci-matrix.yml` (pilot 20 of `/promote-rule` 2026-05-14, compose-in-script with [CI-010]). Centralized-config integrity check (single canonical file: `swift-institute/.github/.github/workflows/swift-ci.yml`); PyYAML inspection of `jobs.windows-release.continue-on-error` — fires if `is True`. Inverse-of-[CI-010] posture check: where [CI-010] asserts `linux-nightly` HAS `continue-on-error: true` (toolchain-noise scope), this rule asserts `windows-release` does NOT (target-shipped-to scope). Baseline 0; self-firing ACTIVE (inherits pilot 10's workflow triggers). Discipline: an internal audit record. [VERIFICATION: WF validate-ci-matrix.py]
 
 **Cross-references**: [CI-010], [CI-096], [CI-105], [CI-114]; memory `feedback_windows_first_class_ci_gating.md`.
 

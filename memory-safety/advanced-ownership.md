@@ -390,7 +390,7 @@ When the Box's witnesses must reach off-protocol members of the substrate (gener
 
 **The defect class (two confirmed occurrences)**: the stack Builder constructing-grammar twins and both dictionary families' Shared `removeAll` — masked by example tests that never forked after the wipe (the [TEST-035] class); fixes landed and regression-locked. Incident detail: rationale archive §[MEM-COPY-019].
 
-**Enforcement**: Mechanical — `Lint.Rule.Tower.CloneLessBox` (`clone-less box`, primitives tier, pack `Primitives Linter Rule Tower`; ζ pilot of /promote-rule 2026-06-12; historically calibrated — fires at the pre-fix `Dictionary+Columns.swift:239` exactly). Discipline: `Audits/PROMOTE-MEM-COPY-019-2026-06-12.md`. [VERIFICATION: AST Lint.Rule.Tower.CloneLessBox]
+**Enforcement**: Mechanical — `Lint.Rule.Tower.CloneLessBox` (`clone-less box`, primitives tier, pack `Primitives Linter Rule Tower`; ζ pilot of /promote-rule 2026-06-12; historically calibrated — fires at the pre-fix `Dictionary+Columns.swift:239` exactly). Discipline: an internal audit record. [VERIFICATION: AST Lint.Rule.Tower.CloneLessBox]
 
 
 **Cross-references**: [MEM-COPY-017] (the pinned pair this rule applies), [TEST-035] (the masking class the finding unmasked).

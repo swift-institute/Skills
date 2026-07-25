@@ -12,7 +12,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: CI workflows MUST NOT cache `.build/` directories via `actions/cache`. Single carve-out: L1 embedded job in swift-primitives wrapper, keyed exact-match with no `restore-keys`.
 
-**Enforcement**: Mechanical — `validate-cache-policy.py` + `validate-cache-policy.yml` (pilot 14 of `/promote-rule` 2026-05-14). Single-repo multi-file integrity check. Carve-out detected by (file basename `swift-ci.yml` + job name `embedded` + no `restore-keys`). Tool-binary caches ([CI-044]) out of scope. Baseline 0/4 wrapper-host repos; self-firing ACTIVE. Discipline: `Audits/PROMOTE-CI-040-2026-05-14.md`. [VERIFICATION: WF validate-cache-policy.py]
+**Enforcement**: Mechanical — `validate-cache-policy.py` + `validate-cache-policy.yml` (pilot 14 of `/promote-rule` 2026-05-14). Single-repo multi-file integrity check. Carve-out detected by (file basename `swift-ci.yml` + job name `embedded` + no `restore-keys`). Tool-binary caches ([CI-044]) out of scope. Baseline 0/4 wrapper-host repos; self-firing ACTIVE. Discipline: an internal audit record. [VERIFICATION: WF validate-cache-policy.py]
 
 **Cross-references**: [CI-041], [CI-042].
 
@@ -22,7 +22,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: `Package.resolved` is gitignored across every package — a permanent library convention (libraries don't pin consumer dep graphs).
 
-**Enforcement**: Script — `swift-institute/Scripts/sync-gitignore.sh` line 47 carries the `Package.resolved` entry; propagates the canonical template across the ecosystem, overwriting per-repo edits at next sync. Discipline: `Audits/PROMOTE-ci-corpus-sweep-2026-05-14.md` § [CI-041]. [VERIFICATION: Script sync-gitignore.sh:47]
+**Enforcement**: Script — `swift-institute/Scripts/sync-gitignore.sh` line 47 carries the `Package.resolved` entry; propagates the canonical template across the ecosystem, overwriting per-repo edits at next sync. Discipline: an internal audit record § [CI-041]. [VERIFICATION: Script sync-gitignore.sh:47]
 
 **Cross-references**: [CI-040], [CI-043]; `swift-institute/Scripts/sync-gitignore.sh:47`.
 
@@ -32,7 +32,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: `restore-keys:` MUST NOT appear on any `actions/cache@*` step (regardless of path). Cache hits MUST be exact-match-only.
 
-**Enforcement**: Mechanical — `validate-cache-policy.py` + `validate-cache-policy.yml` (pilot 16 of `/promote-rule` 2026-05-14, extending pilot 14's script). Single-repo multi-file integrity check; no carve-out. Detects single-line and multi-line block-scalar forms; correctly skips `restore-keys` on non-`actions/cache` actions. Baseline 0/4 wrapper-host repos; self-firing ACTIVE (shared with [CI-040]). Discipline: `Audits/PROMOTE-CI-042-2026-05-14.md`. [VERIFICATION: WF validate-cache-policy.py]
+**Enforcement**: Mechanical — `validate-cache-policy.py` + `validate-cache-policy.yml` (pilot 16 of `/promote-rule` 2026-05-14, extending pilot 14's script). Single-repo multi-file integrity check; no carve-out. Detects single-line and multi-line block-scalar forms; correctly skips `restore-keys` on non-`actions/cache` actions. Baseline 0/4 wrapper-host repos; self-firing ACTIVE (shared with [CI-040]). Discipline: an internal audit record. [VERIFICATION: WF validate-cache-policy.py]
 
 **Cross-references**: [CI-040], [CI-041].
 
@@ -42,7 +42,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: `.gitignore` files are propagated by `swift-institute/Scripts/sync-gitignore.sh`; per-repo edits don't persist past next sync.
 
-**Enforcement**: Script — `swift-institute/Scripts/sync-gitignore.sh` overwrites each consumer's `.gitignore` with the canonical template. Discipline: `Audits/PROMOTE-ci-corpus-sweep-2026-05-14.md` § [CI-043]. [VERIFICATION: Script sync-gitignore.sh]
+**Enforcement**: Script — `swift-institute/Scripts/sync-gitignore.sh` overwrites each consumer's `.gitignore` with the canonical template. Discipline: an internal audit record § [CI-043]. [VERIFICATION: Script sync-gitignore.sh]
 
 **Cross-references**: [CI-041]; **github-repository** [GH-REPO-070]–[GH-REPO-072].
 
@@ -109,11 +109,11 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Status**: **DEPRECATED** per pilot 26 of `/promote-rule` (2026-05-14). Empirically dismissed: consumers ALWAYS access shadowing types via the qualified-namespace form (`Array_Primitives.Array<T>`); swift-format's shorthand rewrite only touches *unqualified* `Array<T>`, which would refer to `Swift.Array` anyway. The "structural protection" rationale that motivated this rule does not materialize in practice — `swift-format` cannot rewrite a qualified namespace reference back to `[T]` shorthand, and unqualified `Array<T>` in shadowing-package source code never points to the package's own shadowing type (which always requires qualified access).
 
-**Evidence**: Tier-A.5 canonical-sync commit `3d5b5ce` flipped `UseShorthandTypeNames: true` ecosystem-wide AFTER the original `365c69d` "set false" rollout, with no observable build failures on shadowing packages (`swift-array-primitives`, `swift-dictionary-primitives`). Current state: 296/298 consumers have `: true`; 2 (`swift-affine-primitives`, `swift-standard-library-extensions`) retain `: false` for unrelated reasons. Discipline: `Audits/PROMOTE-CI-055-2026-05-14.md` (REMOVE disposition).
+**Evidence**: Tier-A.5 canonical-sync commit `3d5b5ce` flipped `UseShorthandTypeNames: true` ecosystem-wide AFTER the original `365c69d` "set false" rollout, with no observable build failures on shadowing packages (`swift-array-primitives`, `swift-dictionary-primitives`). Current state: 296/298 consumers have `: true`; 2 (`swift-affine-primitives`, `swift-standard-library-extensions`) retain `: false` for unrelated reasons. Discipline: an internal audit record (REMOVE disposition).
 
 **No enforcement**: deprecated rules are not mechanized. The pre-deprecation rule body is preserved in the outcome record for historical lineage. `.swift-format` configuration is per-package autonomy per [CI-057].
 
-**Cross-references**: [CI-057]; `Audits/PROMOTE-CI-055-2026-05-14.md`.
+**Cross-references**: [CI-057]; an internal audit record.
 
 ---
 

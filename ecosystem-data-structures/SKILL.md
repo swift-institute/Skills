@@ -537,7 +537,7 @@ cross-package half of (a) (parent-namespace bound resolution), (b) associated-ty
 (semantic), (c) front-door existence + resolves-to-carrier (whole-package + cross-file), (d) the
 pairwise Memory-leaf op-extension comparison ([DS-029], with the lawful Pool/Generational/`Store.Split`
 heap-pin carve-outs), and (e) `@inlinable`/`@_documentation(visibility: public)` (adjacent, [API-IMPL-022]/
-[API-IMPL-023] track). Discipline: `Audits/PROMOTE-DS-026-2026-07-06.md`. [VERIFICATION: AST (partial) + Script]
+[API-IMPL-023] track). Discipline: an internal audit record. [VERIFICATION: AST (partial) + Script]
 
 **Cross-references**: [DS-002], [DS-004], [DS-025], [DS-027], [DS-028], [DS-029]; **memory-safety** [MEM-COPY-018]; **swift-linter** (the lint encoding).
 

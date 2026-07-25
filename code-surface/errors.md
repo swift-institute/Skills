@@ -1,6 +1,6 @@
 ## Error Handling
 
-**Enforcement**: TEXT-ONLY (insufficient grounding — brand-owner membership needs a curated list; /promote-rule 2026-07-06). Re-promotable via a ratified brand-owner list (`.naming-vocabulary` pattern): `Audits/PROMOTE-API-BRAND-001-2026-07-06.md`.
+**Enforcement**: TEXT-ONLY (insufficient grounding — brand-owner membership needs a curated list; /promote-rule 2026-07-06). Re-promotable via a ratified brand-owner list (`.naming-vocabulary` pattern): an internal audit record.
 
 ### [API-ERR-001] Typed Throws Required
 

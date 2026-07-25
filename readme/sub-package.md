@@ -219,7 +219,7 @@ Apache 2.0. See [LICENSE](LICENSE).
 ## Installation  <!-- ❌ Missing one-liner and badges — inventory violation -->
 ```
 
-**Enforcement**: Mechanical — `validate-readme.py:150` (checks `## License` section presence). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family E. Discipline: `Audits/PROMOTE-readme-annotations-2026-07-06.md`. [VERIFICATION: WF validate-readme.py:150]
+**Enforcement**: Mechanical — `validate-readme.py:150` (checks `## License` section presence). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family E. Discipline: an internal audit record. [VERIFICATION: WF validate-readme.py:150]
 
 **Cross-references**: [README-006], [README-008], [README-009], [README-023], [README-024]
 
@@ -298,7 +298,7 @@ An individual package MAY include zero, one, two, or all three — these section
 
 **Statement**: READMEs MUST NOT include Roadmap/TODO/Changelog sections, failing CI badges, screenshots (unless inherently visual), unsubstantiated marketing language, or author-oriented content (ecosystem-hierarchy framing, implementation autobiography, design reflections, pre-tag process notes, unverified compatibility claims).
 
-**Enforcement**: Mechanical — `validate-readme.py:180` (flags literal `## Roadmap`, `## TODO`, `## Changelog` section headers; the remaining prohibited-content rows are not yet mechanically checked). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family E. Discipline: `Audits/PROMOTE-readme-annotations-2026-07-06.md`. [VERIFICATION: WF validate-readme.py:180]
+**Enforcement**: Mechanical — `validate-readme.py:180` (flags literal `## Roadmap`, `## TODO`, `## Changelog` section headers; the remaining prohibited-content rows are not yet mechanically checked). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family E. Discipline: an internal audit record. [VERIFICATION: WF validate-readme.py:180]
 
 **Cross-references**: [README-010], [README-020], [README-023], [README-025], [DOC-010] (inline-comment counterpart of this exclusion rule), [RELEASE-001b] (Phase 0 baseline that GENERATES the evidence this rule requires).
 
@@ -322,7 +322,7 @@ An individual package MAY include zero, one, two, or all three — these section
 ![Status](https://img.shields.io/badge/status-beta-yellow.svg)  <!-- ❌ Non-standard status -->
 ```
 
-**Enforcement**: Mechanical — `validate-readme.py:144` (first badge line MUST match the Development Status shield pattern). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family E. Discipline: `Audits/PROMOTE-readme-annotations-2026-07-06.md`. [VERIFICATION: WF validate-readme.py:144]
+**Enforcement**: Mechanical — `validate-readme.py:144` (first badge line MUST match the Development Status shield pattern). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family E. Discipline: an internal audit record. [VERIFICATION: WF validate-readme.py:144]
 
 ---
 
@@ -474,7 +474,7 @@ dependencies: [
 .package(url: "...", from: "0.1.0")  // ❌ Resolution fails — 0.1.0 doesn't exist
 ```
 
-**Enforcement**: Mechanical — `validate-readme.py:154` (checks `## Installation` presence, `.package(` dependency block, and `.target(` configuration block within the section). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family E. Discipline: `Audits/PROMOTE-readme-annotations-2026-07-06.md`. [VERIFICATION: WF validate-readme.py:154]
+**Enforcement**: Mechanical — `validate-readme.py:154` (checks `## Installation` presence, `.package(` dependency block, and `.target(` configuration block within the section). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family E. Discipline: an internal audit record. [VERIFICATION: WF validate-readme.py:154]
 
 ---
 
@@ -670,7 +670,7 @@ do {
 }
 ```
 
-**Enforcement**: Mechanical — `validate-readme.py:173` (any public `throws(NonNever)` signature in `Sources/` requires a `## Error Handling` section). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family E. Discipline: `Audits/PROMOTE-readme-annotations-2026-07-06.md`. [VERIFICATION: WF validate-readme.py:173]
+**Enforcement**: Mechanical — `validate-readme.py:173` (any public `throws(NonNever)` signature in `Sources/` requires a `## Error Handling` section). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family E. Discipline: an internal audit record. [VERIFICATION: WF validate-readme.py:173]
 
 **Cross-references**: [API-ERR-001], [README-001]
 
@@ -720,7 +720,7 @@ do {
 
 **Statement**: READMEs MUST use exactly one H1 (package name, as the first non-empty line), `---` separators between major sections, H2/H3-only heading depth, language-tagged code blocks, and column-aligned tables.
 
-**Enforcement**: Mechanical — `validate-readme.py:119` (H1 count == 1 and the first non-empty line is the H1; the remaining sub-rules — separators, heading depth, code-block language tags, table alignment — are not yet mechanically checked). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Universal. Discipline: `Audits/PROMOTE-readme-annotations-2026-07-06.md`. [VERIFICATION: WF validate-readme.py:119]
+**Enforcement**: Mechanical — `validate-readme.py:119` (H1 count == 1 and the first non-empty line is the H1; the remaining sub-rules — separators, heading depth, code-block language tags, table alignment — are not yet mechanically checked). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Universal. Discipline: an internal audit record. [VERIFICATION: WF validate-readme.py:119]
 
 ---
 

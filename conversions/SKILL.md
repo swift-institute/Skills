@@ -813,7 +813,7 @@ let i = Index<Element>(Ordinal(UInt(slot)))  // runtime int — explicit constru
 slab[Index<Int>(Ordinal(UInt(0)))] = x       // ❌ verbose noise for a constant index
 ```
 
-**Enforcement**: Mechanical — AST `Lint.Rule.Idiom.SliLiteral` (`sli literal`, `Bundle.institute`; /promote-rule 2026-07-06). Discipline: `Audits/PROMOTE-IDX-019-2026-07-06.md`. [VERIFICATION: AST]
+**Enforcement**: Mechanical — AST `Lint.Rule.Idiom.SliLiteral` (`sli literal`, `Bundle.institute`; /promote-rule 2026-07-06). Discipline: an internal audit record. [VERIFICATION: AST]
 
 **Cross-references**: [IDX-001] (Index = `Tagged<Element, Ordinal>`), [IDX-006a] (Count / Offset literal resolution), [CONV-015] (prefer typed forms over `__unchecked`).
 
