@@ -522,7 +522,7 @@ Each finding MUST include a verification tag:
 | `Carried forward (unverified)` | Taken from prior document, not re-checked |
 | `Resolved: YYYY-MM-DD` | Finding no longer applies (with explanation) |
 
-**Forcing function** — a stated discipline is weak; prefer a **mechanical, always-fresh check that reads live source** (a lint/inventory, e.g. `Scripts/layer-placement-classify.py`) over a prose state-claim that silently ages. A lint cannot go stale; a dated doc does.
+**Forcing function** — a stated discipline is weak; prefer a **mechanical, always-fresh check that reads live source** (a lint or a CI validator such as `validate-layer-deps.py`) over a prose state-claim that silently ages. A lint cannot go stale; a dated doc does.
 
 **Cross-references**: [RES-013], [RES-008]
 

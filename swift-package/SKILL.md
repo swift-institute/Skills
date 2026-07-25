@@ -858,7 +858,7 @@ variable isolation in negative experiments.
 
 **Why**: SwiftPM's mirror substitution is an exact-string lookup, and `createResolvedPackages` compares canonical *locations*, not identities: two spellings of one identity where only one hits a mirror key (or an org-rename divergence, mirror-free) put the identity under two canonical locations and fire the conflicting-identity branch — which on SwiftPM 6.2+ enumerates every distinct dependency path (exponential; an effective hang on institute-scale graphs; one edge suffices). Dossier: `Issues/swift-issue-spm-identity-conflict-path-enumeration-hang/` (catalog §A26).
 
-**Enforcement**: Mechanical — `validate-dependency-spelling.py` (+ `validate-dependency-spelling.yml` org sweep). Machine-side companions: `Scripts/scan-identity-conflicts.py` (fleet divergence scan across HEAD+tags+pins, both mirror contexts), `Scripts/normalize-dependency-spellings.py` (mechanical fixer, dump-package-gated), `Scripts/sync-mirrors.py --check` (mirror-table closure guard). [VERIFICATION: WF]
+**Enforcement**: Mechanical — `validate-dependency-spelling.py` (+ `validate-dependency-spelling.yml` org sweep); identity-conflict detection additionally CI-enforced by `ci-identity-conflict-fastcheck.py` and `validate-package-identity.py`. [VERIFICATION: WF]
 
 **Cross-references**: [PKG-DEP-001], [PKG-DEP-008], [CI-112].
 

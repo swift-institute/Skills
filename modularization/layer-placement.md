@@ -90,7 +90,7 @@ The full variant inventory, classified once by axis. This table is **closed**: a
 
 **Statement**: When auditing a placement, check **both** mirror-image failures: **(i) too-high** — does a strictly lower layer own this axis and enforce this invariant? (if yes → push down); **(ii) too-low** — can this layer actually see the invariant it must enforce? (if no → the floor was crossed; lift up). The too-high symptom is the **wart triad**: a runtime override where compile-time type-selection would do; a universal stored requirement where a leaf-private record would do; an awkward non-conformance where an honest absence would do.
 
-**Mechanical checks** (`Scripts/layer-placement-classify.py`): no `Storage.* : Buffer.\`Protocol\`` or `Buffer.* : <ADT>.\`Protocol\`` conformance (upward / inverted placement); no allocation strategy (`Arena`/`Pool`) named or composed at Storage/Buffer/ADT when `Memory.Allocator.*` is its home.
+**Mechanical checks**: no `Storage.* : Buffer.\`Protocol\`` or `Buffer.* : <ADT>.\`Protocol\`` conformance (upward / inverted placement); no allocation strategy (`Arena`/`Pool`) named or composed at Storage/Buffer/ADT when `Memory.Allocator.*` is its home.
 
 **Rationale**: Mechanizes the post-hoc `.Small`-class discovery into a pre-hoc check; the wart triad is the operational signature of a leaked lower secret.
 

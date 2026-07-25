@@ -173,7 +173,7 @@ grep "{Domain}_{X}_Primitives" "{owner}/Sources/{Domain} Primitives/exports.swif
 
 **Worked examples** (Memory Cursor pilot clean; Affine Ordinal rejected; Cardinal Subtract rejected) + provenance: rationale archive §[MOD-033].
 
-**Cross-references**: [MOD-032] (the cycle rule this enforces), [MOD-034] (the parallel pre-flight on the foundational axis), `Scripts/integration-extraction-inventory.py` (v3.5 discriminator, Step 4 mechanizes this check)
+**Cross-references**: [MOD-032] (the cycle rule this enforces; acyclicity is CI-enforced by `validate-package-graph.py` / `validate-layer-deps.py`), [MOD-034] (the parallel pre-flight on the foundational axis)
 
 ---
 
