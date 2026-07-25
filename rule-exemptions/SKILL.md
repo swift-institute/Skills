@@ -1,7 +1,7 @@
 ---
 name: rule-exemptions
 description: |
-  Eleven recurring exemption shapes for the linter rule corpus.
+  Twelve recurring exemption shapes for the linter rule corpus.
   Apply when authoring or amending a custom lint rule whose firing
   intersects a deliberate institute or stdlib pattern.
 
@@ -20,20 +20,28 @@ created: 2026-05-12
 
 # Rule Exemptions
 
-Eleven exemption shapes — six empirically validated across Wave 2 of the
+Twelve exemption shapes — six empirically validated across Wave 2 of the
 2026-05-11 rule-amendment campaign (see
 `swift-foundations/swift-linter-rules/Research/wave-2-rule-amendments-2026-05-11.md`),
 the SwiftSyntax-visitor-subclass shape ([RULE-EXEMPT-7]) added in
 Thread C of the 2026-05-12 rule-pack-dogfeed triage (see
 `swift-foundations/swift-linter-rules/Research/2026-05-12-thread-b-rule-pack-dogfeed-triage.md`),
-and four shapes ([RULE-EXEMPT-8]..[RULE-EXEMPT-11]) ratified by the #16
+four shapes ([RULE-EXEMPT-8]..[RULE-EXEMPT-11]) ratified by the #16
 Option C ledger DECISION (2026-07-23,
 `swift-institute/Research/lint-rule-adjudication-ledger-option-c.md`,
-implemented at swift-foundations/swift-institute-linter-rules `ff5efa2`).
+implemented at swift-foundations/swift-institute-linter-rules `ff5efa2`),
+and the path-scoped target shape ([RULE-EXEMPT-12]) ratified 2026-07-25 in
+Wave 0 of the Foundation-drain program (implemented at
+swift-foundations/swift-institute-linter-rules `ef3c138`).
 Each shape recurs across multiple rule packs and represents a *structural*
 reason a rule should not fire — not a discretionary opt-out. Rule authors
 MUST cite the shape's `[RULE-EXEMPT-N]` ID at the exemption site and reuse
 the named helper.
+
+**Eleven of the twelve gate on the syntax tree; [RULE-EXEMPT-12] does not.**
+It is the sole path-scoped shape, because the fact licensing it — which
+target compiles the file — is not present in the file's text at all. Read
+its entry before assuming the catalog's AST-shaped idioms apply.
 
 The goal is to promote each shape from per-rule re-derivation to a
 citable, named pattern. Lookup-form helpers live in each rule pack's
@@ -73,6 +81,7 @@ if <helperCall(node)> {
 | [RULE-EXEMPT-9] | C-library-module availability | `platformPlatformConditionalCLibraryModules` set | `Lint.Rule.Platform.PlatformConditional` |
 | [RULE-EXEMPT-10] | wire-schema/named-options memberwise-init | `namingBoolParameterHasWireSchemaConformance(_:)` + `namingBoolParameterAssignsSelf(_:parameter:)` | `Lint.Rule.Naming.BoolParameter` |
 | [RULE-EXEMPT-11] | brand-token orthography | `namingCompoundTypeBrandTokenCitations` dict | `Lint.Rule.Naming.CompoundType` |
+| [RULE-EXEMPT-12] | path-scoped target | `<rule>IsInsideSanctionedTarget(_:)` (path, **not** AST) | `Lint.Rule.Foundation.Import` |
 
 ---
 
@@ -818,6 +827,147 @@ accepted-as-warning sites); #16 Option C Entries III.a/III.b DECISION.
 
 ---
 
+## [RULE-EXEMPT-12] path-scoped target exemption
+
+**Statement**: A rule whose violation is defined against a **target's role**
+rather than against any property of the source text MUST gate on the file's
+path, and MUST do so by matching a whole **directory segment** against a
+required suffix. The exemption applies when some directory segment of the
+file's path ends in the sanctioned target-name suffix. Three constraints are
+mandatory, not stylistic:
+
+1. **Directory segments only** — split the path and drop the trailing
+   filename before matching. A source file *named* like the sanctioned
+   target (`My Foundation Integration.swift`) sitting in a core target must
+   still fire.
+2. **Suffix, not substring** — `contains` would exempt any path carrying the
+   token anywhere, including a parent directory that merely mentions it.
+3. **A leading separator inside the suffix** (here, a space) so the match
+   mandates a non-empty brand token. `" Foundation Integration"` matches
+   `JSON Foundation Integration`; it does not match a hypothetical
+   `XFoundation Integration`, and it does not match a core target merely
+   named `HTML Foundation`.
+
+Each constraint corresponds to a near-miss spelling that fails **open** —
+treating any of the three as style reintroduces the hole.
+
+The exemption is **not** a per-file opt-out and MUST NOT be widened to
+adjacent target roles (for example the sanctioned target's *test* target)
+without its own adjudication and its own controls.
+
+**Why**: Some institute rules exist precisely to push a category of code
+*out of* core targets and *into* a dedicated, opt-in target that consumers
+choose to depend on. `[ARCH-LAYER-007]` is the type case: its own diagnostic
+text names `* Foundation Integration` as the sanctioned destination
+(`[PRIM-FOUND-001]`). A target-blind, per-file implementation therefore
+fires on the very target it tells authors to create — the destination cannot
+be clean on the rule that exists to fill it. Authors then reach for per-site
+disables *inside* the sanctioned pattern, which trains people to suppress
+the rule (the failure mode [RULE-EXEMPT-11] was ratified to stop).
+
+Target membership is the correct gate but is unavailable: rule witnesses see
+a parsed file, not a resolved manifest. `import Foundation` inside
+`JSON Foundation Integration/JSON.Foundation.Coder.swift` is byte-for-byte
+identical to the violation in `JSON/JSON.Value.swift`; only the compiling
+target differs. The path is the sole carrier of target identity reaching the
+witness. That makes this a *structural* exemption in the same sense as the
+other eleven — but the only one whose evidence lies outside the syntax tree.
+
+**How to apply**:
+
+1. Declare the sanctioned suffix as a named constant beside the rule, with
+   the leading separator included:
+
+   ```swift
+   private let <rule>TargetSuffix: Swift.String = " Foundation Integration"
+   ```
+
+2. Implement a segment-wise predicate. Split on `/`, **drop the last
+   component**, then test the remaining segments:
+
+   ```swift
+   private func <rule>IsInsideSanctionedTarget(_ filePath: Swift.String) -> Swift.Bool {
+       let components = filePath.split(separator: "/", omittingEmptySubsequences: true)
+       guard components.count > 1 else { return false }
+       return components.dropLast().contains { $0.hasSuffix(<rule>TargetSuffix) }
+   }
+   ```
+
+3. Gate at the **top of the `findings` closure**, not inside the visitor —
+   the whole file is exempt, so the walk should not run at all.
+
+4. **Fixtures are mandatory in both directions.** Every adoption MUST carry:
+   - a negative control per detection shape the rule supports, inside the
+     sanctioned path;
+   - a positive control in a core path, **including a path with no directory
+     component at all** — the bare `"test.swift"` default most rule fixtures
+     use. Without it, a careless predicate silences the entire existing
+     fixture suite and the run still reads green;
+   - over-skip guards for the three near-miss spellings: look-alike core
+     directory, missing brand-token separator, and filename-not-directory.
+
+**Example**:
+
+```swift
+findings: { source, severity in
+    // Exempt per [RULE-EXEMPT-12] (path-scoped target): the dedicated,
+    // opt-in `* Foundation Integration` target IS the sanctioned boundary
+    // this rule's own message directs authors to ([PRIM-FOUND-001]).
+    // Directory segments only; every core target still fires.
+    guard !foundationImportIsInsideFoundationIntegrationTarget(source.file.filePath) else {
+        return []
+    }
+    let visitor = FoundationImportVisitor(/* … */)
+    visitor.walk(source.tree)
+    return visitor.matches
+}
+```
+
+**Deliberately out of scope**: `* Foundation Integration Tests`. Test-target
+firing is a separate, separately-tracked over-report (`[ARCH-LAYER-007]`
+governs *main* targets); folding it into a narrow enabling change would
+widen the carve-out to absorb an unrelated defect. Adjudicated 2026-07-25.
+
+**Relationship to `filtered(toPaths:)`**: `Lint.Rule.filtered(toPaths:)`
+already exists as a *configuration-level* path filter, and it is the wrong
+instrument here — it would require every consumer to configure the exemption
+individually, leaving the sanctioned pattern dirty-by-default and clean only
+for packages that remembered to opt out. A rule-level carve-out makes the
+institute's own prescribed shape clean by construction. Use
+`filtered(toPaths:)` for *consumer-specific* scoping; use this shape when
+the exempt target is defined by institute convention.
+
+**⚠️ Why this shape is catalogued rather than re-derived**: it is the only
+shape here whose defect is **silent and self-flattering**. Every AST-based
+shape fails toward *still firing* — an author sees a false positive and
+complains. A path exemption fails toward *not firing*: a sloppy predicate
+(`contains`, a prefix test, a filename match, or forgetting the
+no-directory case) silences findings the rule exists to surface, and the
+resulting drop reads as progress on the very metric the work is tracked by.
+On `[ARCH-LAYER-007]` an over-skip would certify packages Foundation-free on
+the rule an entire drain program is built around. Hence the mandatory
+both-direction fixtures — and prefer, as the lead control, a package that
+exercises **both directions at once**, where the correct answer sits one
+digit from the catastrophic one and cannot be reached by accident.
+
+**Adopting rules**:
+
+- `Lint.Rule.Foundation.Import` (lives in
+  swift-foundations/swift-institute-linter-rules, target
+  `Institute Linter Rule Foundation`) — `ef3c138`.
+
+**Source signal**: Foundation-drain Wave 0, 2026-07-25. Ecosystem population
+at adoption: 7 packages / 7 realised `* Foundation Integration` source
+targets; measured effect 62 → 39 findings, with only swift-nist-sp-800-63b
+flipping fully clean and every other residual a genuine core-target import —
+the signature of a carve-out that is not a hole. Verified against the
+authoritative linter on two real consumers:
+swift-structured-queries-primitives **7 → 6** (FI file silent, all six
+core-target files still firing, each identifiable by path) and swift-json
+**2 → 1** (residual is the FI *test* target, deliberately out of scope).
+
+---
+
 ## Cross-shape composition
 
 Some declarations are exempt by multiple shapes simultaneously. The
@@ -855,6 +1005,8 @@ matters only for readability:
   defends.
 - `[API-NAME-001]` (code-surface) — the rule [RULE-EXEMPT-11]
   additionally defends (brand-token orthography is not a compound name).
+- `[ARCH-LAYER-007]` / `[PRIM-FOUND-001]` (workspace architecture;
+  primitives) — the rule [RULE-EXEMPT-12] primarily defends.
 
 **Source dispatch ledgers**:
 `swift-foundations/swift-linter-rules/Research/wave-2-rule-amendments-2026-05-11.md`
