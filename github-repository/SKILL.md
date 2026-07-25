@@ -246,7 +246,7 @@ principal direction; a *relaxation*, so previously-conforming repos (3+) are
 unaffected. **Applied at (2026-07-25)**: schema reconciled to 2–10; every site
 read rather than cited — `SKILL.md:442` `3-10`→`2-10` (`Skills@b691932`),
 `metadata-schema.json` 0–20→2–10 (`.github@643cfdc`), and the three org meta-repos
-this rule exempts, which now omit `topics` rather than declare `[]` because a schema cannot express the exemption (`swift-primitives.org@8ae8895`, `swift-foundations/.github@2b979e7`, `swift-ietf/.github@d1f194c`).
+this rule exempts, which now omit `topics` rather than declare `[]` because a schema cannot express the exemption (`swift-foundations/.github@2b979e7`, `swift-ietf/.github@d1f194c`, plus one private org-website stub whose SHA a public reader could not resolve).
 
 ### [GH-REPO-024] Forbidden topics
 **Statement**: The following topic values are forbidden:
