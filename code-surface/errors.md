@@ -155,3 +155,33 @@ extension Dictionary_Primitives_Core.Dictionary.Ordered.Bounded {
 
 ---
 
+### [API-ERR-009] No Phantom-Generic Error Types in Typed Throws
+
+**Statement**: An error type used in typed throws MUST NOT be nested in a generic type whose parameter it never uses. A non-payload `enum Error` nested in `Parse<Input>` is *accidentally* generic: the `@error` SIL result carries a type parameter, which trips `FunctionSignatureOpts` (`SILArgument.cpp:40 !type.hasTypeParameter()`) under stock `-O -enable-default-cmo`, aborting the release build of the package AND of every consumer (swiftlang/swift#89617; a build-blocker on 6.2 through 6.5-dev, not nightly-only). Hoist the enum to non-generic module scope and keep a `public typealias Error` on the generic type so the nested spelling still resolves — behaviour-preserving, because the cases never used the parameter.
+
+**Incorrect**:
+```swift
+public struct Parse<Input> {
+    public enum Error: Swift.Error { case expectedPeriod }   // ❌ phantom <Input>
+}
+extension Parse: Parser.`Protocol` {
+    public typealias Failure = Parse<Input>.Error
+}
+```
+
+**Correct**:
+```swift
+public enum __JWTParserError: Swift.Error { case expectedPeriod }
+extension Parse { public typealias Error = __JWTParserError }   // nested spelling preserved
+extension Parse: Parser.`Protocol` {
+    public typealias Failure = __JWTParserError                 // signature no longer parameterised
+}
+```
+
+**Shape is necessary but not sufficient**: the crash additionally requires an eliminable argument for the optimizer to build a signature-optimized thunk, which is a SIL-level property no syntactic check can see. `swift-rfc-2045` carries the byte-identical shape and builds clean; `swift-rfc-9110` crashed. Treat a finding as a candidate and confirm with a release build — never as proof of breakage, and never as proof of safety.
+
+**Lint enforcement**: `Lint.Rule.Throws.PhantomGenericError` uses two detectors whose union is required: a *declaration-site* detector (non-generic `Error`/`Failure` enum with cases, nested in a generic type visible in the same file, cases never using the parameter outside a generic-argument list) and a *use-site* detector (typed-throws position naming a member type whose base carries generic arguments). Neither suffices alone — `swift-w3c-xml` spells its clauses bare (`throws(Error)`), and `swift-iso-8601` / `swift-rfc-9110` declare the enum in a separate file, which a per-file rule cannot resolve. Reachability is deliberately NOT gated: the enum and its `typealias Failure` routinely live in different files, so a same-file gate would have certified `swift-rfc-9110` clean while it was crashing. Fires at `.warning`; a use-site finding on an already-hoisted type means only the spelling is stale. Scope detail: rationale archive §[API-ERR-009]. [VERIFICATION: AST Lint.Rule.Throws.PhantomGenericError]
+
+**Cross-references**: [API-ERR-001], [API-ERR-007]
+
+---

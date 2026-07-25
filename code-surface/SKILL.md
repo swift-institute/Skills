@@ -39,7 +39,7 @@ Full rationale, provenance, and extended worked examples for every rule: `swift-
 |-------|------|-------|
 | Namespace structure and type naming | `namespace.md` | [API-NAME-001], [API-NAME-001a]–[API-NAME-001c], [API-NAME-002]–[API-NAME-004], [API-NAME-004a], [API-NAME-015] |
 | Brand-owner lint configuration | `brand-lint.md` | [API-IMPL-024], [API-BRAND-001] |
-| Error handling | `errors.md` | [API-ERR-001]–[API-ERR-008] |
+| Error handling | `errors.md` | [API-ERR-001]–[API-ERR-009] |
 | File structure and type bodies | `file-structure.md` | [API-IMPL-005]–[API-IMPL-009], [API-IMPL-018]–[API-IMPL-023] |
 | State modeling | `state-modeling.md` | [API-IMPL-003], [API-IMPL-010], [API-IMPL-011] |
 | Parameter ordering | `parameters.md` | [API-IMPL-012]–[API-IMPL-014] |
@@ -84,6 +84,7 @@ One-line hooks for every rule. Load the linked file when the topic is active.
 | [API-ERR-006] | No existential throws, ever |
 | [API-ERR-007] | Public API path for error types, not hoisted internals |
 | [API-ERR-008] | Lifecycle typealias only when ALL cases apply |
+| [API-ERR-009] | No phantom-generic error types in typed throws |
 
 ### File structure and type bodies (`file-structure.md`)
 
