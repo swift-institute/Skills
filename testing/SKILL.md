@@ -1064,7 +1064,7 @@ In both rows the masking is structural, not statistical: the default state satis
 
 **Procedure**: clean-build for the gate of record; incremental runs are development convenience only. Where suite counts are the claim, the count comparison MUST come from the clean log.
 
-**Cross-references**: [TEST-035] (suite-reach honesty), the seat verification protocol (HANDOFF-tower-SEAT.md).
+**Cross-references**: [TEST-035] (suite-reach honesty), an internal verification protocol.
 
 ---
 
