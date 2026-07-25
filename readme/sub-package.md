@@ -636,7 +636,24 @@ Include only meaningful metrics: throughput, latency (p50, p95, p99), memory (st
 
 ### [README-013] Error Handling Section
 
-**Statement**: Packages with a non-trivial error shape (≥ 3 catch arms, a nested generic error envelope, or multiple throwing surfaces) MUST include a `## Error Handling` section with an ASCII error tree and an exhaustive pattern-matching example.
+**Statement**: A package MUST include a `## Error Handling` section — with an ASCII error tree and an exhaustive pattern-matching example — when **both** conditions hold: **(1) Ownership** — the package declares the thrown error type in its own `Sources`, so an error tree of its own exists to document; **and (2) Non-triviality** — that error shape is non-trivial (≥ 3 catch arms, a nested generic error envelope, or multiple throwing surfaces).
+
+A package that throws only a **dependency-owned** error type — a facade, re-export, or forwarder — is **out of scope**: it owns no error tree, so the remedy this rule prescribes does not exist for it, and a finding against it cannot be acted on.
+
+**⚠️ Amendment 2026-07-25 — condition (1) was ADDED; the original statement carried only condition (2), and that omission was a defect rather than a simplification.** Read faithfully, condition (2) alone mandates an impossible remedy: its "multiple throwing surfaces" disjunct carries no ownership precondition, so it reaches any package with two or more throwing surfaces regardless of who owns the error — and that disjunct dominates the other two in practice. Measured across 449 Family E packages (388 lacking the section) on 2026-07-25:
+
+| Threshold | Packages flagged |
+|---|---|
+| (2) alone, faithfully implemented | **152** |
+| — of which own no error type at all (remedy impossible) | **75** |
+| (1) alone — ownership with no triviality test | 83 |
+| **(1) AND (2) — this statement** | **77** |
+
+Condition (2) alone would flag 75 packages whose thrown error belongs to a dependency, buying no actionable finding for any of them. Condition (1) alone over-fires in the opposite direction: it flags 6 packages whose owned error has fewer than three catch arms and exactly one throwing surface — precisely the *trivial* shape the "non-trivial" language already excluded. Each condition is wrong alone, in a different direction; the conjunction is what the rule always meant.
+
+**⚠️ 77 is a FLOOR, not an exact count.** The measuring probe anchors `public … throws` within a single line, so a signature spanning several lines is not counted. Treat every figure above as a lower bound.
+
+**Scope — typed throwing surfaces only.** The threshold reads `throws(T)` signatures and does not count bare `throws`. This is deliberate: [API-ERR-001] forbids untyped throws outright, so an untyped public surface is already a violation of that rule, whose remedy is to type the signature rather than to document an error tree. Counting untyped surfaces here would prescribe the wrong remedy, reintroducing the defect this amendment removes.
 
 **Correct** (error hierarchy + exhaustive matching):
 
@@ -670,7 +687,9 @@ do {
 }
 ```
 
-**Enforcement**: Mechanical — `validate-readme.py:173` (any public `throws(NonNever)` signature in `Sources/` requires a `## Error Handling` section). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family E. Discipline: an internal audit record. [VERIFICATION: WF validate-readme.py:173]
+**Enforcement**: Mechanical — `validate-readme.py:222` (`declares_thrown_error`: a public `throws(T)` whose `T` resolves to a type the package declares in its own `Sources`). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family E. Discipline: an internal audit record. [VERIFICATION: WF validate-readme.py:222]
+
+**⚠️ Text/check divergence, recorded 2026-07-25 — do not read this rule as fully enforced.** The shipped check implements condition (1) only. It therefore flags the 6 trivial-shape packages this statement excludes, and its finding count is 83 where the statement's is 77. Bringing the check into line with condition (2) is a separate change, sequenced after this amendment. Until it lands, a README-013 finding is a claim that condition (1) holds; condition (2) is unverified.
 
 **Cross-references**: [API-ERR-001], [README-001]
 
