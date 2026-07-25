@@ -439,7 +439,7 @@ cross-org run).
 
 ```yaml
 description: <string, required, ≤ 350 chars>
-topics: [<string>, ...]   # required, 3-10 entries per [GH-REPO-023]
+topics: [<string>, ...]   # required, 2-10 entries per [GH-REPO-023]
 homepage: <string, optional; default per [GH-REPO-030]>
 settings:                 # optional; keys default per [GH-REPO-050..053, 055-057]
   hasIssuesEnabled: <bool>
