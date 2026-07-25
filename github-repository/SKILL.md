@@ -243,10 +243,10 @@ repos (156 public: 104 primitives + 52 foundations) carrying exactly
 prior floor of 3 ("layer + 2 domain") assumed two domain tags are always
 available; for single-concept packages the second is noise. Relaxed per
 principal direction; a *relaxation*, so previously-conforming repos (3+) are
-unaffected. NOTE — `metadata-schema.json` currently declares `topics`
-`minItems: 0, maxItems: 20`, which neither enforced the old floor nor matches
-this range; reconciling the schema bounds to 2–10 is deferred (25 repos carry
-0 topics and 1 carries 12, so tightening needs its own remediation pass).
+unaffected. **Applied at (2026-07-25)**: schema reconciled to 2–10; every site
+read rather than cited — `SKILL.md:442` `3-10`→`2-10` (`Skills@b691932`),
+`metadata-schema.json` 0–20→2–10 (`.github@643cfdc`), and the three org meta-repos
+this rule exempts, which now omit `topics` rather than declare `[]` because a schema cannot express the exemption (`swift-primitives.org@8ae8895`, `swift-foundations/.github@2b979e7`, `swift-ietf/.github@d1f194c`).
 
 ### [GH-REPO-024] Forbidden topics
 **Statement**: The following topic values are forbidden:
