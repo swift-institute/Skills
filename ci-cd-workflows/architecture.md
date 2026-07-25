@@ -100,7 +100,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Statement**: Per-package consumer `ci.yml` contains only workflow name + `on:` + `concurrency:` + thin `uses:` jobs with `secrets: inherit` ([CI-059]). No inline build/test logic, caching, matrices, or toolchain overrides.
 
-**Enforcement**: Mechanical — `validate-thin-callers.py` + `validate-thin-callers.yml` (pilot 7 of `/promote-rule` 2026-05-14, extended at pilot 17 with [CI-030] + [CI-059] compose-in-script). [GH-REPO-074] checks (no inline `runs-on:`, no inline `steps:`, ≥1 `uses:` job; standalone `swift-format.yml`/`swiftlint.yml` forbidden) plus [CI-030] @main pinning and [CI-059] `secrets: inherit` co-presence. Discipline: an internal audit record § [CI-031]; pilot-17 outcome an internal audit record. [VERIFICATION: WF validate-thin-callers.py (GH-REPO-074, CI-030, CI-059)]
+**Enforcement**: Mechanical — `validate-thin-callers.py` + `validate-thin-callers.yml` (pilot 7 of `/promote-rule` 2026-05-14, extended at pilot 17 with [CI-030] + [CI-059] compose-in-script). [GH-REPO-074] checks (no inline `runs-on:`, no inline `steps:`, ≥1 `uses:` job; standalone `swift-format.yml`/`swiftlint.yml` forbidden) plus [CI-030] @main pinning and [CI-059] `secrets: inherit` co-presence. Discipline: an internal audit record § [CI-031]; pilot-17 outcome a further internal audit record. [VERIFICATION: WF validate-thin-callers.py (GH-REPO-074, CI-030, CI-059)]
 
 **Cross-references**: [CI-030], [CI-032], [CI-053], [CI-054], [CI-058], [CI-059], [CI-060]; memory `project_per_repo_vs_centralized_ci.md`.
 
