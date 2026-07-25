@@ -53,6 +53,8 @@ When no iteration infrastructure exists: per [IMPL-000], add `.forEach`, `.reduc
 
 **Lint enforcement**: `Lint.Rule.Idiom.IterationIntent` (in `swift-foundations/swift-linter-rules`, target `Linter Rule Idiom`) flags `for <i> in <a>..<<b>` counter loops with a simple identifier binding — index-counted iteration is mechanism. Direct iteration (`for element in items`), `enumerated()`, `stride(from:to:by:)`, and `forEach { ... }` are not flagged. Tuple-pattern bindings (e.g., zip iteration) are out of scope. Added Wave 3 mechanization 2026-05-11. [VERIFICATION: AST Lint.Rule.Idiom.IterationIntent]
 
+**Applied at**: `swift-foundations/swift-package-manager`, `Sources/Package Manager/Package.Manager+Resolution.swift:45` — `for index in span.indices` replacing a `0..<count` counter. Recorded because the prescribed remedy is NOT universally available: `Span<Byte>` is non-escapable and cannot be handed to a closure-taking form such as `forEach`, so `.indices` is the resolution for span-shaped iteration where the closure forms are inexpressible. A remedy nobody has executed is a hypothesis; this one has a landed site.
+
 ---
 
 ### [IMPL-034] unsafe Keyword Placement

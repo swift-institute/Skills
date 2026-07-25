@@ -18,6 +18,19 @@ func parse() throws(any Error)   // Existential error - FORBIDDEN
 
 **Lint enforcement**: SwiftLint custom rule `typed_throws_required` (`swift-institute/.github/.swiftlint.yml`) flags `throws` without a typed-throws specifier in `Sources/`; AST counterpart `Lint.Rule.Throws.Untyped` flags any throws clause whose type is `nil` (covers `func f() throws` and `func g() async throws -> T`). The existential-throws sub-case (`throws(any Error)`) is handled separately per [API-ERR-006]. [VERIFICATION: SwiftLint typed_throws_required, AST Lint.Rule.Throws.Untyped]
 
+**⚠️ Discarding a throw from an UNTYPED callee — no construct satisfies every rule.** `Lint.Rule.Try.Optional` also cites this ID when it flags `try?`, and its remedy (`do { … } catch { }`) is correct ONLY when the callee's error is typed. When the callee throws untyped — cross-module APIs such as `FileManager.removeItem(at:)` or `try await task.value` — every expressible form violates something:
+
+| form | fires |
+|---|---|
+| `try? x()` | `try optional` — this rule |
+| `do { try x() } catch { }` | `do throws for typed catch` [IMPL-075] |
+| `do throws(any Error) { try x() } catch { }` | `existential throws` [API-ERR-006] |
+| `do throws(E) { … }` | does not compile — there is no `E` |
+
+The escape is **not** a code change: keep the `try?` (or the bare `do`/`catch`) and apply `// swift-linter:disable:next try optional` with a `// REASON:` naming the untyped callee. **No lint rule can decide this for you**: a per-file AST rule can prove a callee *typed* (declared in-file with a typed throws clause) but can never prove it *untyped*, because those callees are cross-module and unresolvable from a parsed source. The author is the only party who can evaluate the condition, which is why this is documented rather than carved out in a predicate — softening [IMPL-075] would license the typed-callee case, where both rules are satisfiable together and behave correctly.
+
+**Applied at**: `swift-institute/Workspace`, target `Application` — 7 of its 11 live `try?` sites are bare `try? FileManager.default.removeItem(…)` in `defer`/statement position (untyped callee, discard intended); the other 4 are value-fallback (`(try? …) == true`, `!= nil`) where `try?` is the intent rather than a discard. Measured 2026-07-25 against `try optional: 11` at `93 rules · 55 files · 117 violations`. Converting a site to an institute-typed callee resolves it outright (−1 `try optional`, +0 elsewhere); converting to a Foundation callee is net-zero (−1 `try optional`, +1 [IMPL-075]).
+
 ---
 
 ### [API-ERR-002] Nested Error Types

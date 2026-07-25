@@ -90,9 +90,15 @@ do throws(IO.Lane.Error) {
 
 **Key distinction**: `catch let error` erases to `any Error`. The implicit `error` binding in a `do throws(E)` catch preserves `E`.
 
-**Cross-references**: [IMPL-040], [API-ERR-001]
 
-**Lint enforcement**: `Lint.Rule.Throws.DoCatchTyped` (in `swift-foundations/swift-linter-rules`, target `Linter Rule Throws`) flags `do { try … } catch { … }` blocks missing the typed-throws specifier on the `do`. Wave 3 companion `Lint.Rule.Throws.DoCatchTypedThrow` covers the additional `do { throw … } catch { … }` pattern whose body has NO `try` (which the original rule misses). Together both AST rules cover the typed-`do`-`catch` discipline; the existing `no_typed_catch_let_error_where` SwiftLint rule (per [PATTERN-009]) catches the `catch let error where` mistake that this rule's "use the implicit binding" guidance prevents. [VERIFICATION: AST Lint.Rule.Throws.DoCatchTyped, Lint.Rule.Throws.DoCatchTypedThrow]
+
+**⚠️ Does not apply when the callee's error is untyped.** This rule fires on the bare `do { try … } catch { }` that [API-ERR-001]'s `try optional` remedy tells authors to write. Where the callee throws untyped — cross-module APIs such as `FileManager.removeItem(at:)` or `try await task.value` — there is no `E` to name, `do throws(any Error)` is closed by [API-ERR-006], and **no construct satisfies all three rules**. See [API-ERR-001] for the full table and the disable-with-`REASON` escape. Do not "fix" such a site by softening this rule: where a typed `E` does exist, both rules are satisfiable simultaneously and the pair behaves correctly, and a softening would license exactly that working case.
+
+**Applied at**: `swift-institute/Workspace`, target `Application` — a probe conversion of one site to a Foundation (untyped) callee measured −1 `try optional` / **+1 this rule**, net zero; the same conversion to an institute-typed callee measured −1 / +0, resolving outright. That pair is what isolates the trigger as untypedness rather than the package or the library.
+
+**Cross-references**: [IMPL-040], [API-ERR-001], [API-ERR-006]
+
+**Lint enforcement**: `Lint.Rule.Throws.DoCatchTyped` (in `swift-foundations/swift-institute-linter-rules`, target `Institute Linter Rule Throws`) flags `do { try … } catch { … }` blocks missing the typed-throws specifier on the `do`. Wave 3 companion `Lint.Rule.Throws.DoCatchTypedThrow` covers the additional `do { throw … } catch { … }` pattern whose body has NO `try` (which the original rule misses). Together both AST rules cover the typed-`do`-`catch` discipline; the existing `no_typed_catch_let_error_where` SwiftLint rule (per [PATTERN-009]) catches the `catch let error where` mistake that this rule's "use the implicit binding" guidance prevents. [VERIFICATION: AST Lint.Rule.Throws.DoCatchTyped, Lint.Rule.Throws.DoCatchTypedThrow]
 
 ---
 
@@ -152,7 +158,7 @@ loop.runInTick { result in
 
 **Cross-references**: [API-ERR-001], [IMPL-040], [IMPL-075], [IMPL-INTENT]
 
-**Lint enforcement**: `Lint.Rule.Throws.ResultCallback` (in `swift-foundations/swift-linter-rules`, target `Linter Rule Throws`) flags closure-typed parameters (in function/init parameters and stored properties) whose parameter type is `Result<T, E>`; function-return `Result` and top-level non-closure `Result` parameters are not flagged — those could be storage-shape uses of Result. Scope detail: rationale archive §[IMPL-092]. [VERIFICATION: AST Lint.Rule.Throws.ResultCallback]
+**Lint enforcement**: `Lint.Rule.Throws.ResultCallback` (in `swift-foundations/swift-institute-linter-rules`, target `Institute Linter Rule Throws`) flags closure-typed parameters (in function/init parameters and stored properties) whose parameter type is `Result<T, E>`; function-return `Result` and top-level non-closure `Result` parameters are not flagged — those could be storage-shape uses of Result. Scope detail: rationale archive §[IMPL-092]. [VERIFICATION: AST Lint.Rule.Throws.ResultCallback]
 
 ---
 
