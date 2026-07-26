@@ -297,9 +297,15 @@ This repository is private; no public license. See organization terms.
 
 **Statement**: Process READMEs MUST NOT include an Installation block, any badge (development status, CI, or SPI), a Quick Start section, or other software-product-shaped sections (Architecture, Platform Support, Performance, Error Handling, Stability) — process repos are not software products.
 
+**Carve-out — process repos that ship an executable.** A Family C repo whose workflow *is* a command the reader runs (the step 3 / step 4 collision in the hub's decision flow) MUST document that command surface: a getting-started block of runnable commands is required, not prohibited, and it must satisfy [README-030] capability coverage and [README-031] first-run cost disclosure. The other prohibitions stand in full — no badges, no `## Installation` with a `.package(...)` block (the reader runs the tool, they do not depend on it), no Architecture / Platform Support / Performance / Stability sections; architecture belongs in a sibling `ARCHITECTURE.md` or the governing skill.
+
+The mechanical checks do not yet model this carve-out. A repo relying on it MUST NOT title the section literally `## Quick Start` — use `## Get started` or equivalent — until the check is taught the exemption.
+
 **Enforcement**: Mechanical — `validate-readme.py:190,194,198` (flags a literal `## Installation` section, any badge line, or a `## Quick Start` section; the remaining forbidden sections are not yet mechanically checked). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family C. Discipline: an internal audit record. [VERIFICATION: WF validate-readme.py:190]
 
-**Cross-references**: [README-003], [README-004], [README-005], [README-009], [README-010], [README-011], [README-013]
+**Origin of the carve-out**: `swift-institute/Workspace` (2026-07-26). Routed to Family C by role, it is also the ecosystem front door and ships the `workspace` CLI. The unqualified prohibition made the correct document non-conforming, and no rule anywhere then required the command surface to be documented — the corpus's own contribution to the capability gap that [README-030] closes.
+
+**Cross-references**: [README-003], [README-004], [README-005], [README-009], [README-010], [README-011], [README-013], [README-030], [README-031]
 
 ---
 
@@ -307,7 +313,11 @@ This repository is private; no public license. See organization terms.
 
 **Statement**: Process READMEs SHOULD be 30–50 lines; exceeding 80 lines flags content that belongs in a governing skill, a DocC article, or `Research/`.
 
+**Carve-out — process repos that ship an executable.** The budget does not bind the content [README-030] and [README-031] require. A repo whose README is the *whole* contributor surface — no private support path, no internal-only companion document — cannot evict command documentation to a governing skill, because the reader has no access to one. The budget still binds everything else: rationale, history, and design discussion remain out of scope and belong in `ARCHITECTURE.md` or `Research/`. For such a repo the 80-line flag is advisory and MUST be adjudicated, not treated as a defect.
+
 **Enforcement**: Mechanical — `validate-readme.py:204` (flags READMEs exceeding 80 lines). Invoked by `validate-readme.yml` on public-repo PR/push. Scope: Family C. Discipline: an internal audit record. [VERIFICATION: WF validate-readme.py:204]
+
+**Origin of the carve-out**: `swift-institute/Workspace` (2026-07-26). Its README is the entire contributor surface by design; documenting five commands, the compose loop, and how to read `doctor` output does not fit in 80 lines, and the content has nowhere else to go.
 
 ---
 

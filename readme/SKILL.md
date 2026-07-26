@@ -65,7 +65,9 @@ Plus user accounts (e.g., `coenttb`), which are not orgs at all but a separate G
 
 ### Every Swift package is one repo
 
-The workspace has **no monorepos and no superrepos**. Every Swift package is a single GitHub repo. The local-disk directory at `~/Developer/<org>/` is a clone-mirror of an org's repos as siblings — useful for cross-repo work locally, but not a GitHub artifact and not a README target. Workspace orientation lives in `CLAUDE.md`'s Package Locations table and in each org's GH profile (Family G).
+The workspace has **no monorepos and no superrepos**. Every Swift package is a single GitHub repo. The local-disk directory at `~/Developer/<org>/` is a clone-mirror of an org's repos as siblings — useful for cross-repo work locally, but not a GitHub artifact and not a README target.
+
+Ecosystem orientation is a **published artifact**, not agent-side context: the `swift-institute/Workspace` repository is the front door, carrying the package inventory (`Workspace.json`, the sole name → org → path authority) and machine-checked checkout facts (`workspace doctor`). Its README, not a private instruction file, is the document a newcomer reads. Each org's GH profile (Family G) remains the per-org catalog. When a README needs to point a reader at "where the ecosystem is described", it points there.
 
 ---
 
@@ -97,7 +99,11 @@ Walk this in order. The first match wins.
 4. **Repo is an implemented Swift package** with working code and a public API? → **Family E**.
 5. **Repo is an unimplemented namespace reservation** or scaffold with title + status only? → **Family F**.
 
-(Local-disk grouping READMEs at `~/Developer/<org>/README.md` are out of scope — workspace orientation lives in `CLAUDE.md`, not in per-directory READMEs.)
+(Local-disk grouping READMEs at `~/Developer/<org>/README.md` are out of scope — ecosystem orientation is published in the `swift-institute/Workspace` front door, not in per-directory READMEs.)
+
+**Step 3 / step 4 collision — a process repo that ships an executable.** Some workspace-tooling repos are *both*: workspace tooling by role, and an implemented Swift package with a public command surface. `swift-institute/Workspace` is the canonical instance — it is the ecosystem front door (step 3) and ships the `workspace` command-line application (step 4). First-match-wins routes it to Family C, whose rules then forbid exactly the content such a repo needs: [README-137] prohibits a Quick Start, and [README-138] caps length at 80 lines. Both are mechanically enforced.
+
+Route these to **Family C**, and apply the executable carve-outs stated in [README-137] and [README-138]. The reader of such a repo is still a maintainer, not a package evaluator — the Family C voice is correct — but a command surface they are expected to run must be documented, and that content is not optional prose to be evicted to a skill.
 
 **Lint enforcement**: the family-routing rules are mechanically enforced by the `validate-readme.yml` reusable workflow + companion `.github/scripts/validate-readme.py`; the workflow reads `readme.family` from each repo's `metadata.yaml` per Decision 7 (clause hoisted from 2026-05-10 changelog entry).
 
@@ -209,11 +215,66 @@ This package complies with [PRIM-FOUND-001] and depends on no Foundation imports
 
 ---
 
+### [README-030] Capability Coverage
+
+**Statement**: A README MUST name every distinct entry point of the artifact's user-facing surface — each command or subcommand of a CLI, each top-level product of a library — at least by name and purpose. A capability the reader is expected to invoke MUST NOT be discoverable only from source, `--help`, or a design document. Depth may vary; **presence may not**.
+
+This is the additive counterpart to [README-023]. The evaluator's lens is a *subtractive* test — it asks whether each paragraph present earns its place, and a document can pass it completely while omitting the artifact's central capability. Nothing catches an absence except a rule that requires coverage.
+
+**Decision test**: List the artifact's entry points from its own surface — the CLI's operation enum or usage string, the manifest's `products`. Grep the README for each name. Every one MUST appear. A zero count is a finding, regardless of how well-written the rest of the README is.
+
+**Correct** (each command named with its purpose, before any deep-dive section):
+
+```markdown
+| Command | What it does |
+| --- | --- |
+| `sync` | Clone missing repositories and fast-forward eligible ones. |
+| `doctor` | Report what is measurably true about this checkout. |
+| `compose` | Point one package's dependency at your local checkout of it. |
+| `restore` | Undo a composition, restoring the declared clause byte-for-byte. |
+| `verify` | Report which source a dependency actually compiled from. |
+```
+
+**Incorrect**: a README covering `sync` and `doctor` thoroughly while `compose`, `restore`, and `verify` appear zero times — the reader cannot discover that local-source composition exists at all.
+
+**Rationale**: The origin instance is `swift-institute/Workspace` (2026-07-26). A test-drive of the contributor path found the README mentioned `sync` seven times and `doctor` throughout, and `compose` / `restore` / `verify` **zero times** — the package's central local-development capability was invisible to anyone reading the repository. No rule in this corpus was violated: [README-009] governs Quick Start *quality* ("show the primary use case"), not surface *coverage*, and [README-023] cannot fire on absent content. The gap was structural, not a lapse in applying an existing rule.
+
+**Mechanical-check candidate**: this rule is a strong rule → check migration target. For a package with an executable target, a check can extract the declared operation names from the command schema and assert each appears in `README.md`. That check would have caught the origin instance exactly, and it subsumes the prose rule for the CLI case. See [README-161]–[README-166] for the enforcement chassis.
+
+**Cross-references**: [README-023] evaluator's lens (subtractive counterpart); [README-009] Quick Start requirements; [README-137].
+
+---
+
+### [README-031] First-Run Cost Disclosure
+
+**Statement**: When a README documents a command a reader is expected to run, and that command takes **more than roughly 30 seconds** or produces **no output while it works**, the README MUST say so at the point of instruction — stating the expected magnitude and that silence is normal. When a quieter or more legible alternative exists (running the build as its own step first), the README SHOULD offer it.
+
+**Decision test**: Would a first-time reader, thirty seconds into this command with a blank terminal, have any way to distinguish "working" from "hung"? If no, disclose.
+
+**Correct**:
+
+```markdown
+**The third command is slow the first time, and it is silent while it works.** Before it can
+sync anything, `swift run` compiles the application and its whole dependency graph — several
+thousand compile steps. Expect several minutes with no output at all. That is normal and it is
+not a hang.
+```
+
+**Incorrect**: a bare quickstart block whose first command silently compiles for minutes, with no note — the reader's only signal that anything is happening is an unchanging cursor.
+
+**Rationale**: The origin instance is `swift-institute/Workspace` (2026-07-26). The quickstart's first command compiles roughly four thousand steps and emits nothing for minutes; the agent test-driving the contributor path had to inspect the machine's running processes to convince itself the command had not hung. A newcomer without that option concludes the tool is broken and leaves. A grep of this skill and the **documentation** skill for first-run duration, expected timing, or output silence returned nothing: the entire corpus was silent on first-run experience, treating a README as a description of an artifact rather than of an encounter with it.
+
+**Scope**: applies to every family whose README documents runnable commands (C, E, and any F/G README carrying a command block). Long-running commands that *do* stream progress need no disclosure — the defect is silence, not duration alone.
+
+**Cross-references**: [README-009] Quick Start requirements; [README-030].
+
+---
+
 ## Files
 
 | Family | File | Existing IDs | New ID range |
 |--------|------|---|---|
-| Universal meta-rules | this file (`SKILL.md`) | [README-023], [README-026], [README-028] | — |
+| Universal meta-rules | this file (`SKILL.md`) | [README-023], [README-026], [README-028], [README-030], [README-031] | [README-032..039] |
 | A. User profile | `user-profile.md` | — | [README-120..129] |
 | C. Process / workflow | `process.md` | — | [README-130..139] |
 | E. Sub-package library | `sub-package.md` | [README-001..017], [README-019], [README-021], [README-022], [README-024], [README-025], [README-027], [README-029], [README-040] | [README-041..049] (reserved) |
@@ -236,6 +297,8 @@ One-line hooks for every rule. Load the linked file when the family is active.
 | [README-023] | Evaluator's Lens — every paragraph serves the family's evaluation question |
 | [README-026] | No Internal Rule-ID Citations — no `[MOD-*]`, `[README-*]`, etc. in README prose |
 | [README-028] | Speculative family / rule validation discipline — zero-instance proposals flagged pending validation |
+| [README-030] | Capability Coverage — every user-facing entry point named; presence is mandatory, depth varies |
+| [README-031] | First-Run Cost Disclosure — a slow or silent documented command must say so at the point of instruction |
 
 ### Family A: User Profile (`user-profile.md`)
 
@@ -263,8 +326,8 @@ One-line hooks for every rule. Load the linked file when the family is active.
 | [README-134] | Companion repositories table — peer process repos in the same org |
 | [README-135] | Layout assumption (when scripts depend on disk shape) |
 | [README-136] | License section — Apache 2.0 link or per-org standard |
-| [README-137] | No installation block, no badges, no Quick Start (this is not a software product) |
-| [README-138] | Length budget — 30–50 lines typical; >80 lines suggests content belongs in DocC or `Research/` |
+| [README-137] | No installation block, no badges, no Quick Start (this is not a software product) — carve-out for repos that ship an executable |
+| [README-138] | Length budget — 30–50 lines typical; >80 lines suggests content belongs in DocC or `Research/` — carve-out for repos that ship an executable |
 | [README-139] | (reserved) |
 
 ### Family E: Sub-Package Library (`sub-package.md`)
