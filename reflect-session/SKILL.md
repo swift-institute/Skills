@@ -25,9 +25,10 @@ indexing, and triage pipeline this skill used to mandate are gone (solo-dev cere
   `Reflections/` — legal work goes to `rule-law/Research/`, Dutch legislature to
   `swift-nl-wetgever/Research/`). A few sentences is fine. No fixed structure, no cap.
 - If the learning is a **convention**, fix it in its owning skill directly (see the
-  skill-routing map in the workspace instructions). If it is **deferred work**, record it
-  in the project's tracked backlog. Swift Institute maintainers use
-  `Internal/BACKLOG.md`; quick corrections go to `Internal/inbox.md`.
+  skill-routing map in the workspace instructions). If it is **deferred work**, file it
+  on the public issue register of the relevant repository (`gh issue create`). Quick
+  corrections go to `Internal/inbox.md` (transitional until the issue register fully
+  lands); `Internal/BACKLOG.md` is frozen and receives nothing.
 
 ## Two habits worth keeping (they catch real bugs)
 

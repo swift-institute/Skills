@@ -249,7 +249,7 @@ Together the three rules enforce strict downward composition: L1 → L2 → L3-p
 
 ### [PLAT-ARCH-008g] Pre-Flight Consultation Before Cross-L2 Dependencies
 
-**Statement**: When a fix candidate involves adding a `.package(path: ...)` dependency (code or test) that crosses L2 package boundaries, the writer MUST grep the tracked homes — `Skills/platform/`, `Skills/modularization/`, `Internal/CLAUDE.md` (and `Internal/inbox.md` for undrained corrections) — for layering-direction entries matching the two packages' layer positions BEFORE proposing the dependency. Cross-L2 dependencies are the single most common site of ecosystem-wide dep-direction violations.
+**Statement**: When a fix candidate involves adding a `.package(path: ...)` dependency (code or test) that crosses L2 package boundaries, the writer MUST grep the tracked homes — `Skills/platform/`, `Skills/modularization/`, `Internal/RULINGS.md` (and `Internal/inbox.md` for undrained corrections) — for layering-direction entries matching the two packages' layer positions BEFORE proposing the dependency. Cross-L2 dependencies are the single most common site of ecosystem-wide dep-direction violations.
 
 **Procedure**:
 
@@ -258,7 +258,7 @@ Together the three rules enforce strict downward composition: L1 → L2 → L3-p
 grep -rl "iso9945\|iso-9945\|linux-standard" \
   ~/Developer/swift-institute/Skills/platform/ \
   ~/Developer/swift-institute/Skills/modularization/ \
-  ~/Developer/swift-institute/Internal/CLAUDE.md \
+  ~/Developer/swift-institute/Internal/RULINGS.md \
   ~/Developer/swift-institute/Internal/inbox.md
 ```
 
