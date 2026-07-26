@@ -239,6 +239,10 @@ This is the additive counterpart to [README-023]. The evaluator's lens is a *sub
 
 **Rationale**: The origin instance is `swift-institute/Workspace` (2026-07-26). A test-drive of the contributor path found the README mentioned `sync` seven times and `doctor` throughout, and `compose` / `restore` / `verify` **zero times** — the package's central local-development capability was invisible to anyone reading the repository. No rule in this corpus was violated: [README-009] governs Quick Start *quality* ("show the primary use case"), not surface *coverage*, and [README-023] cannot fire on absent content. The gap was structural, not a lapse in applying an existing rule.
 
+**Every instruction surface, not only the README.** In the origin instance the *same* capability was absent from `CLAUDE.md` as well — the agent-facing instruction surface listed `sync`, `doctor`, and `test` and named the three composition verbs zero times. Two independent surfaces, one omission each, same author-side cause: a capability that no rule required anyone to enumerate. (`AGENTS.md` there is a symlink to `CLAUDE.md`, so it is one surface, not a third — verify before counting.)
+
+Apply the decision test to **every instruction surface the repository publishes**, not only `README.md`. Note the boundary honestly: this skill's scope is README files, and **no skill in the corpus currently owns `CLAUDE.md` / `AGENTS.md` content** — several reference those files, none govern them. Until that owner exists, this clause is the only thing asking the question of the agent-facing surface, and it is deliberately stated as a coverage obligation rather than as a structural rule for a file this skill does not own. A skill that does own the agent instruction surface would be the better home; that is a gap to fill, not a fiction to paper over here.
+
 **Mechanical-check candidate**: this rule is a strong rule → check migration target. For a package with an executable target, a check can extract the declared operation names from the command schema and assert each appears in `README.md`. That check would have caught the origin instance exactly, and it subsumes the prose rule for the CLI case. See [README-161]–[README-166] for the enforcement chassis.
 
 **Cross-references**: [README-023] evaluator's lens (subtractive counterpart); [README-009] Quick Start requirements; [README-137].
@@ -297,7 +301,7 @@ One-line hooks for every rule. Load the linked file when the family is active.
 | [README-023] | Evaluator's Lens — every paragraph serves the family's evaluation question |
 | [README-026] | No Internal Rule-ID Citations — no `[MOD-*]`, `[README-*]`, etc. in README prose |
 | [README-028] | Speculative family / rule validation discipline — zero-instance proposals flagged pending validation |
-| [README-030] | Capability Coverage — every user-facing entry point named; presence is mandatory, depth varies |
+| [README-030] | Capability Coverage — every user-facing entry point named, on every instruction surface; presence is mandatory, depth varies |
 | [README-031] | First-Run Cost Disclosure — a slow or silent documented command must say so at the point of instruction |
 
 ### Family A: User Profile (`user-profile.md`)
