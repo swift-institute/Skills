@@ -17,6 +17,10 @@ Give each capability one semantic owner: the package and layer that define its
 vocabulary, invariants, and lawful operations. Shared code, file size,
 namespace spelling, and consumer count are evidence to inspect, not owners.
 
+Institute tooling and policy follow the same rule. A package consumes the
+Institute-owned executable or reusable workflow; it does not reproduce policy
+in package-local YAML, helpers, or validators.
+
 ### [MOD-BOUNDARY] Decide every boundary independently
 
 Choose:
@@ -35,6 +39,10 @@ reviewing a structural change.
 Before adding a capability, apply **reuse-first**. Depend on and expose the
 existing owner when it exists. If an owner lacks a lawful operation, add the
 operation there and consume it; do not reproduce it locally.
+
+For GitHub operations, compose repository-policy and
+`swift-institute-bot`. Package-local Actions are a deny-by-default boundary,
+not a convenient integration site.
 
 ### [MOD-GRAPH] Make ownership visible in the graph
 
@@ -136,6 +144,8 @@ semantic ownership, cohesion, and whether a boundary should exist.
 
 - Use Workspace's typed inventory and ecosystem probes for ecosystem facts.
 - Use swift-linter and centralized validators for syntax and graph predicates.
+- Use repository-policy for GitHub files, settings, Actions grants, and typed
+  exemptions; use `swift-institute-bot` for cross-repository convergence.
 - Use the compiler and coordinated build/test boundary for compilation facts.
 - Keep semantic ownership, cohesion, and boundary choice as explicit review
   judgments. A detector may supply evidence but cannot decide them.

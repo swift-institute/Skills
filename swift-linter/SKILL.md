@@ -16,7 +16,9 @@ and prevents recurrence through centralized CI.
 Every mechanically recognizable convention has one executable owner:
 
 - swift-linter for Swift syntax and AST semantics;
-- Workspace validators for package, repository, and cross-package graph facts;
+- Workspace validators for checkout, package, and cross-package graph facts;
+- repository-policy for GitHub repository files, settings, Actions, and
+  cross-repository policy;
 - centralized CI for execution and fleet rollout.
 
 Do not restate an executable predicate as a second prose algorithm.
@@ -88,7 +90,8 @@ are all canonical.
 2. Search existing rules and bundles; extend the existing owner when possible.
 3. Write the predicate and exemption table before code.
 4. Implement source rules in SwiftSyntax-backed swift-linter rule packages.
-   Keep repository/package graph checks in typed Workspace validation.
+   Keep checkout/package graph checks in typed Workspace validation and GitHub
+   repository/Actions checks in repository-policy.
 5. Add positive, negative, edge, exemption, and self-firing fixtures.
 6. Run focused rule tests.
 7. Run a fresh ecosystem measurement over Sources and Tests with explicit
@@ -151,6 +154,7 @@ Record:
 
 - **rule-exemptions** for predicate and suppression shapes.
 - **ci-cd-workflows** for centralized execution.
+- **github-repository** for repository-policy and bot convergence.
 - **swift-package-build** for local lint invocation.
 - **modularization** when a rule exposes an ownership or dependency defect.
 - the motivating domain skill for the semantic judgment.

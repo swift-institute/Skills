@@ -79,6 +79,12 @@ For a capability involving owners `A` and `B`:
 
 Never duplicate either owner's vocabulary in the integration site.
 
+For repository/CI integration, the Institute control plane is an owner:
+repository-policy defines admissible structure, centralized workflows own
+shared execution, and `swift-institute-bot` owns fleet convergence. A
+package-local workflow/action boundary requires an explicit typed whitelist
+grant in addition to the target/product criteria above.
+
 ## Layer placement
 
 Place a capability at the lowest layer that both owns its semantic axis and can

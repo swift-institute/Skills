@@ -5,7 +5,9 @@ description: |
   Apply when authoring or auditing GitHub-side metadata for any ecosystem repo.
 ---
 
-<!-- Detailed repository policy catalogue retained for progressive disclosure. -->
+<!-- Judgment and rationale catalogue retained for progressive disclosure.
+Mechanical schemas, inventories, defaults, and validators live in the
+repository-policy Swift product and outrank illustrative shapes below. -->
 
 # GitHub Repository
 
@@ -16,10 +18,11 @@ and the centralized reusable workflows in `swift-institute/.github/.github/workf
 
 **Authority**: `swift-institute/Research/github-metadata-harmonization.md` (Tier 2 recommendation, 2026-04-29).
 
-**Scope boundary**: this skill governs **per-repository** metadata. Org-
-scoped community-health files (FUNDING.yml, CODE_OF_CONDUCT.md, etc.) are
-owned by centralized repository policy and its Swift tooling rather than this
-per-repository metadata contract.
+**Scope boundary**: this catalogue governs editorial judgment, repository
+classification, rationale, and exception history. The repository-policy Swift
+product owns schemas and deterministic evaluation for metadata, settings,
+community-health inheritance, Dependabot, and GitHub Actions. Central CI runs
+that product; `swift-institute-bot` converges cross-repository state.
 
 ---
 
@@ -31,24 +34,18 @@ question — *"what is this repo, and would I look further?"* Content that does
 not survive the discovery-lens belongs in the README, the package's DocC, or
 not at all.
 
-### [GH-REPO-002] Single-Source Discipline
-**Statement**: The repo's `.github/metadata.yaml` is the canonical
-source for description / topics / homepage / settings. The GitHub-side state
-is a derived view, propagated by the centralized `sync-metadata.yml`
-reusable workflow in `swift-institute/.github`. Editing GitHub metadata
-directly (via the web UI or `gh repo edit` outside the workflow) is
-forbidden — drift is detected and reverted automatically by the next sync
-run.
+### [GH-REPO-002] Single-source discipline
+**Statement**: The repository's typed policy input is canonical for authored
+metadata and settings; GitHub-side state is a derived view. Cross-repository
+convergence runs through `swift-institute-bot`, not direct manual edits or a
+second repository-local implementation. The repository-policy product owns the
+current input schema and default derivation.
 
-### [GH-REPO-003] All-active scope
-**Statement**: Metadata work applies to all non-archived repos across the
-17 ecosystem orgs (public + private). The standard does not gate on
-visibility — `.github/metadata.yaml` MAY be authored at any time, and
-the centralized sync workflow propagates it. Private-repo metadata is
-not user-facing-load-bearing but the YAML being in place pre-flip means
-the private→public flip moment requires no metadata-specific work
-beyond "verify `.github/metadata.yaml` is present and current" — the
-YAML is typically already there from pre-flip authoring.
+### [GH-REPO-003] Scope comes from typed inventory
+**Statement**: Repository-policy derives its population from the canonical
+Workspace inventory and live GitHub facts, with archived, unavailable, and
+exception cases reported explicitly. A prose organization count or remembered
+repository list is not authority.
 
 ---
 
@@ -485,11 +482,15 @@ prose-rule + mechanical-check pattern.
 
 ## Tooling
 
-### [GH-REPO-070] Centralized reusable workflows
-**Statement**: All metadata propagation logic lives in
-`swift-institute/.github/.github/workflows/` as three reusable workflows
-(resolved 2026-04-29; revised same day to centralised-only architecture
-per § 7 Q9):
+### [GH-REPO-070] Central policy and bot convergence
+**Statement**: Repository-policy owns metadata/settings evaluation in Swift.
+Central workflows schedule that product and `swift-institute-bot` performs
+cross-repository convergence with a canary, journal, receipt, and final
+readback.
+
+The workflow names below are historical/current integration examples, not a
+canonical inventory. Read the central repository and typed policy for the live
+surface:
 
 - **`sync-metadata.yml`** — `workflow_call`, inputs `org` (optional),
   `repo` (optional), `dry-run` (bool). Reads each in-scope repo's
@@ -504,30 +505,28 @@ per § 7 Q9):
   Heuristic-seeded `.github/metadata.yaml` drafts; opens a PR per
   in-scope repo without one. Phase-1 bulk authoring lever.
 
-**Centralised-only by design**: per-repo caller workflows are NOT used.
-All token-minting happens from `swift-institute/.github` (the only repo
-that holds `SWIFT_INSTITUTE_BOT_APP_*` secrets), keeping cross-org auth simple.
-Trade-off: convergence on metadata edits has up to 24h latency (next
-nightly run), or the maintainer manually dispatches `sync-metadata.yml`
-post-merge for immediate sync. PR-time preview is achievable by
-dispatching `sync-metadata.yml` with `dry-run=true` against the affected
-repo; the run summary contains the proposed `gh repo edit` invocations.
+**Centralized by design**: package repositories do not host metadata/settings
+convergence callers. Central CI mints a narrowly scoped App token and invokes
+the Swift product. Manual dispatch may select timing or canary scope, but does
+not replace the bot transaction with hand-authored mutations.
 
 ### [GH-REPO-071] Drift detection and convergence cadence
-**Statement**: Three mechanisms catch drift between `.github/metadata.yaml`
-and GitHub state (resolved 2026-04-29; revised same day for centralised-
-only architecture per [GH-REPO-070]):
+**Statement**: The bot periodically evaluates the typed desired state against
+live GitHub state, reports drift, and converges authorized fields. A targeted
+dispatch runs the same product for a canary or immediate convergence. Dry-run
+uses the same population and predicate and emits a mutation-free receipt.
+
+The following legacy trigger descriptions illustrate scheduling only; the
+repository-policy/bot contract above is authoritative:
 
 1. **Nightly cron sweep**. The full ecosystem (all 17 orgs, all
    non-archived repos) is reconciled every 24 hours at 04:00 UTC by
    `sync-metadata-nightly.yml`. Drift introduced via web-UI edits or
    out-of-band `gh repo edit` is reverted to the YAML state. Tracking
    issue summarises what changed.
-2. **Manual `workflow_dispatch` for immediate sync**. After merging a
-   metadata-changing PR (or batched waves of merges), the maintainer
-   dispatches `sync-metadata.yml` from the GitHub Actions UI (or via
-   `gh workflow run`) with `org=<org>` or `repo=<owner>/<repo>` to
-   converge immediately rather than waiting for the next cron tick.
+2. **Targeted `workflow_dispatch` for immediate sync**. After merging a
+   policy-changing PR, dispatch the central bot-backed workflow with an exact
+   organization or repository scope.
 3. **Pre-merge dry-run preview**. To preview what sync will do before
    merging a metadata PR, dispatch `sync-metadata.yml` with the same
    scope inputs and `dry-run=true`. The run summary shows the proposed
@@ -540,57 +539,58 @@ repo callers in each org's secret context); the manual-dispatch path
 covers the "need it now" case at minimal friction.
 
 ### [GH-REPO-072] Boundary with adjacent CI tooling
-**Statement**:
+**Statement**: The exact executable/product map lives in repository-policy and
+central CI. The semantic boundaries are:
 
 | Concern | Tool | Lives in | Triggered by |
 |---|---|---|---|
-| Per-repo metadata | `sync-metadata.yml` + `sync-metadata-nightly.yml` + `generate-metadata.yml` | `swift-institute/.github/.github/workflows/` | cron / dispatch (no per-repo caller) |
-| Org community-health files | repository-policy Swift product | central CI owner | cron / dispatch |
-| Per-package CI callers | caller-schema Swift validator | central CI owner | pull request / sweep |
-| Per-package CI execution | reusable workflows + per-repo `ci.yml` | `swift-institute/.github` + each repo | PR / push |
+| Per-repo metadata/settings | repository-policy + bot | central control plane | cron / dispatch |
+| Org community-health files | repository-policy + org `.github` defaults | central control plane | cron / dispatch |
+| Per-package Actions whitelist | repository-policy | Workspace doctor + central CI | local / PR / sweep |
+| Per-package CI execution | reusable workflows + whitelisted thin caller | central/layer owner + package | admitted repo events |
 
-Metadata is the only concern in this table that does NOT involve a
-per-repo caller — by design, to keep cross-org auth contained to
-`swift-institute/.github`. No new locally-run tooling is
-introduced.
+Cross-repository concerns do not require package callers. Package-local files
+exist only for whitelisted repository events or tool-owned reusable surfaces.
 
 ### [GH-REPO-073] Authentication
 
-**Statement**: Cross-org workflow authentication uses the **`swift-institute-bot`**
-GitHub App, installed across all 17 orgs (per § 7 Q9 resolution 2026-04-29).
-Initial App permissions:
+**Statement**: Cross-org workflow authentication uses the
+**`swift-institute-bot`** GitHub App. The typed operation declares the exact
+repositories and least permissions it needs; repository-policy verifies the
+operation class before mutation.
 
 - Repository: **Metadata: Read**, **Administration: Read & Write**.
 - Pull requests: **Read & Write** (PR preview comments).
 - Issues: **Read & Write** (tracking issues).
 
-Permissions accrete only when a new cross-org concern actually requires
-them, with PR-review gating against `swift-institute/.github`. The App is
-positioned as the cross-org bot; concerns needing a narrower install scope
-(only some orgs) get separate sibling Apps named `swift-institute-{concern}-bot`.
+Permissions accrete only when a real typed operation requires them. The App is
+the default cross-repository actor; a narrower sibling App is justified only
+by a materially different installation or permission boundary.
 
-App credentials live as `swift-institute/.github` org-level secrets
-`SWIFT_INSTITUTE_BOT_APP_ID` + `SWIFT_INSTITUTE_BOT_APP_PRIVATE_KEY` and **only** there. Other
-orgs do NOT receive duplicate copies of the secrets — the Path B
-centralised-only architecture (per § 7 Q9 resolution) means all
-token-minting workflows run from `swift-institute/.github`'s context,
-where the secrets are already available. Workflows mint short-lived
-(1-hour) installation tokens per run via `actions/create-github-app-token@v1`,
-using `repositories:` and `permissions:` inputs to scope each minted
-token narrower than the App's ceiling.
+App credentials remain only in the central control-plane secret context.
+Workflows mint short-lived installation tokens scoped more narrowly than the
+App ceiling and never copy the private key or a long-lived token to consumers.
 
 App installation status is independent of secret distribution: the App
 is installed on every org (granting it permission to act on those
 repos), but only `swift-institute/.github`'s workflows hold the keys
 needed to mint a token.
 
-Fine-grained Personal Access Token is permitted only for ephemeral local
-prototyping (e.g., debugging a workflow before the App is set up); production
-operation requires the App per § 7 Q9.
+A personal token is not a production or fleet fallback. Bounded local
+read-only diagnosis may use the user's existing authentication; writes route
+through the bot or an explicitly selected one-off recovery.
 
-### [GH-REPO-074] Per-Package Workflow Files MUST Be Thin Callers
+### [GH-REPO-074] Package-local Actions are denied unless whitelisted
 
-**Statement**: Per-repository workflow files at `<package>/.github/workflows/*.yml` MUST be thin callers to centralized reusable workflows in `swift-institute/.github/.github/workflows/`. A thin caller contains: workflow name, trigger (`on:`), and one `jobs:` block in which every job uses `uses:` syntax to reference a centralized reusable workflow with `with:` and `secrets:` blocks as required. Thin callers MUST NOT contain inline `runs-on:`, `steps:`, or job-step definitions.
+**Statement**: The repository-policy Swift product denies every package-local
+workflow and action unless a typed whitelist grant admits its exact repository
+class, path, triggers, and direct `uses:` references.
+
+The default package grant is a thin caller to the approved layer entry point.
+A thin caller contains the admitted trigger/concurrency surface and job-level
+`uses:` calls with only declared inputs and secrets. It contains no
+`runs-on:`, `steps:`, matrix, tool setup, validation predicate, scheduled fleet
+job, or cross-repository mutation.
 
 **Correct** (current canonical shape, post-2026-05-10 consolidation — the per-package thin caller is `ci.yml` ONLY; `swift-format.yml` and `swiftlint.yml` are absorbed into the layer wrapper's universal matrix and MUST NOT exist as standalone per-package files):
 
@@ -643,32 +643,38 @@ jobs:
       - run: swift test
 ```
 
-**Scope**: applies to the canonical `ci.yml` workflow under `<package>/.github/workflows/`. Package-specific workflows (release automation, deploy events, custom integrations) where centralized abstraction adds no value MAY be inline; the thin-caller rule targets the canonical CI file that every package ships. **Per-package `swift-format.yml` and `swiftlint.yml` MUST NOT exist as standalone files** — the format and lint legs are part of the layer wrapper's universal matrix (via `swift-institute/.github/.github/workflows/swift-ci.yml`'s `format` and `lint` jobs).
+**Scope**: applies to every file below `.github/workflows/` and
+`.github/actions/`, not only `ci.yml`. Release automation, deploy events,
+custom integrations, and new filenames are denied until a typed grant places
+the behavior at the correct owner. Common format/lint behavior remains
+central.
 
-**Tool reusables carve-out**: a package whose primary product is a CLI tool MAY host a reusable workflow (`on: workflow_call:`) in its own repo at `<package>/.github/workflows/<tool>.yml`, exposing the invocation glue for that tool. Such workflows are NOT thin callers; they own version-pinned action refs because they ARE the reusable consumed by downstream repos. The tool and its invocation glue share a lifecycle (single SHA pin, single release, no two-repo coordination) — co-locating them is the deliberate model, mirroring the broader open-source convention (`actions/setup-node`, `swift-actions/setup-swift`, `golangci/golangci-lint-action`). The CI hierarchy (`<org>/.github`) is for CI invariants that vary by layer; it is NOT for tool packaging. Reference case: `swift-foundations/swift-linter/.github/workflows/lint.yml` (consumed by ecosystem repos to run the swift-linter CLI). Tool-reusable repos are an explicit class in [GH-REPO-077] and configure both `swift` and `github-actions` Dependabot ecosystems.
+**Tool-owned grant**: a package whose product is a reusable tool may host
+invocation glue only when the whitelist names the exact workflow/action path
+and allowed references. Co-location is justified by shared lifecycle and
+ownership, not detected merely from the presence of `workflow_call`.
 
-**Lint enforcement**: Reusable workflow `validate-thin-callers.yml` + companion `.github/scripts/validate-thin-callers.py` parse each per-package repo's `.github/workflows/ci.yml` and flag (a) inline `runs-on:` in any job, (b) inline `steps:` in any job, (c) absence of any `uses:` reference. Additionally flags standalone `.github/workflows/swift-format.yml` and `swiftlint.yml` files (forbidden post-2026-05-10 consolidation). Honors the tool-reusable carve-out: workflow files declaring `on: workflow_call:` are exempt from the inline-job checks. Added pilot 7 of `/promote-rule` 2026-05-14. [VERIFICATION: WF validate-thin-callers.py (GH-REPO-074)]
+**Mechanical owner**: repository-policy parses the full YAML structure,
+classifies all local files/triggers/jobs/references, matches the typed grant,
+and emits stable diagnostics. Positive, negative, edge, and exemption fixtures
+are the contract. Workspace doctor and central CI invoke that product.
 
 **Cross-references**: [GH-REPO-070], [GH-REPO-072], [GH-REPO-073], [GH-REPO-075].
 
 ---
 
-### [GH-REPO-075] Thin-Caller Schema Validation
+### [GH-REPO-075] Caller and reusable contracts are typed
 
-**Statement**: The central Swift validator MUST parse both a package's thin
-caller and the selected reusable workflow contract. Every caller `with:` and
-`secrets:` key must be declared by `workflow_call`; a mismatch fails with the
-caller path, offending key, and expected contract.
+**Statement**: Repository-policy parses both a package caller and the selected
+reusable contract. Every caller `with:` and `secrets:` key must be declared by
+`workflow_call`; a mismatch fails with the caller path, offending key, and
+expected contract. It also verifies that the caller's file, trigger, reusable
+identity, and ref are admitted by the whitelist.
 
 **Composite:** YAML parse of caller (mechanical) + YAML parse of centralized `workflow_call:` declaration (mechanical) + key-set comparison (mechanical) + diagnostic emission (mechanical).
 
-**Procedure**:
-
-1. Parse the centralized workflow YAML (`swift-institute/.github/.github/workflows/<reusable>.yml`); extract the `on.workflow_call.inputs:` and `on.workflow_call.secrets:` key sets.
-2. Parse the caller YAML; extract the `jobs.<job>.with:` and `jobs.<job>.secrets:` key sets.
-3. Compare: caller-side keys MUST be a subset of centralized-side declarations.
-4. On mismatch, emit the diagnostic and exit non-zero without rewriting the
-   consumer.
+The exact parse/comparison algorithm belongs in the Swift product and tests,
+not in this skill.
 
 **Cross-references**: [GH-REPO-070], [GH-REPO-074], [CI-053].
 
@@ -722,8 +728,8 @@ by repo class:
 | `.github` stub repo (no workflows) | No | No | No | NO `dependabot.yml` |
 
 The repository-policy Swift product derives one closed shape — Swift,
-GitHub Actions, both, or absent — from repository structure. There is no set of
-copied canonical template files.
+GitHub Actions, both, or absent — from repository class plus the typed Actions
+grant. There is no copied template and no independent prose detector.
 
 **Speculative ecosystem configuration is forbidden**: configuring
 `github-actions` in a per-package repo because "a future inline step
@@ -732,20 +738,10 @@ Per-package repos following [GH-REPO-074] have no bumpable action
 refs; configuring an ecosystem with nothing to scan adds drift surface
 without value.
 
-**Tool-host detection** (safe auto-detection — distinct from the
-mechanical-grep approach this rule otherwise rejects): a per-package
-repo qualifies as tool-host iff at least one workflow file under
-`.github/workflows/` declares `on: workflow_call:` AND contains
-version-pinned third-party action refs. The `on: workflow_call:`
-trigger is deliberate — a workflow with that trigger is INTENTIONALLY
-exposing a reusable surface and therefore is INTENDED to host action
-refs. Auto-detection on this signal cannot silently mask
-[GH-REPO-074] violations because non-thin "regular" workflows use
-`on: push:` / `pull_request:`, not `on: workflow_call:`. The two
-shapes are mutually exclusive. Reference case:
-`swift-foundations/swift-linter` (CLI package shipping
-`.github/workflows/lint.yml` consumed by ecosystem repos to run the
-linter in CI).
+**Tool-host classification**: a workflow declaring `workflow_call` does not
+grant itself tool-owner status. The typed whitelist names the tool repository,
+path, and allowed action references. Repository structure is evidence checked
+against that declaration, not the authority that creates it.
 
 **Conformance interaction**: when the repository-policy validator detects a
 per-package repo whose workflow files contain inline version-pinned action
@@ -756,20 +752,9 @@ NOT to add `github-actions` to its `dependabot.yml`. Tool-host repos
 (`workflow_call:` shape) are exempt from this gate per [GH-REPO-074]'s
 tool-reusables carve-out.
 
-**Procedure** (validation and repair):
-
-1. For each per-package repo (has `Package.swift` at root): require the Swift
-   ecosystem configuration. Assert thin-caller status of
-   every `.github/workflows/*.yml`; on inline version-pinned action
-   refs, FAIL with repo path + [GH-REPO-074] citation.
-2. For each `.github` repo with bespoke action pins, require the GitHub Actions
-   ecosystem configuration.
-3. For each `.github` repo without bespoke action pins (today:
-   `swift-foundations/.github`, `swift-standards/.github`, plus
-   `swift-ietf/.github`, `swift-iso/.github`, `swift-iec/.github`
-   stubs): remove `dependabot.yml` if present.
-4. Report the derived class and exact mismatch; repair through the repository's
-   normal reviewed change rather than a fleet rewrite.
+Repository-policy reports the derived class and exact mismatch. A deterministic
+repair is applied through `swift-institute-bot` only after the policy owner,
+fixtures, and canary are green.
 
 **Cross-references**: [GH-REPO-070], [GH-REPO-074], [GH-REPO-075].
 

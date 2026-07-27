@@ -20,20 +20,22 @@ Library repositories ignore `Package.resolved`. Workflows must not commit,
 edit, copy, inspect individual pins as policy, or delete it to force movement.
 Change `Package.swift` and resolve through the Swift-owned package interface.
 
-The central generated-state predicate, rather than a propagation script, owns
-enforcement of the required ignore and absence of tracked resolved files.
+The repository-policy Swift product owns the repository-level generated-state
+predicate; package-analysis owners handle manifest semantics. Central CI
+invokes them rather than propagating files.
 
 ### [CI-042] Cache keys do not fall back by prefix
 
 `restore-keys` is forbidden for every `actions/cache` use. A cache either
 matches the complete key or misses. Partial matches make provenance ambiguous.
 
-### [CI-043] Central policy validates; it does not overwrite repositories
+### [CI-043] Central policy validates; the bot converges typed changes
 
-Central CI owns required structural `.gitignore` entries. Package repositories
-may add their own ignores. Do not synchronize whole files from a template or
-reintroduce a fleet mutation script; validate the invariant and fix a consumer
-through its normal repository workflow.
+Repository-policy owns required structural `.gitignore` entries. Package
+repositories may add their own ignores. Do not synchronize whole files from a
+template. When a deterministic repair is safe and authorized,
+`swift-institute-bot` applies the minimal typed change through the repository's
+normal review/commit path and records the receipt.
 
 ### [CI-044] Immutable tool binaries may use exact caches
 

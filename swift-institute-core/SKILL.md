@@ -15,7 +15,7 @@ This is the root meta-skill for the Swift Institute ecosystem.
 - **swift-institute-core** (this skill) - [BET-*] System manifest, harness architecture bets
 
 ### Architecture Layer
-- **swift-institute** - [ARCH-LAYER-*] Five-layer architecture, semantic dependencies
+- **swift-institute** - [ARCH-LAYER-*] Three realized layers, Institute-first composition, semantic dependencies
 - **swift-institute-ecosystem** - [ECO-*] Ecosystem tour: rationale (cross-platform + Embedded + typed correctness + fine-grained); three active layers; per-authority Standards sub-orgs (IETF, ISO, W3C, WHATWG, IEEE, IEC, Ecma, INCITS + vendor orgs); `-standard` convergence pattern; layer-placement decision model; five cross-cutting disciplines; deeper-reading routes; essential glossary. Carries no enforcement rules — points to canonical sources
 - **primitives** - Primitives-specific conventions (in swift-primitives repo)
 - **swift-package** - [PKG-NAME-*], [PKG-DEP-*] Package and namespace naming: noun form for packages/namespaces; gerund reserved as top-level typealias onto `Namespace.\`Protocol\``; external-compat exception; foundations cascade; hoisted protocol for generic namespaces. Cross-repo dep declaration: path-form-as-safe-default during pre-publishable work
@@ -37,7 +37,7 @@ This is the root meta-skill for the Swift Institute ecosystem.
 - **benchmark** - [BENCH-*] Performance testing: .timed(), .build cleanup, comparison benchmarks
 - **documentation** - [DOC-*] Inline DocC comments, .docc catalogue conventions, code comment quality
 - **readme** - [README-*] README structure, badges, maturity tiers, org-tier patterns
-- **github-repository** - [GH-REPO-*] GitHub-side repository metadata: description templates, topic taxonomy, homepage URL, license auto-detection, repo settings, .github/metadata.yaml source-of-truth, centralized reusable workflows in swift-institute/.github
+- **github-repository** - [GH-REPO-*] GitHub repository judgment, repository-policy routing, bot-first convergence, metadata/settings ownership, and deny-by-default Actions
 - **social-preview** - [SOC-*] GitHub social preview cards: parametric chassis, organization brand in metadata.yaml, and the skill-owned rendering workflow
 - **document-markup** - [DOC-MARKUP-*] Document creation using HTML, PDF, and Markdown rendering packages
 - **swift-linter** - [LINT-*] Mechanical-rule ownership, predicate design, fixtures, exemptions, severity graduation, bundles, consumer setup, and centralized enforcement
@@ -57,7 +57,7 @@ This is the root meta-skill for the Swift Institute ecosystem.
 - **swift-evolution** - [PITCH-PROC-*] Pitch phase: triggers, evidence, scope, drafting, submission, iteration, bidirectional evidence
 - **swift-forums-review** - [FREVIEW-*] Pressure-test a package pre-launch: simulate a forums.swift.org review thread with statistically-derived reviewer archetypes, predict which critique angles will land hardest, and triage outputs along two orthogonal axes — classification (load-bearing vs archetype-shaped) per [FREVIEW-012] and correctness (verified-true vs false-premise) per [FREVIEW-018]
 - **release-readiness** - [RELEASE-*] Multi-phase release-readiness brief and final pre-release scan: 4-phase release-prep brief, 7-phase final scan, skill-incorporation gate for pilot launches in a cohort, per-action authorization gates (tag/visibility/blog/deploy), GO/CONDITIONAL GO/NO-GO recommendation
-- **ci-cd-workflows** - [CI-*] Three-tier reusable-workflow chain (consumer → layer wrapper → universal); universal matrix shape (Swift 6.3 + 6.4-dev nightly); L1 embedded-build invariant; reusable consumption pattern (`@main` pinning, public/private visibility gate, minimal per-package callers); no-`.build/`-cache policy; mass-rollout discipline (per-action authorization, surgical commits, dirty-skip)
+- **ci-cd-workflows** - [CI-*] Three-tier reusable-workflow chain, typed Actions whitelist, bot-first fleet convergence, universal matrix, secret transport, and generated-state policy
 - **rule-exemptions** - [RULE-EXEMPT-*] Eleven recurring exemption shapes for the linter rule corpus: authoring or amending a custom lint rule whose firing intersects a deliberate institute or stdlib pattern
 - **swift-package-index** - [SPI-*] SPI onboarding + package collections: listing gates (public + semver tag + valid manifest + URL-form closure), leaf-first tagging cascade, per-org auto vs self-hosted-unified collections, unsigned-v1 signing posture (host-based trust selection), PackageList submission + at-scale etiquette, and the canonical `.spi.yml` policy (docs-hosting only, no CI-matrix mirror)
 
@@ -95,6 +95,7 @@ Common routes:
 | build or test | **swift-package-build** |
 | mechanical rule or exemption | **swift-linter**, **rule-exemptions** |
 | CI architecture | **ci-cd-workflows** |
+| GitHub settings or fleet convergence | **github-repository**, **ci-cd-workflows** |
 
 ---
 

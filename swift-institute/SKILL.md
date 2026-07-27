@@ -1,29 +1,41 @@
 ---
 name: swift-institute
 description: |
-  Five-layer architecture and core conventions for Swift Institute.
+  Realized three-layer architecture, Institute-first composition, and core conventions for Swift Institute.
   ALWAYS apply when working in any Swift Institute repository.
 ---
 
 # Swift Institute Conventions
 
-Core architectural conventions for all Swift Institute packages.
+Core architectural conventions for all Swift Institute packages and tooling.
 
 ---
 
-## Five-Layer Architecture
+## Institute-first architecture
+
+Reusable capability and typed policy land at their Institute owner first.
+Packages compose them and never reimplement them locally. Cross-repository
+GitHub operations default to `swift-institute-bot`; repository-local Actions
+are denied unless repository-policy grants their exact trigger, thin-caller, or
+tool-owned reusable shape.
+
+Deterministic source rules live in swift-linter, checkout and graph facts in
+Workspace, GitHub repository/Actions policy in repository-policy, and hosted
+execution in centralized/layered CI. Skills retain semantic judgment,
+rationale, routing, and exceptions.
+
+## Realized three-layer architecture
 
 ```
-Layer 5: Applications    (Commercial)   - End-user products
-              ↑
-Layer 4: Components      (Flexible)     - Opinionated assemblies
-              ↑
 Layer 3: Foundations     (Apache 2.0)   - Composed building blocks
               ↑
 Layer 2: Standards       (Apache 2.0)   - Specification implementations
               ↑
 Layer 1: Primitives      (Apache 2.0)   - Atomic building blocks
 ```
+
+Components and Applications are reserved names, not realized library layers.
+Do not cite a directory or reservation as ownership evidence.
 
 ### [ARCH-LAYER-001] Dependency Direction
 
@@ -165,7 +177,10 @@ same-layer edge does not merge the packages' missions or change either package's
 **Why**: Carrying dead or superseded packages forward accrues maintenance and review cost. The prior blanket "no removal for any reason during pre-1.0" rested on two premises that don't hold: that a package's value is "non-obvious until consumers materialize" and that removal is "irreversible loss" (committed code is recoverable from git history). Correctness drives the decision; the two guards make it safe.
 
 **How to apply**:
-- When `[MOD-PACKAGE]` or `[ARCH-LAYER-008]` identifies dead or superseded code, remove it: commit-first, verify-dead, then delete. No separate per-action authorization — git is the safety net.
+- When `[MOD-PACKAGE]` or `[ARCH-LAYER-008]` identifies dead or superseded
+  code, propose the exact deletion after proving recoverability and deadness.
+  Execute only with the authority applicable to that exact file/deletion
+  scope; git recoverability does not itself grant deletion authority.
 - If the target is not yet committed, commit it first (history preserves it), then delete in a follow-up commit.
 - Composes with `[ARCH-LAYER-008]` (correctness and merit drive the decision) and `[MOD-PACKAGE]`.
 

@@ -1,147 +1,166 @@
 ---
 name: ci-cd-workflows
-description: Design, change, or audit Swift Institute CI, reusable workflows, matrices, security, and cross-repository rollouts. Apply whenever CI behavior or workflow ownership changes.
+description: Design, change, audit, or converge Swift Institute CI, GitHub Actions, reusable workflows, matrices, security, and cross-repository policy. Apply whenever CI behavior, workflow ownership, or repository Actions posture changes.
 ---
 
 # CI/CD workflows
 
-CI is a centralized execution system, not a collection of copied repository
-scripts. This hub supplies the architecture and decision order. Load one
-companion only when its topic becomes active.
+CI is Institute infrastructure. Put reusable behavior and typed policy at the
+Institute owner first; packages compose those owners and never reimplement
+them.
 
 ## Ownership
 
 ### [CI-OWNER] Put each behavior at one executable owner
 
-Choose the narrowest owner whose change reaches every intended consumer:
-
 | Concern | Owner |
 | --- | --- |
-| universal build, test, format, lint, and docs behavior | Institute reusable workflow |
+| common build, test, format, lint, and docs behavior | universal Institute reusable workflow |
 | layer-specific verification | layer wrapper |
-| repository trigger and concurrency | thin consumer caller |
+| package event trigger and concurrency | whitelisted thin caller |
+| GitHub Actions structure and invocation policy | repository-policy Swift product |
 | Swift source predicate | swift-linter rule pack |
 | package graph or manifest predicate | owning Swift package-analysis product |
-| workspace facts and local orchestration | Workspace |
+| checkout facts and local orchestration | Workspace |
+| cross-repository convergence | `swift-institute-bot` |
 
-GitHub Actions YAML schedules and wires these owners. Custom validation logic
-must be implemented and tested in Swift, not embedded as Python, shell, or
-duplicated YAML expressions.
+GitHub Actions YAML schedules and connects these owners. It must not contain a
+second implementation of their policy.
 
-### [CI-CHAIN] Preserve the three-tier call chain
+### [CI-CHAIN] Preserve the three-tier execution chain
 
 ```text
-consumer caller → layer wrapper → universal reusable
+package thin caller → layer wrapper → universal reusable
 ```
 
-- The consumer owns events, concurrency, and a thin `uses:` job.
-- The layer wrapper adds only genuine layer behavior and transports secrets.
+- The package caller owns only admitted events, concurrency, and typed inputs.
+- The layer wrapper adds only a genuine invariant shared by the layer.
 - The universal reusable owns common jobs, matrix selection, and aggregation.
+- Authority sub-organizations enter through their parent layer wrapper; do not
+  add a fourth reusable-workflow tier.
 
-An authority sub-organization caller still enters through its parent layer
-wrapper; do not add a fourth reusable-workflow hop.
+### [CI-ACTIONS] Deny package-local Actions by default
 
-### [CI-CALLER] Consumers declare policy, never reimplement mechanics
+The repository-policy Swift product evaluates every workflow, local action,
+trigger, job, and `uses:` reference against a typed whitelist.
 
-A package caller may declare explicit inputs such as supported platform
-identity. It must not copy setup steps, choose tool versions, or shadow a
-central job. When a package needs behavior that other packages could use,
-change the shared owner first.
+Only three classes are admissible:
+
+1. an explicitly allowed package-local trigger with a thin caller;
+2. an explicitly allowed tool-owned reusable workflow or action;
+3. a typed, justified exemption with exact repository and path scope.
+
+Absence from the whitelist is a denial. Existing files, successful runs,
+another repository's configuration, and copied templates do not establish
+permission. Move denied behavior to the centralized owner or mediate it with
+`swift-institute-bot`.
+
+### [CI-BOT] Use the bot for fleet behavior
+
+`swift-institute-bot` is the default actor for cross-repository GitHub reads,
+writes, canaries, convergence, and receipts. A local or manual path is a
+bounded recovery or bootstrap exception, not a second operating model.
+
+The bot consumes the same typed repository policy used by local validation and
+central CI. It fails closed on unknown repository classes, workflow shapes,
+permissions, and exemptions.
 
 ## Designing a change
 
 ### [CI-PREDICATE] Promote deterministic prose to Swift
 
-When a skill sentence can be decided from source, manifests, repository files,
-or a dependency graph:
+When a sentence can be decided from source, manifests, workflow files,
+repository state, or a dependency graph:
 
-1. name the semantic owner;
-2. implement a Swift predicate there;
-3. add positive, negative, and exemption fixtures;
+1. identify the semantic owner;
+2. implement one typed Swift predicate there;
+3. add positive, negative, edge, and exemption fixtures;
 4. expose a stable diagnostic identifier;
-5. call it from the appropriate reusable workflow;
-6. remove duplicated procedural instructions from skills.
+5. invoke that exact executable from Workspace or centralized CI;
+6. remove the duplicated algorithm from skills and YAML.
 
-Use **swift-linter** for SwiftSyntax predicates and **modularization** plus
-**reuse-first** before creating a new analysis product.
+Use **swift-linter** for SwiftSyntax predicates. Use repository-policy for
+GitHub repository and Actions structure. Use Workspace for checkout,
+inventory, and cross-package facts.
 
-### [CI-PARITY] Local and hosted gates share the same executable boundary
+### [CI-PARITY] Local and hosted gates share an executable boundary
 
-Hosted CI and local verification must invoke the same Swift-owned behavior.
-`workspace package` owns local package operations. swift-linter owns source
-rules. A green substitute that evaluates a different predicate is not parity.
+Hosted CI and local verification invoke the same Swift-owned behavior.
+`workspace package` owns package operations; swift-linter owns source rules;
+repository-policy owns GitHub repository policy. A substitute implementation
+that checks a similar-looking condition is not parity.
 
-### [CI-EVIDENCE] A gate reports what actually ran
+### [CI-EVIDENCE] Report what actually ran
 
-Every aggregate job must fail when planning, setup, or a required child job
-fails. Advisory jobs are explicitly identified. Skipped jobs are not silently
-treated as full-contract evidence.
+Required aggregation fails when planning, setup, or any selected required job
+fails. Advisory posture is explicit. Skipped and unmeasured work is not
+described as green.
 
-For a CI claim, record the workflow, selected tier, toolchain, package,
-required/advisory posture, and run result.
+For a CI claim, record the workflow, selected tier, executable revision,
+toolchain, package, required/advisory posture, and result.
 
 ## Stable architecture decisions
 
-### [CI-MATRIX] The universal matrix is a scheduled platform contract
+### [CI-MATRIX] Keep the platform contract centralized
 
 The universal reusable owns the platform and toolchain contract. Ordinary
-pushes may run a smaller deterministic tier; tags, scheduled sweeps, and
+pushes may select a smaller deterministic tier; tags, scheduled sweeps, and
 explicit full dispatch run the full contract. Platform exclusions express
-package identity, never cost or convenience.
+package identity, never convenience or current consumer count.
 
-Load `matrix.md` when changing legs, runners, toolchains, tier selection,
-Embedded Swift, or platform declarations.
+Load `matrix.md` only when changing legs, runners, toolchains, scheduling
+tiers, Embedded Swift, or platform declarations.
 
-### [CI-SECRETS] Transport credentials explicitly across organization boundaries
+### [CI-SECRETS] Transport credentials explicitly
 
-`secrets: inherit` is useful only at a same-organization hop. Cross-organization
-hops explicitly forward the closed credential set. Token-holding workflows
-accept structured inputs and never caller-supplied shell.
+Same-organization calls may inherit secrets. Cross-organization calls forward
+the closed credential set explicitly. Token-holding workflows accept typed or
+closed inputs and never caller-supplied shell.
 
 Load `secrets-tokens.md` for visibility, private repositories, clean-room
-resolution, or credential transport.
+resolution, bot credentials, or credential transport.
 
-### [CI-CACHE] Cache immutable tools, not unresolved package graphs
+### [CI-CACHE] Cache immutable tools, not unresolved graphs
 
-Do not cache SwiftPM `.build` state for ordinary package jobs and do not use
-partial `restore-keys`. A versioned tool binary may use an exact immutable key.
+Do not cache ordinary SwiftPM `.build` state and do not use partial
+`restore-keys`. Versioned tool binaries may use exact immutable keys.
 `Package.resolved` remains generated and ignored.
 
-Load `caching.md` when changing caches, generated-state policy, linter binary
-distribution, or per-package format/lint configuration.
+Load `caching.md` for cache, generated-state, or binary-delivery changes.
 
-### [CI-SECURITY] Make dangerous workflow states unrepresentable
+### [CI-SECURITY] Make dangerous states unrepresentable
 
-Use least privilege, checksum downloaded binaries, pin security-sensitive
-actions by digest, and keep user-controlled strings out of privileged command
-execution.
+Use least privilege, verify downloaded artifacts, pin sensitive actions, keep
+untrusted strings out of privileged execution, and express local Actions
+permission through the whitelist rather than review convention.
 
-Load `security-hardening.md` for permissions, runner hardening, downloads,
-action pins, or elevated tokens. Load `workflow-authoring.md` for GitHub
-Actions parse-time and expression constraints.
+Load `security-hardening.md` for permissions, downloads, pins, or elevated
+tokens. Load `workflow-authoring.md` for GitHub expression and trigger
+constraints.
 
-### [CI-ROLLOUT] Central changes use a canary and measured fan-out
+### [CI-ROLLOUT] Change the owner, prove a canary, let the bot converge
 
-Before changing multiple repositories:
+For a cross-repository change:
 
-1. inspect dirty state and skip any affected repository;
-2. land and verify the semantic owner;
-3. prove one representative consumer;
-4. inspect the real diff;
-5. fan out only the minimal caller or configuration change;
-6. measure post-state and list skips.
+1. land and verify the reusable owner and typed policy;
+2. run positive, negative, and exemption fixtures;
+3. prove one representative canary;
+4. inspect the receipt and live readback;
+5. have `swift-institute-bot` converge the measured population;
+6. report skips, exemptions, and post-state.
 
-Visibility, tags, releases, archival, and destructive operations retain their
-separate approval gates. Load `mass-rollout.md` for multi-repository work.
+Preserve dirty repositories. Releases, tags, visibility, archival, and
+destructive operations keep their separate authority gates. Load
+`mass-rollout.md` for fleet work.
 
 ## Companion routing
 
 | Active decision | Load |
 | --- | --- |
-| tier placement or reusable call chain | `architecture.md` |
+| tier placement, thin callers, or Actions whitelist | `architecture.md` |
 | platforms, toolchains, runners, Embedded | `matrix.md` |
-| secrets, private repos, clean-room resolve | `secrets-tokens.md` |
-| permissions, downloads, pins | `security-hardening.md` |
+| secrets, bot credentials, private repos | `secrets-tokens.md` |
+| permissions, downloads, action pins | `security-hardening.md` |
 | cache and generated state | `caching.md` |
-| GitHub Actions syntax and expression traps | `workflow-authoring.md` |
-| multi-repository rollout | `mass-rollout.md` |
+| workflow syntax and expression phases | `workflow-authoring.md` |
+| cross-repository convergence | `mass-rollout.md` |

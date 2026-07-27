@@ -4,6 +4,21 @@ Load this reference for workflow syntax, expressions, composite actions, or
 parse/startup failures. These rules describe GitHub Actions interfaces; custom
 Institute predicates still belong in Swift.
 
+Before authoring YAML, confirm that repository-policy admits the exact local
+file class, triggers, and direct `uses:` references. GitHub accepting a
+workflow is not Institute permission to host it.
+
+### [CI-ACTIONS-AUTHOR] Author only admitted local surfaces
+
+Package repositories normally author one thin caller. Tool repositories may
+author only the reusable workflows or actions explicitly granted to that tool
+owner. Shared jobs, schedules, fleet checks, and cross-repository mutations
+belong in central workflows and `swift-institute-bot`.
+
+When a new local shape is legitimate, change the typed whitelist and its
+positive/negative/exemption fixtures before or with the YAML. Do not add a
+filename exception to a validator after the fact.
+
 ### [CI-070] Composite actions run as top-level steps
 
 A composite action is invoked from `steps`, never from inside shell iteration.
@@ -42,7 +57,8 @@ typed inputs explicitly before forwarding them. An event without the input is
 not equivalent to an asserted Boolean value.
 
 Prefer a planning job that converts event context into closed outputs consumed
-by later jobs.
+by later jobs. Repository-policy separately verifies that every declared
+trigger is admitted for that repository class.
 
 ### [CI-104] Exercise scheduled workflows through dispatch
 

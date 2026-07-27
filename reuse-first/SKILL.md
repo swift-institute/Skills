@@ -5,9 +5,10 @@ description: Find, select, expose, and compose existing Swift Institute capabili
 
 # Reuse first
 
-Treat the ecosystem as one composed library. A capability has one owner and
-every package either consumes that owner or contributes the missing lawful
-operation to it.
+Treat the ecosystem as one composed Institute. A capability or policy has one
+Institute owner and every package composes that owner or contributes the
+missing lawful operation to it. Package-local reimplementation is never the
+first disposition.
 
 This skill replaces static infrastructure catalogues. A copied catalogue
 drifts; source, manifests, Workspace facts, compiler behavior, and owning skills
@@ -33,6 +34,10 @@ Reuse the package that owns the vocabulary and laws. Do not choose a local copy
 because it is closer, easier to import, or avoids a dependency that the
 semantics genuinely require.
 
+For GitHub and CI behavior, search the Institute control plane and typed policy
+products before considering repository-local YAML or actions. Cross-repository
+operations default to `swift-institute-bot`.
+
 ### [REUSE-004] Expose instead of reproduce
 
 If the owner exists but the consumer cannot reach the capability, add the
@@ -54,9 +59,10 @@ layering, or specification boundaries. Redesign the call site when it does.
 ### [REUSE-007] Make recurrence mechanical
 
 When a duplicate or mechanism-shaped pattern can be recognized
-deterministically, add or extend a swift-linter rule and enforce it through
-centralized CI. Keep rationale and choice in skills; keep repeat detection out
-of them.
+deterministically, add or extend its typed owner: swift-linter for Swift source,
+Workspace for checkout/graph facts, or repository-policy for GitHub repository
+and Actions structure. Enforce it through centralized CI. Keep rationale and
+choice in skills; keep repeat detection out of them.
 
 ## Workflow
 

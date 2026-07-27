@@ -1,126 +1,106 @@
-# CI/CD — Secrets, Tokens, Visibility & Private-Repo Gates
+# CI secrets, bot credentials, and private repositories
 
-Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load when working on the public/private visibility gate, org-level tokens, cross-org secret transport, `secrets: inherit` vs explicit-forward, or how pre-publication CI gates are satisfied on this workspace's Free-plan private repos. This file reads independently: it collects the credential-transport and private-repo-signal rules.
+Load this reference when a call crosses organizations, a workflow mints a
+token, or a gate reads private repositories.
 
-**Rules in this file**: [CI-032], [CI-058], [CI-059], [CI-060], [CI-109], [CI-094], [CI-095], [CI-112]
+### [CI-032] Visibility is an explicit planning input
 
----
+The central planner resolves repository visibility and selects only supported
+work. A skipped private job is not evidence that its contract passed.
 
-## Visibility Gate
+Do not duplicate visibility expressions throughout jobs. Repository-policy and
+the planning job own the classification; required jobs consume the closed
+result.
 
-### [CI-032] Public/Private Visibility Gate
+### [CI-058] Private-repository support fails closed
 
-**Statement**: Every job in every intra-Institute reusable workflow carries `if: ${{ !github.event.repository.private }}` at the job level (simple form, or compound via `&&`). Excluded: pure `uses:`-only routing jobs (job-level `uses:` with no `steps:`/`runs-on:`) — the gate lives on the called workflow's real work job, not the routing shim; NARROWS [CI-080]'s pure-`uses:`-only routing exclusion (corrected 2026-07-05, Phase-3 review — the two are not a mirror: [CI-080]'s carve-out (`validate-harden-runner.py`) requires only the absence of `steps:`, while [CI-032]'s additionally requires the absence of `runs-on:` so the exemption stays narrower). A job carrying real work (`steps:`/`runs-on:`) is never treated as routing even if it also declares `uses:`.
+A reusable that supports private dependencies declares that capability in its
+typed contract. Missing credentials, an inaccessible dependency, or an
+unmeasured repository is a failure or explicit not-run result, never an
+anonymous fallback reported as green.
 
-**Enforcement**: Mechanical — `validate-visibility-gate.py` + `validate-visibility-gate.yml` (pilot 13 of `/promote-rule` 2026-05-14). Single-repo multi-file integrity check. Carve-outs: pure `uses:`-only routing jobs (structural — job-level `uses:` with no `steps:`/`runs-on:`; mirrors [CI-080]), `if: false` disabled jobs, non-`workflow_call:` workflows (out of scope). Self-firing ACTIVE; post-carve-out the true baseline of genuinely-ungated jobs is 0 on `swift-institute/.github`. Provenance: the 18 findings that surfaced 2026-07-03 were pure-routing `scan:` jobs in the `validate-*.yml` thin callers (each routes to `validate-base.yml`, whose real work job carries the gate), un-masked when the Slice-A `validate-base.yml` aggregation fix (`12c9d5a`) restored real finding counts. They were routing-job artifacts, not gate violations, and are resolved by the routing carve-out added here. Discipline: an internal audit record. [VERIFICATION: WF validate-visibility-gate.py]
+### [CI-059] Same-organization callers may inherit
 
-**Cross-references**: [CI-031], [CI-060], [CI-080]; an internal memory note.
+A package caller reaching a wrapper in the same organization may use
+`secrets: inherit`. Repository-policy validates that the hop is same-org and
+the caller is an admitted thin caller.
 
----
+### [CI-060] Do not duplicate long-lived repository secrets
 
-## Secrets & Tokens
+Production cross-repository authentication uses the
+`swift-institute-bot` GitHub App. Do not distribute a long-lived token to every
+repository or create a workstation admin token as a fleet mechanism.
 
-### [CI-058] Universal `enable-private-repos` Default True
+Where a legacy org secret remains during migration, central policy reports it
+as transitional state; new workflows do not make it a dependency.
 
-**Statement**: Any reusable workflow declaring an `enable-private-repos` input MUST default it to `true`; consumers opt OUT (rare public-only case) rather than opt IN.
+### [CI-109] Cross-organization hops forward a closed set
 
-**Enforcement**: Mechanical — `validate-input-defaults.py` + `validate-input-defaults.yml` (pilot 24 of `/promote-rule` 2026-05-14). Single-repo multi-file integrity check; PyYAML navigates `on.workflow_call.inputs.enable-private-repos.default` and fires if not literally `True`. Silent on workflows that don't declare the input. Covers the swift-institute/.github reusables (swift-ci.yml + swift-docs.yml) and swift-primitives/.github's swift-ci.yml. NOTE (2026-07-03, per CI-REVIEW dossier F34): the swift-standards/.github and swift-foundations/.github layer wrappers ALSO declare `enable-private-repos` (verified) and are currently OUTSIDE the validator's target set — a coverage gap tracked for follow-up (extend the validator's target list to the standards + foundations wrappers). Consumer-side redundant-pass-through check deferred — future composition into validate-thin-callers.py. Baseline 0/2 wrapper-host repos; self-firing ACTIVE. Discipline: an internal audit record. [VERIFICATION: WF validate-input-defaults.py]
+`secrets: inherit` does not transport organization secrets across an
+organization boundary. A cross-org call explicitly forwards only the secrets
+declared by the called workflow.
 
-**Cross-references**: [CI-031], [CI-032], [CI-059], [CI-060].
+The preferred fleet path avoids consumer-held credentials entirely: a central
+workflow mints a short-lived `swift-institute-bot` installation token scoped to
+the exact repositories and permissions, then invokes the typed Swift product.
 
----
+### [CI-BOT-TOKEN] Mint narrowly and late
 
-### [CI-059] `secrets: inherit` for Per-Repo Reusable Workflow Calls
+For every bot operation:
 
-**Statement**: Per-repo `ci.yml` `uses:` invocations of intra-Institute reusable workflows MUST include `secrets: inherit` in the same job; explicit per-secret forwarding and omission are both forbidden — for LAYER-ORG-hosted consumers. Sub-org-hosted consumers follow the sub-org caveat below.
+1. derive the exact repository population before minting;
+2. request only the permissions needed by the closed operation kind;
+3. mint per organization or narrower when supported;
+4. keep the token out of arguments, output, journals, and receipts;
+5. perform live readback with the same identity;
+6. let the short-lived token expire.
 
-**Sub-org caveat (principal-confirmed 2026-06-04, pattern (ii))**: consumers hosted in per-authority SUB-ORGS (the 11 L2 + 2 L3 orgs enumerated in [CI-004b]) are the exception: their hop 1 into the parent layer wrapper is itself cross-org, where `secrets: inherit` delivers no org secrets ([CI-109]). Sub-org thin callers therefore MUST explicit-forward the named private-dep credential set (`PRIVATE_REPO_TOKEN`, `SWIFT_INSTITUTE_BOT_APP_CLIENT_ID`, `SWIFT_INSTITUTE_BOT_APP_ID`, `SWIFT_INSTITUTE_BOT_APP_PRIVATE_KEY`) instead of `secrets: inherit` — values resolve in the consumer's own org context and survive the cross-org hop. (Validator support SHIPPED: `validate-thin-callers.py` accepts the explicit-forward shape for sub-org-hosted callers as of swift-institute/.github `d56e36a` (2026-06-04), matching [CI-004a]'s landed-note. The prior "aspirational / would fire on them today" parenthetical was doc-drift, corrected 2026-07-03 per CI-REVIEW dossier F9.)
+The App's installation ceiling and the token's requested permissions are both
+policy inputs. An unexpected permission or missing installation fails closed.
 
-**Enforcement**: Mechanical — `validate-thin-callers.py` + `validate-thin-callers.yml` (pilot 17 of `/promote-rule` 2026-05-14, compose-in-script with [GH-REPO-074] and [CI-030]). Per-job indentation walk requires same-job co-presence of `uses: <intra-Institute>` and `secrets: inherit`; distinguishes explicit-forwarding from omission for diagnostic clarity. Baseline 0/240 consumer repos; self-firing DEFERRED — `validate-thin-callers.yml` is `workflow_call`-only (no `push`/`pull_request` trigger); validated via the weekly `lint-validators-weekly` sweep only (manifest `self-firing: deferred`) (corrected 2026-07-03 per CI-REVIEW dossier F8). Sub-org explicit-forward acceptance: SHIPPED (`d56e36a`, 2026-06-04). Discipline: an internal audit record. [VERIFICATION: WF validate-thin-callers.py]
+### [CI-094] Private-package gates use the same local executable
 
-**Cross-references**: [CI-031], [CI-032], [CI-058], [CI-060], [CI-004b], [CI-109].
+When hosted private-repository CI cannot provide reliable signal, run the same
+Swift-owned executable locally through Workspace. Record the substitution and
+its scope. Do not replace the predicate with a text probe or a different local
+script.
 
----
+Build and test evidence uses:
 
-### [CI-060] Org-Level `PRIVATE_REPO_TOKEN` + Free-Plan Visibility Alignment
-
-**Statement**: `PRIVATE_REPO_TOKEN` lives as an org-level Actions secret with `--visibility all` on every ecosystem org that hosts CI-running consumer repos; per-repo `PRIVATE_REPO_TOKEN` secrets are forbidden as redundant. Free-plan constraint: org secrets inherit only to public repos — aligns with [CI-032] (private consumer repos skip jobs).
-
-**Enforcement**: Mechanical — `lint-org-bot-coverage.yml` axis 2 verifies org-level secret exists with `--visibility all` for each org in `orgs.yaml`; gap surfaces as tracking issue per [README-167]. Discipline: an internal audit record § [CI-060]. [VERIFICATION: WF lint-org-bot-coverage.yml axis 2]
-
-**Cross-references**: [CI-031], [CI-032], [CI-058], [CI-059].
-
----
-
-### [CI-109] Cross-Org Secret Transport (Explicit-Forward at Org Boundaries)
-
-**Statement**: Intra-Institute reusable-workflow call chains MUST carry secrets across org boundaries via explicit `secrets:` value-forwarding. `secrets: inherit` is same-org-only: a chain hop whose `uses:` target lives in a DIFFERENT org silently delivers no org-level secrets — jobs behave as if unsecreted, with no parse-time or run-time diagnostic. Chain-design corollary: hop 1 (consumer → wrapper) MUST be same-org so inherit lands the org secrets in the wrapper; every subsequent cross-org hop explicit-forwards the values. Sub-org-hosted consumers, whose hop 1 is itself cross-org, follow the [CI-059] sub-org caveat (explicit-forward at the thin caller).
-
-**Empirical basis**: byte-primitives run 26959288611 (2026-06-04), paired within one run, same org, same secrets: the docs job (consumer → swift-institute/.github cross-org, `secrets: inherit`) produced `Configured 0 git url rewrite rule(s)`; the matrix path (consumer → swift-primitives/.github same-org inherit → swift-institute/.github cross-org EXPLICIT) produced `Configured 4`. The configure-private-repos composite's `Configured N` echo is the canonical canary check for this rule.
-
-**Enforcement**: Architectural today — the layer wrappers (`<layer>/.github/.github/workflows/swift-ci.yml` + `swift-docs.yml`) carry the explicit `secrets:` blocks; consumers reach the universal only through them per [CI-004a] and [CI-031]. Mechanical candidate (queued): extend `validate-thin-callers.py` to fire on `uses: <other-org>/…` + `secrets: inherit` co-presence. [VERIFICATION: ARCH]
-
-**Rationale**: The gap is silent by construction — the empty-credential path degrades to anonymous fetch, which works for all-public dependency graphs and fails only when a private dep enters the graph (the 2026-06-04 public-cohort redness class). Encoding the transport rule prevents new chain edges from reintroducing the latent gap.
-
-
-**Cross-references**: [CI-001], [CI-004a], [CI-059], [CI-060].
-
----
-
-## Private-Repo CI Gates (Free-Plan)
-
-### [CI-094] Local Clean-Build Substitution for Private-Repo Gates
-
-**Statement**: On this workspace's Free-plan GitHub account (no billing configured), CI on private repositories does not produce reliable signal — private-repo minutes are constrained (2000/month default); exhausted minutes silently fail subsequent runs and absent billing there is no extension path. Any pre-publication CI gate that targets a private repo (e.g., [RELEASE-001] Phase 0 "CI green", [RELEASE-002] Phase 0) MUST be satisfied via local-equivalent verification, NOT via GitHub Actions output, until the visibility flip to public.
-
-**Local-equivalent substitution shape**:
-
-```sh
+```text
 workspace package build --fresh
 workspace package test --fresh
-# Run the same Swift-owned linter bundle that the reusable workflow invokes.
 ```
 
-Run the build/test pair from a clean git worktree when fresh compilation is
-required. Do not manufacture freshness by deleting generated state in a dirty
-working tree.
+Source and repository policy use their owning Swift products. A local green is
+not a hosted matrix result; describe exactly which contract it proves.
 
-The release brief's Phase 0 verification section MUST document the substitution so the next reviewer can confirm the gate cleared via local-equivalent.
+### [CI-095] Distinguish activation from alignment
 
-**Visibility flip ordering**: the visibility-flip-to-public is a CI-activation step in addition to a launch step. Sequence the flip just before the tag, AFTER local equivalents are clean. Per-action authorization still applies to the flip itself (settings.json gate).
+Repository-policy may validate configuration across public and private
+repositories even when hosted execution runs only on a subset. Report these as
+separate populations:
 
-**Failure-mode discipline**: any "CI failure" on a private repo is billing-constraint UNTIL proven otherwise. Read the run logs to confirm (minutes-exhausted vs actual error) — default suspicion is billing. Treating billing-constraint failures as code defects burns dispatches chasing nothing.
+- **activation** — repositories where the hosted gate actually ran;
+- **alignment** — repositories whose checked-in configuration matches policy.
 
+Never add the populations or call alignment a CI pass.
 
-**Cross-references**: [CI-052] (visibility/tag explicit-authorization), [CI-095] (the surface-distinction companion), [RELEASE-001], [RELEASE-002].
+### [CI-112] Clean-room resolution is non-substitutable
 
----
+A claim that a package resolves off-machine requires an actual clean,
+mirror-bypassed resolve from canonical sources. Reachability probes and a
+mirror-backed build are different evidence.
 
-### [CI-095] Rule-Activation Surface vs Bookkeeping Surface
+Run the resolve through the coordinator and keep `Package.resolved` generated.
+Central CI and local verification use the same manifest-owned operation.
 
-**Statement**: The `swift-ci.yml` reusable workflow's job-level `if: ${{ !github.event.repository.private }}` causes all consumer-orchestrated CI jobs to skip on private repositories. Rollout-strategy planning and blast-radius estimation MUST distinguish two surfaces:
+## Review checklist
 
-| Surface | Population | What CI activity fires |
-|---------|------------|------------------------|
-| Rule-activation | Public packages only (e.g., currently 4 in swift-primitives — swift-carrier-primitives, swift-tagged-primitives, swift-ownership-primitives, swift-property-primitives) | New rule-tier additions immediately affect these on next CI run |
-| Bookkeeping / alignment | All sub-packages (132+ in swift-primitives) | Local config alignment maintained; produces no rule-firing CI signal under current configuration |
-
-"Broad rollout" framing implies wide CI signal; under the private-no-CI gate, broad-rollout describes alignment, not activation. Phase-2+ rule-addition decisions MUST be made considering only public-package CI signal as the active diagnostic surface; the private-package surface is currently inert as a diagnostic.
-
-**Dispatch-surface rider (2026-07-03)**: the `!github.event.repository.private` gate evaluates against the ORCHESTRATING/triggering repo (the repo whose event fired the run), not the dependency target. For the consumer-orchestrated surface tabled above, that repo IS the consumer, so a private consumer's jobs skip. The centrally-dispatched surface is different: `ci-dispatch.yml` (added 2026-07-03, runs from the PUBLIC `swift-institute/.github`) fires with the public hub as the triggering repo, so its jobs are NOT subject to the private-skip — they run. A private dispatch target is therefore not silenced at the gate; it instead fails downstream at the target checkout (private-repo access), a distinct failure mode from the silent gate-skip. Rollout planning MUST account for both: the gate protects consumer-orchestrated runs, not centrally-dispatched ones. See [CI-032] (the gate itself) and [CI-096] (public-hub dispatch = free Actions minutes).
-
-**Composes with [CI-094]**: pre-publication gates on private packages substitute local-equivalent (per [CI-094]); the activation/bookkeeping distinction is the framing-level companion that describes WHY the substitution is needed and WHEN the gate will eventually clear via real CI signal (post-visibility-flip).
-
-
-**Cross-references**: [CI-032] (the visibility gate itself), [CI-094], [CI-052], [CI-096], `project_per_repo_vs_centralized_ci.md`.
-
----
-
-### [CI-112] Clean-Room (Mirror-Bypassed) Resolve Is a Non-Substitutable Off-Machine Gate
-
-**Statement**: A gate that asserts a package "resolves from scratch" / off-machine (publication, public-flip, closure re-verify) MUST be satisfied by an ACTUAL mirror-bypassed resolve in a fresh clone or worktree — never by substitute proofs (`grep` + `git ls-remote` reachability + a mirror-backed resolve) declared "equivalent." Only the mirror-bypassed resolve catches empty/unpushed dependency repositories and off-machine package identity ([PKG-DEP-008]). A mirror-backed resolve proves only the local graph. Locally, use the `swift-package-build` coordinator with an explicit empty SwiftPM configuration path and ambient authentication; do not move the user's mirror configuration, inject a temporary HOME, or edit `Package.resolved`. CI performs the same manifest-based resolve on its clean runner.
-
-**Enforcement (CI-runner form, LANDED)**: `clean-room-resolve.yml` on the public hub (/promote-rule 2026-07-06) — weekly + dispatch, matrix over the heaviest consumer roots, per-org bot-token `insteadOf` injection, a clean-runner manifest resolve, and a guard that rejects any tracked `Package.resolved`. The workflow never deletes, stages, or inspects individual pins. ADVISORY during soak (`gating=false`); flip gating before any publication flip. Discipline: an internal audit record. [VERIFICATION: WF]
-
-
----
+- cross-repository mutations route through `swift-institute-bot`;
+- no long-lived admin token is created or copied;
+- every cross-org secret is explicitly declared and forwarded;
+- token permissions and repository scope are closed and minimal;
+- missing private access is a failure/not-run state, not a silent fallback;
+- local substitution invokes the same Swift predicate;
+- activation and alignment populations are reported separately.
