@@ -1,0 +1,14 @@
+{
+  "name": "social-preview-uploader",
+  "version": "0.1.0",
+  "description": "Vendored Playwright uploader for GitHub social preview images. Accepts pre-rendered PNGs via --image.",
+  "private": true,
+  "main": "upload.js",
+  "scripts": {
+    "init-auth": "node upload.js init-auth",
+    "postinstall": "playwright install chromium"
+  },
+  "dependencies": {
+    "playwright": "^1.50.0"
+  }
+}

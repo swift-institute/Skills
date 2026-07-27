@@ -1,7 +1,7 @@
 ---
 name: social-preview
 description: |
-  GitHub social preview cards: parametric chassis, org brand in metadata.yaml's socialPreview block, local render+upload via Scripts/social-preview.sh.
+  GitHub social preview cards: parametric chassis, org brand in metadata.yaml's socialPreview block, local render+upload via this skill's social-preview.sh.
   Apply when adding preview cards, modifying the chassis, or adding an org brand variant.
 
 layer: implementation
@@ -52,7 +52,7 @@ access, broader privilege than `admin:org`) and **cannot live in CI
 secrets** — anyone with workflow-write on a shared infrastructure repo
 could exfiltrate it.
 
-Consequence: deployment is local-only. The `Scripts/social-preview.sh`
+Consequence: deployment is local-only. The `./social-preview.sh`
 script renders + uploads from the maintainer's laptop using the maintainer's
 existing browser session. Same privilege as manually clicking "Edit" in the
 Settings UI; no new attack surface.
@@ -63,7 +63,7 @@ Settings UI; no new attack surface.
 
 **Statement**: Social preview deployment MUST run locally on a
 maintainer's machine, never in CI. The vendored Playwright uploader at
-`swift-institute/Scripts/social-preview-uploader/` uses a
+`social-preview-uploader/` (in this skill's directory) uses a
 `user_session`-cookie-based authentication that is password-equivalent
 and MUST NOT be stored in shared CI secrets.
 
@@ -286,7 +286,7 @@ GitHub-served `og:image` hash, NOT vs an in-repo PNG.
 ### [SOC-007] Vendored Uploader
 
 **Statement**: The Playwright-based uploader at
-`swift-institute/Scripts/social-preview-uploader/` is vendored from
+`social-preview-uploader/` (in this skill's directory) is vendored from
 [AnswerDotAI/gh-social-preview](https://github.com/AnswerDotAI/gh-social-preview)
 (ISC license) with the README-screenshot logic stripped. It accepts a
 pre-rendered PNG via `--image`, which the upstream tool does not.
@@ -307,7 +307,7 @@ from the S3 CDN.
 If any of (1)–(3) fail, the upload was incomplete and must be re-run.
 
 **Cross-references**: upstream commit at AnswerDotAI/gh-social-preview that
-this is based on; vendor file: `Scripts/social-preview-uploader/upload.js`.
+this is based on; vendor file: `social-preview-uploader/upload.js`.
 
 ---
 
@@ -387,7 +387,7 @@ the script level — a maintainer may pass any repo name — but a private-repo
 target will fail at the upload step with the selector timeout above.
 **Pre-publication card prep is not possible**: a repo must be public at
 the moment of upload. The workflow is: (1) flip the repo public, (2) run
-`Scripts/social-preview.sh <owner>/<repo>` immediately after.
+`./social-preview.sh <owner>/<repo>` immediately after.
 
 **Forbidden anti-pattern**: do not flip a repo public for the sole purpose
 of deploying its card. Wait until the repo is being published for its own
@@ -411,7 +411,7 @@ incorrect and has been removed.
 ### One-time setup
 
 ```bash
-cd ~/Developer/swift-institute/Scripts/social-preview-uploader
+cd ./social-preview-uploader
 npm install                # installs Playwright + downloads Chromium (~150 MB)
 node upload.js init-auth   # opens browser; log in to github.com; session saved
 ```
@@ -419,7 +419,7 @@ node upload.js init-auth   # opens browser; log in to github.com; session saved
 ### Single repo (render + upload)
 
 ```bash
-~/Developer/swift-institute/Scripts/social-preview.sh swift-primitives/swift-buffer-primitives
+./social-preview.sh swift-primitives/swift-buffer-primitives
 ```
 
 ~7-10 sec total: render (50 ms) + Playwright launch (~5 sec) + upload + networkidle wait.
@@ -427,7 +427,7 @@ node upload.js init-auth   # opens browser; log in to github.com; session saved
 ### Single repo (render only, manual upload via Settings UI)
 
 ```bash
-~/Developer/swift-institute/Scripts/social-preview.sh --no-upload swift-primitives/swift-buffer-primitives
+./social-preview.sh --no-upload swift-primitives/swift-buffer-primitives
 # Auto-opens Finder (with PNG selected) + Settings → Social preview tab.
 # Drag PNG into upload area; click Save changes.
 ```
@@ -435,7 +435,7 @@ node upload.js init-auth   # opens browser; log in to github.com; session saved
 ### Org-wide backfill
 
 ```bash
-~/Developer/swift-institute/Scripts/social-preview.sh --backfill swift-primitives
+./social-preview.sh --backfill swift-primitives
 ```
 
 Iterates every public swift-* repo in the org, render + upload each
@@ -470,7 +470,7 @@ Backfill each sub-org separately:
 ```bash
 for org in swift-standards swift-ietf swift-iso swift-ieee swift-iec \
            swift-w3c swift-whatwg swift-ecma swift-incits; do
-  ~/Developer/swift-institute/Scripts/social-preview.sh --backfill "$org"
+  ./social-preview.sh --backfill "$org"
 done
 ```
 
@@ -482,7 +482,7 @@ done
 3. Commit + push.
 4. Re-render and re-upload that one repo:
    ```bash
-   ~/Developer/swift-institute/Scripts/social-preview.sh <owner>/<package>
+   ./social-preview.sh <owner>/<package>
    ```
 
 See [SOC-010] for the override decision rule (when to override vs. when
@@ -585,7 +585,7 @@ swift-institute/Scripts/
 
 ```bash
 # After tuning constants (e.g., pane width 0.70 → 0.74):
-Scripts/social-preview.sh --backfill <org> --no-upload
+./social-preview.sh --backfill <org> --no-upload
 
 # Then dispatch multimodal subordinate agent against the rendered cohort:
 # Brief shape: "you are a senior visual designer obsessed with margin
@@ -616,3 +616,10 @@ The 2026-05-08 social-preview rollout went through 3 estimator iterations. Itera
 - Internal: `swift-institute/Research/social-preview-cards-ecosystem-strategy.md`
 - Internal: `swift-institute/Skills/github-repository/SKILL.md`
 - Internal: `swift-institute.org/avatars/avatar-{primitives,standards,foundations,institute}.svg`
+
+## Provenance
+
+`social-preview.sh` and `social-preview-uploader/` moved into this skill folder
+2026-07-27 from the dissolving private `swift-institute/Scripts` repo, so the
+instrument lives beside its user. Run them from this directory. A Swift
+replacement is queued per the Full-Swift end-state.
