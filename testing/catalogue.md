@@ -1029,7 +1029,7 @@ In both rows the masking is structural, not statistical: the default state satis
 
 ### [TEST-036] Clean Build Is the Gate of Record for `canImport`-Gated Suites
 
-**Statement**: A gate whose evidence covers `#if canImport(...)`-conditioned test suites MUST run from a clean git worktree after `swift-build package clean`; direct `.build` deletion is forbidden. `canImport` conditions do NOT re-evaluate on incremental builds: a suite rejoined by a dependency change stays silently EXCLUDED from a green incremental run, so the run under-counts without failing.
+**Statement**: A gate whose evidence covers `#if canImport(...)`-conditioned test suites MUST run from a clean git worktree after `workspace package clean`; direct `.build` deletion is forbidden. `canImport` conditions do NOT re-evaluate on incremental builds: a suite rejoined by a dependency change stays silently EXCLUDED from a green incremental run, so the run under-counts without failing.
 
 **Procedure**: clean-build for the gate of record; incremental runs are development convenience only. Where suite counts are the claim, the count comparison MUST come from the clean log.
 
@@ -1039,7 +1039,7 @@ In both rows the masking is structural, not statistical: the default state satis
 
 ### [TEST-037] The Carved TSan Gate
 
-**Statement**: TSan legs on packages whose dependency closure carries `~Copyable & ~Escapable` lifetime-dependent accessor projections run under the CARVED invocation — `swift-build package test -- --sanitize=thread --scratch-path .build-tsan -Xswiftc -Xllvm -Xswiftc -sil-disable-pass=lifetime-dependence-diagnostics` — subject to ALL of:
+**Statement**: TSan legs on packages whose dependency closure carries `~Copyable & ~Escapable` lifetime-dependent accessor projections run under the CARVED invocation — `workspace package test --argument=--sanitize=thread --argument=--scratch-path --argument=.build-tsan --argument=-Xswiftc --argument=-Xllvm --argument=-Xswiftc --argument=-sil-disable-pass=lifetime-dependence-diagnostics` — subject to ALL of:
 
 1. The carve appears in INVOCATIONS ONLY — never in manifests or sources.
 2. The unsanitized debug+release legs of the same gate sequence remain the gate of record for compiler warnings AND lifetime diagnostics (no source can land that fails them).

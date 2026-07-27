@@ -363,7 +363,7 @@ section structural rule this workflow targets), [README-160]
 | Example shape | Validation discipline |
 |---------------|------------------------|
 | Single type, ≤2 method calls (e.g., `UUID().uuidString`) | `swiftc -parse` is sufficient |
-| Composed example (≥2 ecosystem types) | (a) Cite real call-site for each composed type, OR (b) extract to a scratch SwiftPM package and run `swift-build package build` |
+| Composed example (≥2 ecosystem types) | (a) Cite real call-site for each composed type, OR (b) extract to a scratch SwiftPM package and run `workspace package build` |
 | Quick Start examples (high-visibility, evaluator-facing) | (b) — full build, regardless of complexity |
 | Code blocks inside narrative (lower-visibility) | (a) — real call-site citation per composed type |
 

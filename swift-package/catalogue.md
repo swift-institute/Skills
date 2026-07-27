@@ -800,7 +800,7 @@ variable isolation in negative experiments.
 **How to apply**:
 1. Candidate = a top-level `.package` with zero `.product(name:, package:<id>)` references across all targets (the vestigial transitive-collision-override signature that pre-canonicalization overrides leave behind; preserve deliberate Test Support spine edges per `[TEST-021]`).
 2. Grep the consumer's `Sources/`+`Tests/` for `import <Module>` of each candidate's vended modules (comment-masked). Any hit ⇒ ADD-PRODUCT (declare the missing `.product` on the importing target); do NOT prune.
-3. No hit ⇒ prune in a clean worktree, then run `swift-build package resolve` and `swift-build package build`; confirm both are green and inspect SwiftPM's resolved graph when transitive retention matters.
+3. No hit ⇒ prune in a clean worktree, then run `workspace package resolve` and `workspace package build`; confirm both are green and inspect SwiftPM's resolved graph when transitive retention matters.
 4. The determination is per-package and empirical — a workflow's aggregate LLM pass is not a substitute for the per-consumer grep.
 
 

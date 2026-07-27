@@ -27,7 +27,7 @@ has direct consequences for collections ([SPI-010]) that a single-org project ne
 ### [SPI-001] Listing Prerequisites
 
 **Statement**: A package MUST NOT be submitted to SPI until ALL hold: (1) the repo is
-public; (2) it has at least one semantic-version git tag; (3) `swift-build package dump-package`
+public; (2) it has at least one semantic-version git tag; (3) `workspace package dump-package`
 emits valid JSON on the launch toolchain; (4) its **entire** dependency closure is itself
 public, tagged, and declared in URL form.
 
