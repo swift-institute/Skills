@@ -37,7 +37,7 @@ CI/CD is organized as a three-tier reusable-workflow chain per [CI-001]. This to
 | 2 — Layer wrapper | `<layer>/.github/.github/workflows/swift-ci.yml` (+ `swift-docs.yml`) | layer-specific verifications; secret transport across org boundaries | [CI-004], [CI-004a], [CI-003] |
 | 3 — Universal reusable | `swift-institute/.github/.github/workflows/swift-ci.yml` | the universal build/test matrix + ecosystem-wide format/lint gates | [CI-002], [CI-010], [CI-054] |
 
-Three cross-cutting axioms frame the rest: the matrix is the platform contract, never derived from any package ([CI-091]) — its SHAPE is sacred, while its per-push SCHEDULING is tiered per [CI-115] (lint/build per push; full contract at tag refs and the nightly `ci-sweep` rotation); CI on this Free-plan workspace fires only on public repos, so **correctness > security > speed** and dollar/minute cost is not an axis ([CI-096], [CI-032], [CI-060]); and runner CONCURRENCY (5 macOS / 20 total per free-plan org) IS a real speed-axis budget — the [CI-096] amendment 2026-07-20 — which is why full-matrix breadth is scheduled, not per-push.
+Three cross-cutting axioms frame the rest: the matrix is the platform contract, never derived from any package ([CI-091]) — its SHAPE is sacred, while its per-push SCHEDULING is tiered per [CI-115] (lint plus one supported release build per push; full contract at tag refs and the nightly `ci-sweep` rotation); CI on this Free-plan workspace fires only on public repos, so **correctness > security > speed** and dollar/minute cost is not an axis ([CI-096], [CI-032], [CI-060]); and runner CONCURRENCY (5 macOS / 20 total per free-plan org) IS a real speed-axis budget — the [CI-096] amendment 2026-07-20 — which is why full-matrix breadth is scheduled, not per-push.
 
 ---
 
@@ -85,8 +85,8 @@ One-line hooks for every rule. Load the linked file when the topic is active.
 | [CI-012] | Linux runs in `swift:6.3` / nightly Docker containers; bare-runner install forbidden |
 | [CI-013] | macOS `macos-26` + Xcode 26.4; Windows `windows-latest` + SwiftyLab/setup-swift (SHA-pinned) |
 | [CI-091] | Uniform-platform-matrix doctrine — the matrix is the platform contract, never derived from `platforms:` (platform-identity carve-out: [CI-114]) |
-| [CI-114] | Platform-identity CI declaration — never CI-gate a package on a platform its identity excludes; `platform-support` input; platform emulation to green a leg forbidden |
-| [CI-115] | Tiered verification scheduling — plan job selects lint/build/full per push; full contract at tags + nightly ci-sweep rotation; ci-ok attests the selected tier |
+| [CI-114] | Platform-identity CI declaration — never CI-gate a package on a platform its identity excludes; `platform-support` input with fail-closed token validation; platform emulation to green a leg forbidden |
+| [CI-115] | Tiered verification scheduling — build selects one declared-supported release leg (Linux, then Windows, then macOS); full contract at tags + nightly ci-sweep rotation; ci-ok attests the selected tier |
 | [CI-092] | `swift:6.3` image is minimal — no curl/python3/gh; default shell is `sh -e`, not bash |
 | [CI-020] | Embedded buildability is an L1 invariant — every L1 package builds under `-enable…Embedded` |
 | [CI-021] | `embedded` job carries `continue-on-error: true` during the main-nightly window |

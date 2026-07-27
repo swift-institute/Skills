@@ -84,7 +84,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 - **NOT a cost knob** — [CI-096] unchanged; cost is not an axis. A declaration is justified by platform identity ONLY, never by "no consumers on X" or "save cycles."
 - **NOT matrix derivation** — [CI-091]'s rejection of deriving the matrix from `Package.swift` `platforms:` stands. The declaration is an explicit CI-level statement in the thin caller, diff-visible and reviewed like any workflow change.
-- **Default-inert** — a package that declares nothing gets the full matrix; [CI-091] holds unchanged for every non-declaring package.
+- **Default-inert** — a package that declares nothing keeps every platform leg eligible for the full tier and retains Linux as its ordinary build leg; [CI-091] holds unchanged for every non-declaring package.
 - **Quality gates unaffected** — format / lint / swift-linter / advisory linters are platform-neutral and never consult the declaration.
 - **Dispatch unaffected** — ci-dispatch.yml passes no declaration, so single-job dispatch can still force any leg on any package (debug surface preserved).
 
@@ -92,7 +92,7 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Evidence**: proven on a real run 2026-07-14 — swift-iso/swift-iso-9945 run 29320018487 (`4f7754f`): `windows-release` **skipped** via the declaration; every other leg enumerated identically vs the pre-mechanism baseline run 29315907291 (`06fc4b2`).
 
-**Enforcement**: Architectural — the universal reusable's six platform-leg `if:` guards consult `inputs.platform-support` (`swift-institute/.github/.github/workflows/swift-ci.yml`, threaded through all three layer wrappers; empty default reproduces the pre-input matrix bit-identically). Declaration legitimacy review is human (the `with:` block is diff-visible in the thin caller). Mechanical enforcement (validate that declarations appear only on identity-qualified packages) is a `/promote-rule` candidate.
+**Enforcement**: Architectural — the universal reusable's plan rejects unknown, duplicate, or empty `platform-support` family tokens before selecting a tier. Its six platform-leg `if:` guards consult the validated declaration, and the ordinary `build` tier uses the same declaration to select one supported release leg (`linux-release` when Linux is declared, otherwise `windows-release` when Windows is declared, otherwise `macos-release`; an empty declaration preserves the Linux default). The universal lives at `swift-institute/.github/.github/workflows/swift-ci.yml`, with the input threaded through all three layer wrappers. Declaration legitimacy review is human (the `with:` block is diff-visible in the thin caller). Mechanical enforcement (validate that declarations appear only on identity-qualified packages) is a `/promote-rule` candidate.
 
 
 **Cross-references**: [CI-091] (amended with this carve-out), [CI-099] (windows-release stays gating for every package that targets Windows), [CI-010], [CI-096], [CI-031]; **platform** [PLAT-ARCH-001], [PLAT-ARCH-004].
@@ -104,10 +104,10 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 **Statement** (R1/R2 principal ruling 2026-07-20): the universal `swift-ci.yml` selects a verification TIER per run via its `plan` job; the matrix SHAPE ([CI-010]/[CI-091]) is unchanged — every leg stays defined in the universal, and the `full` tier runs all of them.
 
 - **lint** — `format` + `lint` + `swift-linter` (Linux-only; ~90–120s wall-clock). Selected by the `[ci lint]` commit token or automatically when the pushed range touches only docs/metadata/lint-config classes (`*.md`, `LICENSE*`, `CITATION*`, `.gitignore`, `.spi.yml`, `Lint.swift`, `Lint/*`, `.swiftlint.yml`, `.swift-format`, `*.docc/*` — deliberately NOT `.github/*`: a caller-workflow edit changes CI behavior and rides the build tier, 2026-07-20).
-- **build** — lint tier + `linux-release`. The DEFAULT for ordinary pushes and PRs; any classification obstacle (force-push zeros, unfetchable before-SHA) fails safe to build.
+- **build** — lint tier + one release leg that the caller supports. The deterministic priority is Linux, then Windows, then macOS; an empty declaration preserves the historical `linux-release` default. A Windows-only package therefore runs `windows-release` — and no Linux or macOS build — on an ordinary push. The tier is the DEFAULT for ordinary pushes and PRs; any classification obstacle (force-push zeros, unfetchable before-SHA) fails safe to build.
 - **full** — the complete platform contract including the advisory legs. Unconditional on tag refs; forced by `[ci full]`, consumer `workflow_dispatch`, and `ci-sweep.yml` (`tier: full`).
 
-Selection mechanics: the `plan` job classifies (forced `tier` input > tag ref > commit token > dispatch > diff classification > build default), emits a `legs` CSV output, and every leg's `if:` guard composes `!cancelled()` + the job-selector disjunct + a `contains()` check on `legs` (same guard family as `platform-support`). `plan` sits in `ci-ok`'s `needs:` so a plan failure (identity conflict, classifier error) fails the run even though every leg skips; tier-skipped legs pass via the pre-existing skipped-as-passing semantics. **`ci-ok` therefore attests "the SELECTED tier passed"; the full-contract attestation lives at tag refs and the nightly sweep.** Single-job dispatch bypasses the plan (`inputs.job != ''` → plan skips; the leg's job-selector disjunct fires), preserving ci-dispatch's exactly-one-job property.
+Selection mechanics: the `plan` job validates the platform declaration, classifies (forced `tier` input > tag ref > commit token > dispatch > diff classification > build default), emits a `legs` CSV output, and every leg's `if:` guard composes `!cancelled()` + the job-selector disjunct + a `contains()` check on `legs` (same guard family as `platform-support`). For the `build` tier, the plan derives only the release-leg choice from the explicit CI declaration — never from `Package.swift`. `plan` sits in `ci-ok`'s `needs:` so a plan failure (identity conflict, classifier error, or malformed platform declaration) fails the run even though every leg skips; tier-skipped legs pass via the pre-existing skipped-as-passing semantics. **`ci-ok` therefore attests "the SELECTED tier passed"; the full-contract attestation lives at tag refs and the nightly sweep.** Single-job dispatch bypasses the plan (`inputs.job != ''` → plan skips; the leg's job-selector disjunct fires), preserving ci-dispatch's exactly-one-job property.
 
 **Scheduled sweep**: `ci-sweep.yml` (swift-institute/.github; nightly 02:11 UTC) partitions the public fleet into `slices` buckets (default 7) by stable name-hash and runs `tier: full` on tonight's bucket via a matrix `uses:` of the universal — every repo gets full-contract verification at least weekly, under swift-institute's own runner quota (never competing with consumer-push queues). Failures aggregate into a rolling tracking issue on swift-institute/.github. Canary/manual: `gh workflow run ci-sweep.yml -f repos="owner/name"`.
 
@@ -115,7 +115,7 @@ Selection mechanics: the `plan` job classifies (forced `tier` input > tag ref > 
 
 **Campaign token policy** (compliance-push discipline, 2026-07-20): do NOT put `[ci lint]` on pushes whose diff touches `Sources/`/`Tests/` — a mechanical lint fix that does not compile is exactly what the default build tier exists to catch, on the uncontended Linux pool, in a few minutes. Reserve `[ci lint]` for pushes that cannot break compilation (docs, metadata, `Lint.swift`/lint-config tuning); those classes auto-select lint anyway, so the token is normally redundant. The plan job reads the token from the HEAD commit of the push only.
 
-**What this does NOT change**: matrix shape and toolchain pins ([CI-010]–[CI-013]); the [CI-091] shape doctrine and [CI-114] carve-out; [CI-099]'s Windows gating posture (Windows gates whenever it runs — full tier and tags); quality gates run in EVERY tier.
+**What this does NOT change**: matrix shape and toolchain pins ([CI-010]–[CI-013]); the [CI-091] shape doctrine and [CI-114] carve-out; [CI-099]'s Windows gating posture (Windows gates whenever it runs — including the ordinary build tier for Windows-only packages); quality gates run in EVERY tier.
 
 **Cross-references**: [CI-010], [CI-091] (amended), [CI-096] (amended), [CI-114] (guard-mechanism precedent), [CI-104] (sweep canary discipline), [CI-108] (centralize-on-schedule). Implementation: `swift-institute/.github/.github/workflows/swift-ci.yml` (`plan` job), `ci-sweep.yml`. Source authority: `swift-institute/Research/ci-tiered-verification.md` (R1/R2 ruling record + measurements).
 
@@ -183,4 +183,3 @@ Selection mechanics: the `plan` job classifies (forced `tier` input > tag ref > 
 **Cross-references**: [CI-010], [CI-096], [CI-105], [CI-114]; an internal memory note.
 
 ---
-
