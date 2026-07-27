@@ -165,7 +165,7 @@ One-line hooks for every rule. Load the linked file when the topic is active.
 - **readme/ci-automation** ([README-160]–[README-167]) — README-related CI workflows (presence sweeps, structure linters, badge validators, inventory generation). Different workflow class from this skill's build/test/lint family; both follow [README-167]'s tracking-issue reporting shape.
 - **swift-package-build** ([PKG-BUILD-*]) — operational build instructions (TOOLCHAINS env var, Linux Docker, Embedded source-guard pattern). The CI containers in [CI-012] and the embedded job in [CI-020] exercise these operations.
 - **primitives** [PRIM-FOUND-001] — the Foundation-free invariant manifested in CI as [CI-022].
-- **swift-institute** [ARCH-LAYER-*] — five-layer architecture; layer wrappers in [CI-001] correspond to L1–L4 layers.
+- **swift-institute** [ARCH-LAYER-*] — five-layer architecture; current layer wrappers in [CI-001] correspond to the realised L1–L3 layers, and an L4 wrapper follows only a whole-layer stand-up.
 
 ### Source authority (research)
 

@@ -34,14 +34,14 @@ How to create documents — HTML pages, PDFs, and markdown-rendered content — 
 | Goal | Import | Layer |
 |------|--------|-------|
 | Generate HTML pages | `import HTML` | L3 (swift-foundations) |
-| Generate PDFs from HTML content | `import PDF` | L4 (swift-foundations/swift-pdf) |
+| Generate PDFs from HTML content | `import PDF` | L3 (swift-foundations/swift-pdf) |
 | Generate PDFs directly (low-level) | `import PDF_Rendering` | L3 (swift-foundations) |
 | Render Markdown as HTML | `import HTML` | L3 (includes Markdown_HTML_Rendering) |
-| Render Markdown as PDF | `import PDF` | L4 (includes HTML + PDF_HTML_Rendering) |
+| Render Markdown as PDF | `import PDF` | L3 (includes HTML + PDF_HTML_Rendering) |
 
 **Package dependency chain**:
 ```
-swift-pdf (L4)
+swift-pdf (L3)
   └─ swift-pdf-html-rendering (L3)     HTML → PDF bridge
        ├─ swift-pdf-rendering (L3)      PDF.View, PDF.Context, PDF.Document
        └─ swift-html-rendering (L3)     HTML.View, HTML.Context
@@ -678,14 +678,14 @@ let document = PDF.Document { h1 { "Hello" } }
 // To byte array
 let bytes = [UInt8](document)
 
-// Write to file (via swift-pdf L4)
+// Write to file (via swift-pdf, L3)
 try document.write(
     to: File("/path/to/output.pdf"),
     options: .init(createIntermediates: true)
 )
 ```
 
-**Rationale**: `[UInt8](document)` is the primary serialization path. File writing is available through the L4 `swift-pdf` package which re-exports `File_System`.
+**Rationale**: `[UInt8](document)` is the primary serialization path. File writing is available through the L3 `swift-pdf` foundation package which re-exports `File_System`.
 
 ---
 

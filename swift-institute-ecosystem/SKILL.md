@@ -196,7 +196,7 @@ swift-{authority}/swift-{spec-id}           ← spec-direct packages
 |------|---------|
 | **Foundation** (Apple's) | Apple's `Foundation` framework — explicitly NOT used in any layer's main target. |
 | **Foundations** (layer) | L3 of the ecosystem — composed building blocks. Distinct from Apple's Foundation framework. |
-| **Layer** | One of five architectural positions (L1 Primitives, L2 Standards, L3 Foundations, L4 Components reserved, L5 Applications reserved). Each is its own GitHub org. |
+| **Layer** | One of five architectural positions (L1 Primitives, L2 Standards, L3 Foundations, L4 Components reserved, L5 Applications reserved). Each realised layer has its own GitHub org; L4/L5 have none until deliberately stood up. |
 | **Tier** | A position in the L1 Primitives DAG (0–12). Tier ≠ layer; tier is intra-L1. |
 | **Authority** | A standards body (IETF, ISO, W3C, WHATWG, IEEE, IEC, Ecma, INCITS, ARM, Intel, RISC-V, Microsoft). Each has its own GitHub org. |
 | **Umbrella org** | swift-institute — holds cross-cutting documentation, Skills/, Research/, Experiments/, the website. Not a layer. |
