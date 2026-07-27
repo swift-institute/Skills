@@ -41,15 +41,15 @@ Part of the **implementation** skill. Full text of the rules governing ecosystem
 
 If you find yourself chaining `.rawValue.rawValue`, that's a missing operator. Add it.
 
-**[IMPL-003] Functor Operations**: Cross-domain conversions MUST use `.map()` (transform raw value, preserve tag) or `.retag()` (preserve raw value, change tag). Direct `__unchecked` construction SHOULD be avoided when a functor path exists. See [INFRA-103].
+**[IMPL-003] Functor Operations**: Cross-domain conversions MUST use `.map()` (transform raw value, preserve tag) or `.retag()` (preserve raw value, change tag). Direct `__unchecked` construction SHOULD be avoided when a functor path exists. Apply [REUSE-005] when the owner lacks the lawful functor operation.
 
 **[IMPL-003a] Domain-Crossing Before Operations**: When an operation requires values from different phantom-typed domains, convert to the target domain first using `.retag()`, then operate. Do NOT extract `.rawValue` as a domain escape hatch. When `Domain` enforcement arrives (via `SuppressedAssociatedTypes`), domain-agnostic operations break.
 
 **[IMPL-006] Typed Stored Properties**: Stored properties holding quantities SHOULD use typed wrappers (`Index<Element>.Count`, `Index<Element>`) rather than raw `UInt`. `Tagged` is zero-cost — same memory layout. Store typed, eliminate N extraction sites.
 
-For canonical constants (`.one`, `.zero`) and their protocol lifting, see [INFRA-101].
+Use the canonical constants (`.one`, `.zero`) and their protocol lifting from the owning arithmetic package.
 
-**Cross-references**: [CONV-010], [CONV-001], [CONV-003], [IDX-010], [INFRA-101], [INFRA-103]
+**Cross-references**: [CONV-010], [CONV-001], [CONV-003], [IDX-010], [REUSE-003], [REUSE-005]
 
 ---
 
@@ -89,7 +89,7 @@ The `Int` conversion lives in one place, once, forever.
 
 ### [IMPL-011] Slot / Region Access Primitives
 
-**Statement**: Types that manage memory SHOULD encapsulate offset computation behind a typed surface, so call sites never hand-roll pointer arithmetic. Per the Span-first direction ([MEM-SAFE-012], [MEM-SPAN-003], [INFRA-109]) that surface is: a typed `subscript(at: Index<Element>)` for per-slot access, and the Span family (`span` / `mutableSpan` / `withOutputSpan(addingCapacity:)`) for whole-region access. A raw `pointer(at:)` is NOT the primitive other accessors delegate to — it is a last-resort escape hatch ([MEM-SAFE-015]), present only on conformers that genuinely need it, `@unsafe`-marked, with a no-span-fits comment.
+**Statement**: Types that manage memory SHOULD encapsulate offset computation behind a typed surface, so call sites never hand-roll pointer arithmetic. Per the Span-first direction ([MEM-SAFE-012], [MEM-SPAN-003]) that surface is: a typed `subscript(at: Index<Element>)` for per-slot access, and the Span family (`span` / `mutableSpan` / `withOutputSpan(addingCapacity:)`) for whole-region access. A raw `pointer(at:)` is NOT the primitive other accessors delegate to — it is a last-resort escape hatch ([MEM-SAFE-015]), present only on conformers that genuinely need it, `@unsafe`-marked, with a no-span-fits comment.
 
 ```swift
 let element = storage[at: slot]             // ✓ Intent — typed slot access
@@ -136,11 +136,11 @@ _slots.set.range(range.map.bounds { $0.retag(Bit.self) })  // ✓
 
 **Arithmetic** [IMPL-053]: Arithmetic on bounded indices follows [IMPL-000]. All advancement operations (`successor`, `predecessor`, `offset`) return `Optional` — principled per [IMPL-001]. If bounded arithmetic requires `.rawValue` extraction and `__unchecked` reconstruction, that is an infrastructure gap.
 
-For bounded type structure and operations, see [INFRA-105].
+Apply [REUSE-001] before introducing another bounded type; use the existing owner when its semantics match.
 
 **Lint enforcement**: `Lint.Rule.Idiom.BoundedIndex` (in `swift-foundations/swift-linter-rules`, target `Linter Rule Idiom`) walks struct / class / enum / actor declarations whose generic parameter clause contains a `let N: Int` value-generic. Inside the type's own body, subscripts whose index parameter is raw `Int` / `Swift.Int` are flagged. Extensions in separate files are out of per-file scope. Added Wave 3 mechanization 2026-05-11. [VERIFICATION: AST Lint.Rule.Idiom.BoundedIndex]
 
-**Cross-references**: [IMPL-000], [IMPL-001], [IMPL-002], [IMPL-006], [IMPL-010], [INFRA-105]
+**Cross-references**: [IMPL-000], [IMPL-001], [IMPL-002], [IMPL-006], [IMPL-010], [REUSE-001]
 
 ---
 

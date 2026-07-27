@@ -3,14 +3,6 @@ name: reflect-session
 description: |
   Lightweight end-of-session note capture.
   Apply at the end of a non-trivial session, or mid-session on a significant learning.
-
-layer: process
-requires:
-  - swift-institute
-applies_to:
-  - reflection
-  - session
-  - learning
 ---
 
 # reflect-session

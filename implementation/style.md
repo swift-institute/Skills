@@ -49,7 +49,7 @@ unsafe dstPointer.initialize(from: srcPointer, count: count)
 | **3. Typed while loop** | `while slot < end { slot += .one }` | Inside iteration infra only |
 | **4. Raw while loop** | Forbidden | Never |
 
-When no iteration infrastructure exists: per [IMPL-000], add `.forEach`, `.reduce`, or the appropriate method, then use it. See [INFRA-107], [INFRA-108], [INFRA-022].
+When no iteration infrastructure exists: per [IMPL-000] and [REUSE-005], add `.forEach`, `.reduce`, or the appropriate method to its owner, then use it.
 
 **Lint enforcement**: `Lint.Rule.Idiom.IterationIntent` (in `swift-foundations/swift-linter-rules`, target `Linter Rule Idiom`) flags `for <i> in <a>..<<b>` counter loops with a simple identifier binding — index-counted iteration is mechanism. Direct iteration (`for element in items`), `enumerated()`, `stride(from:to:by:)`, and `forEach { ... }` are not flagged. Tuple-pattern bindings (e.g., zip iteration) are out of scope. Added Wave 3 mechanization 2026-05-11. [VERIFICATION: AST Lint.Rule.Idiom.IterationIntent]
 

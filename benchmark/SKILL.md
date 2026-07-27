@@ -4,18 +4,6 @@ description: |
   Performance testing: .timed(), .build cleanup, same-package vs nested,
   comparison benchmarks.
   ALWAYS apply when writing or reviewing performance tests and benchmarks.
-
-layer: implementation
-
-requires:
-  - testing
-
-applies_to:
-  - swift
-  - swift6
-  - swift-primitives
-  - swift-standards
-  - swift-foundations
 ---
 
 # Benchmark Conventions
@@ -74,16 +62,16 @@ Performance testing patterns for the Swift Institute ecosystem. Covers benchmark
 
 **Statement**: Before running benchmarks, ALWAYS run the coordinator's `package clean` action from the benchmark package (nested `Tests/` or same-package root). Never delete `.build` directly. Stale build artifacts cause false results and confusing failures.
 
-```bash
+```sh
 # Nested package benchmarks (primitives)
 cd swift-{package}/Tests
-~/Developer/swift-institute/Scripts/swift-build package clean
-~/Developer/swift-institute/Scripts/swift-build package test -- --filter Performance
+workspace package clean
+workspace package test --argument=--filter --argument Performance
 
 # Same-package benchmarks (foundations/standards)
 cd swift-{package}
-~/Developer/swift-institute/Scripts/swift-build package clean
-~/Developer/swift-institute/Scripts/swift-build package test -- --filter Performance
+workspace package clean
+workspace package test --argument=--filter --argument Performance
 ```
 
 **Rationale**: Incremental builds can produce measurement artifacts. A coordinator-owned clean build ensures reproducible benchmark baselines without bypassing machine-wide capacity or manipulating generated state directly. This was a recurring footgun in swift-io development — stale build state caused memory usage to balloon to ~82 GB against io-bench. Separately, for a long-running comparison/throughput suite ([BENCH-005]) that can run for minutes or hang, compile-check it with `swift-build package build` and surface the coordinator-owned run command to the user rather than executing the suite automatically.
@@ -264,20 +252,20 @@ struct `IO Read Benchmark` {
 **Statement**: Benchmark execution depends on placement pattern.
 
 **Same-package benchmarks** (foundations/standards):
-```bash
+```sh
 cd swift-{package}
-~/Developer/swift-institute/Scripts/swift-build package clean
-~/Developer/swift-institute/Scripts/swift-build package test -- --filter Performance
-~/Developer/swift-institute/Scripts/swift-build package test -- --filter "Benchmark"
+workspace package clean
+workspace package test --argument=--filter --argument Performance
+workspace package test --argument=--filter --argument Benchmark
 ```
 
 **Nested package benchmarks** (primitives):
-```bash
+```sh
 cd swift-{package}/Tests
-~/Developer/swift-institute/Scripts/swift-build package clean
-~/Developer/swift-institute/Scripts/swift-build package resolve
-~/Developer/swift-institute/Scripts/swift-build package test -- --filter Performance
-~/Developer/swift-institute/Scripts/swift-build package test -- --filter "Benchmark"
+workspace package clean
+workspace package resolve
+workspace package test --argument=--filter --argument Performance
+workspace package test --argument=--filter --argument Benchmark
 ```
 
 **Rationale**: The nested package has its own `.build/` directory and dependency graph.
@@ -411,5 +399,5 @@ See also:
 - **testing** skill — [TEST-*] for umbrella routing and test support infrastructure
 - **testing-swiftlang** skill — [SWIFT-TEST-004] for performance suite serialization in Swift Testing
 - **testing-institute** skill — [INST-TEST-001] for nested package pattern details
-- **existing-infrastructure** skill — for IO Test Support module inventory
+- **reuse-first** skill — for locating the owned IO test-support capability
 - **research-process** skill — [RES-018] (Cross-Cutting Primitive: Compose-First Justification) + [RES-020] (Tier classification); [BENCH-011] composes with [RES-018]'s compose-first discipline (demonstrate composition of existing primitives fails before promoting a cross-cutting primitive). [RES-018] re-scoped 2026-06-09 to remove consumer-count gating; the composition with [BENCH-011] is unchanged in substance (both demand structural/empirical evidence, not adoption)

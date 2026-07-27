@@ -10,13 +10,29 @@ the public corpus.
 
 ## Structure
 
-Each subdirectory is one skill. Every skill has a `SKILL.md` file at its root that contains the requirement IDs and rules for its area. Some skills also include supporting examples and reference documents.
+Each subdirectory is one skill. Its `SKILL.md` is a compact routing and workflow
+hub; detailed requirement IDs, examples, and edge cases may live in directly
+linked companion documents.
 
 ## Loading
 
-Link or install the desired skill directory into the skill directory used by your agent. Keep
-the directory intact so any companion references beside `SKILL.md` remain available. Swift
-Institute maintainers load additional private operational skills from `Internal/Skills`.
+`swift-institute/Workspace` owns installation for the shared checkout:
+
+```sh
+workspace context install
+workspace context check
+```
+
+The installer validates each canonical `SKILL.md` and projects whole skill
+directories into the common Claude/Codex entry point, preserving companion
+references. Skills use only `name` and `description` frontmatter; the
+description is the routing interface, and detailed material is loaded
+progressively from the body or an explicitly linked companion. The Swift
+validator rejects hubs over 500 lines so context-budget discipline is
+mechanical rather than advisory.
+
+Swift Institute maintainers also project private operational skills from
+`Internal/Skills` through the same owner.
 
 ## Companion repositories
 
@@ -25,7 +41,7 @@ Institute maintainers load additional private operational skills from `Internal/
 | [swift-institute/swift-institute.org](https://github.com/swift-institute/swift-institute.org) | Website + DocC catalog |
 | [swift-institute/Research](https://github.com/swift-institute/Research) | Design rationale and trade-off analysis |
 | [swift-institute/Experiments](https://github.com/swift-institute/Experiments) | Standalone Swift packages backing technical claims |
-| [swift-institute/Scripts](https://github.com/swift-institute/Scripts) | Workspace tooling |
+| [swift-institute/Workspace](https://github.com/swift-institute/Workspace) | Inventory, context installation, and Swift-owned workspace tooling |
 
 ## License
 

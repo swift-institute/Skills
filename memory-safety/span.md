@@ -90,7 +90,7 @@ for item in items { unsafe (tail + i).initialize(to: item); i += 1 }
 
 **Lint enforcement**: `Lint.Rule.Memory.PointerArithmetic` (rule id `pointer advanced by`) flags `unsafe …advanced(by:)` raw pointer arithmetic and recommends the Span family. Exemption scope (`Strideable.advanced(by:)`, `Tests/`-class paths, SAFETY-justified last resorts): rationale archive §[MEM-SPAN-003]. [VERIFICATION: AST]
 
-**Cross-references**: [MEM-SPAN-001], [MEM-SAFE-012], [MEM-SAFE-014], [MEM-SAFE-015], [MEM-SAFE-025a], [INFRA-109]
+**Cross-references**: [MEM-SPAN-001], [MEM-SAFE-012], [MEM-SAFE-014], [MEM-SAFE-015], [MEM-SAFE-025a], [REUSE-003]
 
 ---
 
@@ -128,4 +128,3 @@ for item in items { unsafe (tail + i).initialize(to: item); i += 1 }
 **Cross-references**: [MEM-SPAN-001], [MEM-SPAN-003], [MEM-SPAN-004], [MEM-SAFE-015], [MEM-SAFE-029]
 
 ---
-

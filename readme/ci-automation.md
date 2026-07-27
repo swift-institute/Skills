@@ -122,19 +122,6 @@ The pattern they will follow is the existing reusable + orchestrator + tracking-
 | `<org>/.github/profile/README.md` for every org | G | MUST exist |
 | `<repo>/README.md` for every Swift package repo | E or F | MUST exist |
 | `<repo>/README.md` for every workflow/process repo | C | MUST exist |
-| `~/Developer/<org>/README.md` for every clone-mirror directory | B | SHOULD exist |
-
-**Possibly vestigial — pending cleanup decision (principal flagged 2026-05-01)**:
-
-The directories `~/Developer/rule-law/`, `~/Developer/swift-nl-wetgever/`, and `~/Developer/swift-us-nv-legislature/` are each single GH repos on disk (have own `.git/`) whose CLAUDE.md descriptions imply they hold large package collections ("1057 statute packages", "820 NRS packages", "Legal encoding ecosystem home"). The principal has indicated this on-disk structure may be vestigial — it does not necessarily reflect the current intended topology for the legal domain. The presence sweep should NOT add these to the missing-README list until the topology is resolved:
-
-- `~/Developer/swift-law/README.md` — exists (3-line stub); reclassification depends on whether the legal-domain topology is being kept, updated, or retired.
-- `~/Developer/swift-nl-wetgever/README.md` — pending topology decision.
-- `~/Developer/swift-us-nv-legislature/README.md` — pending topology decision.
-- `~/Developer/rule-law/README.md` — pending topology decision.
-- Any `*/.github/profile/README.md` for these orgs — pending verification that the corresponding GH org exists separately.
-
-When the principal resolves the legal-domain topology, the corresponding family-routing rules apply (Family E or F per-repo if they remain single repos; Family G profile if a corresponding GH org exists separately).
 
 **Rationale**: Family rules without enforcement become aspirational; the nightly sweep mirrors the existing sync-metadata-nightly pattern, making the workflow cheap to add and the reporting cadence familiar. (Known state of Family G org profiles at the 2026-05-01 inaugural-sweep baseline: rationale archive §[README-161].)
 
@@ -249,14 +236,16 @@ A mismatch (e.g., 1-liner says 129, opening says 130, table has 137 rows) MUST f
 
 ### [README-165] Cross-Repo Path Link Validator
 
-**Statement**: A reusable workflow SHOULD validate cross-repo path links in READMEs that reference sibling repos via local paths (e.g., `../swift-buffer-primitives/Sources/...` or `~/Developer/swift-primitives/...`). The existing lychee link-check excludes `file://` URLs deliberately; this validator complements it for the workspace's actual cross-repo path style.
+**Statement**: A reusable workflow SHOULD reject machine-local and
+filesystem-relative cross-repository links in public READMEs, and validate the
+canonical GitHub form against the Workspace inventory.
 
 **Specified contract** (pending implementation):
 
 | Pattern | Resolution |
 |---|---|
-| `[text](../<sibling-repo>/<path>)` | Validate `<sibling-repo>` is a real GH repo in the same org; `<path>` exists in that repo's main branch |
-| `[text](~/Developer/<org>/<repo>/<path>)` | Treat the `~/Developer/` prefix as a clone-mirror reference; resolve against `<org>/<repo>` on GitHub |
+| `[text](../<sibling-repo>/<path>)` | Reject and suggest the canonical GitHub URL |
+| a home-directory or absolute filesystem link | Reject as machine-local |
 | `[text](./<path>)` | Existing same-repo link; lychee already validates |
 | `[text](https://github.com/<org>/<repo>/...)` | Lychee already validates |
 
@@ -382,7 +371,7 @@ section structural rule this workflow targets), [README-160]
 
 1. At README authoring time, identify each code block's composition class.
 2. For composed examples, before declaring the README "validated," locate each composed type's nearest real call site in the ecosystem (`grep -rn "<typename>(" <ecosystem>/Sources/`) and verify the README's invocation shape matches the call site's shape.
-3. For Quick Start examples, additionally extract the example to a scratch SwiftPM package whose `Package.swift` declares deps on every composed type's owning package; run `~/Developer/swift-institute/Scripts/swift-build package build`.
+3. For Quick Start examples, additionally extract the example to a scratch SwiftPM package whose `Package.swift` declares dependencies on every composed type's owning package; run `workspace package build --fresh` in that package.
 4. Document the validation report in the commit message or PR description: list each composed type + its cited real call-site OR the extracted scratch-package path + coordinator build result.
 
 **Rationale**: Per-example call-site discipline catches non-compiling examples at authoring time, composing with [RELEASE-007]'s publication-gate check; the 30-second grep per composed type is strictly cheaper than post-publication rework (full text, origin incident, and the 4-of-5 swift-linter cohort finding: rationale archive §[README-170]).

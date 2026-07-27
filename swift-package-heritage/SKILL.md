@@ -3,21 +3,6 @@ name: swift-package-heritage
 description: |
   Git-level heritage for Institute packages derived from external upstream Swift packages.
   ALWAYS apply when seeding from an external upstream, deciding fork vs re-implement, or formalizing lineage at the git/GitHub level.
-
-layer: architecture
-
-requires:
-  - swift-institute
-  - swift-package
-
-applies_to:
-  - swift
-  - swift6
-  - swift-primitives
-  - swift-standards
-  - swift-foundations
-
-created: 2026-04-30
 ---
 
 # Swift Package Heritage

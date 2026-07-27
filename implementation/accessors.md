@@ -21,9 +21,9 @@ heap.deinitialize(at: slot)                // callAsFunction — direct
 heap.deinitialize.all()                    // named method — tracked
 ```
 
-Tag types are empty enums. Methods are extensions on `Property` constrained by `where Tag == ..., Base == ...`. See [INFRA-106].
+Tag types are empty enums. Methods are extensions on `Property` constrained by `where Tag == ..., Base == ...`. Apply [REUSE-001] before declaring another accessor shape.
 
-**Cross-references**: [API-NAME-002], [INFRA-106]
+**Cross-references**: [API-NAME-002], [REUSE-001]
 
 ---
 
@@ -123,7 +123,7 @@ extension Property.View where Tag == Pop, Base: MyProtocol & ~Copyable {
 
 **The problem**: Two extensions with same method name, different constraints — the more-constrained overload calling `self.method()` resolves to itself, producing infinite recursion.
 
-**The solution**: Statics are called on the type, not `self`, so overload resolution cannot recurse. See [INFRA-110].
+**The solution**: Statics are called on the type, not `self`, so overload resolution cannot recurse.
 
 **Static signature pattern**: Statics take decomposed state as parameters (e.g., `state: inout State`, `storage: Storage`). Methods that replace `self` as a whole (growth, CoW) remain as instance methods.
 
@@ -142,13 +142,13 @@ extension Property.View where Tag == Pop, Base: MyProtocol & ~Copyable {
 | Static | Package author | Compound allowed | `MyType.insertFront(_:state:storage:)` |
 | Property.View | Consumer | Nested required | `instance.insert.front(element)` |
 
-**Cross-references**: [API-NAME-002], [IMPL-023], [INFRA-110], [INFRA-106]
+**Cross-references**: [API-NAME-002], [IMPL-023], [REUSE-001]
 
 ---
 
 ### [IMPL-025] Two-Tier Overload Resolution
 
-**Statement**: Types supporting both `~Copyable` and `Copyable` elements MUST provide two tiers of public methods. Both delegate to the same static. The `Copyable` tier adds preparation logic (e.g., CoW uniqueness checks). Neither tier calls `self.method()`. See [INFRA-110].
+**Statement**: Types supporting both `~Copyable` and `Copyable` elements MUST provide two tiers of public methods. Both delegate to the same static. The `Copyable` tier adds preparation logic (e.g., CoW uniqueness checks). Neither tier calls `self.method()`.
 
 **Cross-references**: [IMPL-023], [MEM-COPY-006]
 

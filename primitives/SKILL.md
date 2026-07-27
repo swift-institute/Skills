@@ -4,19 +4,6 @@ description: |
   Swift Primitives layer conventions. Extends swift-institute conventions with
   Foundation-independence requirements and tier-based layering rules.
   ALWAYS apply when working in the swift-primitives repository.
-
-layer: architecture
-
-requires:
-  - swift-institute
-  - code-surface
-  - memory-safety
-
-applies_to:
-  - swift
-  - swift6
-  - swift-primitives
-
 ---
 
 # Swift Primitives Conventions
@@ -112,7 +99,7 @@ Packages MUST depend only on packages at LOWER tiers.
 .package(path: "../swift-binary-primitives"),  // Tier 7 - FORBIDDEN
 ```
 
-**Enforcement**: Mechanical — covered by `validate-package-graph.py` ([MOD-032] acyclicity; /promote-rule 2026-07-06): tiers are COMPUTED from the dependency graph (`Documentation.docc/Computed Primitives Tiers.md`), so the downward-only ordering exists iff the graph is acyclic; cycle findings inside the primitives org cite both IDs. Discipline: an internal audit record. [VERIFICATION: Script]
+**Enforcement**: Mechanical — covered by the centralized package-cycle validator ([MOD-GRAPH]): tiers are COMPUTED from the dependency graph (`Documentation.docc/Computed Primitives Tiers.md`), so the downward-only ordering exists iff the graph is acyclic. [VERIFICATION: Script]
 
 Circular dependencies are FORBIDDEN. Lateral (same-tier) dependencies are FORBIDDEN.
 
@@ -138,7 +125,10 @@ swift-geometry
 
 **Exceptions** (principal-ruled 2026-07-06): org-scoped infrastructure whose established name is itself a deliberate convention is exempt — the cross-tier `-linter-rules` family (`swift-primitives-linter-rules`) and descriptive substrate with no conforming name that improves on it (`swift-standard-library-extensions`). Exemptions are enumerated in the validator with this ruling cited.
 
-**Enforcement**: Mechanical — `validate-package-naming.py` (+ `validate-package-naming.yml` org sweep; /promote-rule 2026-07-06). Discipline: an internal audit record. [VERIFICATION: WF]
+**Mechanical destination**: Workspace package analysis owns the naming
+predicate and centralized CI invokes it across the primitives inventory. A
+legacy validator is transitional evidence until this owner lands.
+[VERIFICATION: centralized package-policy gate]
 
 ### [PRIM-NAME-003] Names Describe Mechanism, Not Origin
 
@@ -281,7 +271,7 @@ let settings: [SwiftSetting] = [
 Parent skill: **swift-institute** (all those rules apply here)
 
 For detailed documentation:
-- `~/Developer/swift-primitives/Documentation.docc/Primitives Requirements.md`
-- `~/Developer/swift-primitives/Documentation.docc/Primitives Tiers.md`
-- `~/Developer/swift-primitives/Documentation.docc/Primitives Layering.md`
-- `~/Developer/swift-primitives/Documentation.docc/Reference/Collection Primitives Architecture.md`
+- `Documentation.docc/Primitives Requirements.md`
+- `Documentation.docc/Primitives Tiers.md`
+- `Documentation.docc/Primitives Layering.md`
+- `Documentation.docc/Reference/Collection Primitives Architecture.md`

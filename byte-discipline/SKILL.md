@@ -4,20 +4,6 @@ description: |
   UInt8/Byte discrimination — sibling types, no arithmetic on Byte, Binary.Serializable witnesses,
   rawValue:UInt8 domain disposition, UInt8 forwarder discipline.
   ALWAYS apply at the byte / arithmetic-domain boundary.
-
-layer: implementation
-
-requires:
-  - swift-institute
-  - code-surface
-
-applies_to:
-  - swift
-  - swift6
-  - primitives
-  - standards
-  - foundations
-
 ---
 
 # Byte Discipline

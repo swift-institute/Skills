@@ -3,20 +3,6 @@ name: memory-safety
 description: |
   Memory ownership, copyability, lifetime safety, strict memory safety, unsafe marking, sendable, references.
   ALWAYS apply when working with ~Copyable, ownership annotations, unsafe ops, references, or concurrency safety.
-
-layer: implementation
-
-requires:
-  - swift-institute
-  - code-surface
-  - implementation
-
-applies_to:
-  - swift
-  - swift6
-  - primitives
-
-# Amendment/changelog history: Research/memory-safety-skill-rationale.md §Changelog-Provenance (and git history of this file).
 ---
 
 # Memory Safety Conventions

@@ -75,11 +75,10 @@ Companion of the **ci-cd-workflows** skill (navigation hub: `SKILL.md`). Load wh
 
 **Local-equivalent substitution shape**:
 
-```bash
-~/Developer/swift-institute/Scripts/swift-build package build
-~/Developer/swift-institute/Scripts/swift-build package test
-~/Developer/swift-institute/Scripts/swift-build package run \
-  -- <linter>                                  # if CI runs a linter step
+```sh
+workspace package build --fresh
+workspace package test --fresh
+# Run the same Swift-owned linter bundle that the reusable workflow invokes.
 ```
 
 Run the build/test pair from a clean git worktree when fresh compilation is

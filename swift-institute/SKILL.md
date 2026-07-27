@@ -3,18 +3,6 @@ name: swift-institute
 description: |
   Five-layer architecture and core conventions for Swift Institute.
   ALWAYS apply when working in any Swift Institute repository.
-
-layer: architecture
-
-requires:
-  - swift-institute-core
-
-applies_to:
-  - swift
-  - swift6
-  - swift-primitives
-  - swift-standards
-  - swift-foundations
 ---
 
 # Swift Institute Conventions
@@ -64,7 +52,7 @@ same-layer edge does not merge the packages' missions or change either package's
 
 **Statement**: For ecosystem packages with a full three-layer cascade (L1 primitive → L2 spec → L3 composition), L3 MAY import both the L1 primitive and the L2 spec, but the **preferred** shape is L3 imports L2 only and L2 re-exports the L1 namespace via `@_exported public import`. Double-imports are acceptable but flagged as cleanup targets.
 
-**Why**: Minimizes consumer fan-out, makes L2 the canonical entry point for downstream code, and reflects layering intent — L3 is composition over a spec, not over the raw primitive. Distinct from the no-umbrella-imports rule (`[MOD-015]`), which is about narrow-variant target imports within a single multi-target package — this rule is about cross-package layer cascade.
+**Why**: Minimizes consumer fan-out, makes L2 the canonical entry point for downstream code, and reflects layering intent — L3 is composition over a spec, not over the raw primitive. Distinct from `[MOD-IMPORT]`, which governs direct module ownership — this rule is about cross-package layer cascade.
 
 **How to apply**: When finding an L3 package that imports both L1 and L2 of the same namespace family (e.g., `swift-ascii` importing both `ASCII_Primitives` and `INCITS_4_1986`):
 1. Check L2's `exports.swift` for `@_exported public import {L1 namespace}`. If present, drop the L1 import from L3.
@@ -143,7 +131,7 @@ same-layer edge does not merge the packages' missions or change either package's
 - When auditing a package at any layer, `foundation_imports > 0` in the main target is a violation regardless of layer.
 
 
-**Cross-references**: [PRIM-FOUND-001], [ARCH-LAYER-001], [MOD-010]
+**Cross-references**: [PRIM-FOUND-001], [ARCH-LAYER-001], [MOD-INTEGRATION]
 
 ---
 
@@ -160,13 +148,13 @@ same-layer edge does not merge the packages' missions or change either package's
 - Do NOT propose sibling-type workarounds — a non-conforming twin that preserves an old API alongside a new one (e.g. `Parser.Machine.OwnedCompiled` beside `Compiled`) — as the resolution to a **protocol-level** relaxation goal (making a protocol `~Copyable` / `~Escapable`-compatible). Sibling types preserve the underlying protocol-level blocker while papering over one consumer's need, and accrue as latent debt; drive the protocol decision through empirical-blocker validation (`/experiment-process`) instead. Pre-existing L1-`~Copyable` / L3-`Copyable` bifurcations that ARE the architecture (predating any consumer need) are not this pattern.
 
 
-**Cross-references**: [ARCH-LAYER-006], [ARCH-LAYER-009], [ARCH-LAYER-010], [MOD-008]
+**Cross-references**: [ARCH-LAYER-006], [ARCH-LAYER-009], [ARCH-LAYER-010], [MOD-TARGET]
 
 ---
 
 ### [ARCH-LAYER-009] Package / Source-Module Removal Is Correctness-Driven and Git-Recoverable
 
-**Statement**: Packages and source modules (`Sources/<X>/`) MAY be removed when correctness or architectural merit says they are dead or superseded — at any phase — per `[ARCH-LAYER-008]` and the `[MOD-RENT]` Deletion disposition. "No consumers" is not, by itself, a *reason* to remove (correctness is); but it is equally not a *bar*. Removal is gated only by two correctness guards: the removed code MUST be **git-recoverable** and **verified dead** first.
+**Statement**: Packages and source modules (`Sources/<X>/`) MAY be removed when correctness or architectural merit says they are dead or superseded — at any phase — per `[ARCH-LAYER-008]` and `[MOD-PACKAGE]`. "No consumers" is not, by itself, a *reason* to remove (correctness is); but it is equally not a *bar*. Removal is gated only by two correctness guards: the removed code MUST be **git-recoverable** and **verified dead** first.
 
 **Two guards before any removal**:
 1. **Recoverable** — the code MUST already be committed (present in git history) before deletion, so it is recoverable. NEVER `rm -rf` *uncommitted* exploratory work; commit it first, then delete it in a follow-up commit. Git history is the recovery mechanism that makes removal reversible.
@@ -174,15 +162,15 @@ same-layer edge does not merge the packages' missions or change either package's
 
 **Not removals — always permitted**: renaming packages or source modules; reshaping public APIs; removing `Package.swift` *dep declarations* the source does not import (per `[PKG-DEP-003]`); reorganizing files within a module.
 
-**Why**: Carrying dead / superseded packages forward accrues the long tails `[MOD-RENT]` names (maintenance surface, review cost, "absorb or add?" forks). The prior blanket "no removal for any reason during pre-1.0" rested on two premises that don't hold: that a package's value is "non-obvious until consumers materialize" (consumer-demand reasoning, removed 2026-06-09) and that removal is "irreversible loss" (false — committed code is recoverable from git history). Correctness drives the decision; the two guards make it safe.
+**Why**: Carrying dead or superseded packages forward accrues maintenance and review cost. The prior blanket "no removal for any reason during pre-1.0" rested on two premises that don't hold: that a package's value is "non-obvious until consumers materialize" and that removal is "irreversible loss" (committed code is recoverable from git history). Correctness drives the decision; the two guards make it safe.
 
 **How to apply**:
-- When `[MOD-RENT]` or `[ARCH-LAYER-008]` identifies dead / superseded code, remove it: commit-first, verify-dead, then delete. No separate per-action authorization — git is the safety net.
+- When `[MOD-PACKAGE]` or `[ARCH-LAYER-008]` identifies dead or superseded code, remove it: commit-first, verify-dead, then delete. No separate per-action authorization — git is the safety net.
 - If the target is not yet committed, commit it first (history preserves it), then delete in a follow-up commit.
-- Composes with `[ARCH-LAYER-008]` (correctness / merit is the driver) and `[MOD-RENT]` (whose Deletion disposition is now executable rather than blocked).
+- Composes with `[ARCH-LAYER-008]` (correctness and merit drive the decision) and `[MOD-PACKAGE]`.
 
 
-**Cross-references**: [ARCH-LAYER-008], [MOD-RENT], [PKG-DEP-003]
+**Cross-references**: [ARCH-LAYER-008], [MOD-PACKAGE], [PKG-DEP-003]
 
 ---
 
@@ -198,7 +186,7 @@ same-layer edge does not merge the packages' missions or change either package's
 - Don't defer mission-boundary fixes on cost grounds during pre-1.0.
 
 
-**Cross-references**: [ARCH-LAYER-008], [MOD-008], [MOD-026]
+**Cross-references**: [ARCH-LAYER-008], [MOD-TARGET], [MOD-EVIDENCE]
 
 ---
 
@@ -227,7 +215,12 @@ same-layer edge does not merge the packages' missions or change either package's
 2. **Pragmatic (accepted with caveat)**: leave the violating dep in the L2 tests with an explicit `// swiftlint:disable` + comment citing the structural constraint — a marked, known exception (e.g. Codable-round-trip tests whose coverage mostly exercises Foundation anyway, with the load-bearing wire-shape coverage living in real-data tests elsewhere).
 3. **Forbidden**: silently adding the L3 dep to the L2 test target.
 
-**Enforcement**: Mechanical — `validate-test-target-layers.py` (+ `validate-test-target-layers.yml` org sweep; /promote-rule 2026-07-06): dump-package manifest check flagging institute-org test-target deps strictly above the host's layer; sanctioned option-2 exceptions in the sibling `.test-target-layer-allowlist`. Discipline: an internal audit record. [VERIFICATION: WF]
+**Mechanical destination**: Workspace package-graph validation owns the
+manifest predicate that flags Institute test-target dependencies strictly above
+the host layer; centralized CI invokes it across the inventory. Sanctioned
+option-2 exceptions remain in the sibling `.test-target-layer-allowlist`.
+A legacy validator is transitional evidence until this owner lands.
+[VERIFICATION: centralized package-graph gate]
 
 **Cross-references**: [ARCH-LAYER-001] (the rule this extends), [ARCH-LAYER-002] (L3→L2 import cascade), [ARCH-LAYER-007] (no-Foundation across layers), [PATTERN-061] (`JSON.Serializable` — the canonical institute JSON pattern that informs when the sibling-L3 path is worth authoring).
 

@@ -3,18 +3,6 @@ name: swift-evolution
 description: |
   Drafting and submitting Swift Evolution pitches: triggers, evidence, scope, drafting, submission, iteration, convergence.
   Apply when preparing a pitch for community feedback. Later phases (proposal/review/decision/impl) deferred.
-
-layer: process
-
-requires:
-  - swift-institute-core
-
-applies_to:
-  - swift-evolution
-  - swift-primitives
-  - swift-standards
-  - swift-foundations
-  - swift-institute
 ---
 
 # Swift Evolution

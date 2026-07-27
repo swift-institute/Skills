@@ -121,7 +121,7 @@ extension Path.View {
 
 **Rationale**: L1 primitives stay unconditionally platform-agnostic — uniform storage shape, uniform implementation, no carve-out; the re-export chain (behavior) and the L3-typealias chain (divergent shape) make per-platform definitions visible to cross-platform consumers. Full text (relationship to [PLAT-ARCH-008a], mechanism, provenance): rationale archive §[PLAT-ARCH-008c].
 
-**Lint enforcement**: Workflow `validate-platform-architecture.yml` flags `^#if (os|canImport)` in every `*-primitives` package's `Sources/` (`swift-kernel-primitives` and `swift-cpu-primitives` exempt per [MOD-EXCEPT-001]). Detail + fixtures: rationale archive §[PLAT-ARCH-008c]. [VERIFICATION: WF validate-platform-architecture.py (PLAT-ARCH-008c)]
+**Lint enforcement**: Workflow `validate-platform-architecture.yml` flags `^#if (os|canImport)` in every `*-primitives` package's `Sources/`; the validator owns the explicit platform-package allowlist. Detail + fixtures: rationale archive §[PLAT-ARCH-008c]. [VERIFICATION: WF validate-platform-architecture.py (PLAT-ARCH-008c)]
 
 **Cross-references**: [PLAT-ARCH-005], [PLAT-ARCH-008a], [PLAT-ARCH-008e], [PLAT-ARCH-008h], [PLAT-ARCH-002], [PLAT-ARCH-006], [PLAT-ARCH-015]
 
@@ -237,13 +237,13 @@ Together the three rules enforce strict downward composition: L1 → L2 → L3-p
 | (c) Sub-namespace on L2 | Expose L2 under a dedicated sub-namespace (`Raw`, `IO.Read`, `IO.Write`) so the unifier's intent name doesn't collide | Call sites want both surfaces; neither side can reasonably be renamed |
 | (d) Package-level separation | Split L2 and L3 into visibility-separate packages (the socket precedent) | The collision is pervasive across many names in the family |
 
-**Verification requirement**: `~/Developer/swift-institute/Scripts/swift-build package build -- --build-tests` MUST be clean before the unifier lands. Test-target compilation catches import-level ambiguity that source-target compilation misses.
+**Verification requirement**: `workspace package build --fresh --argument=--build-tests` MUST be clean before the unifier lands. Test-target compilation catches import-level ambiguity that source-target compilation misses.
 
 **Example (defect)**: A `swift-kernel` unifier landed `Kernel.File.Read.read(...)` / `Kernel.File.Write.write(...)` where L2's ISO 9945 package had already defined the same names at the same paths via the `Kernel_Primitives.Kernel` alias. The commit passed a source-only package build in isolation; the downstream `swift-file-system` build hit ambiguous-overload errors at every call site.
 
 **Rationale**: When both sides are spec-literal at the same intent, the collision is silent at the L2-raw package boundary and surfaces only at downstream consumers; enumerating the solution families forces an explicit choice at commit time. Full text (worked solution-(a) example: `Kernel.Thread.Local` → L2 `Key`/`Index` renames; provenance): rationale archive §[PLAT-ARCH-008f].
 
-**Cross-references**: [PLAT-ARCH-008e], [PLAT-ARCH-012], [API-NAME-003], [MOD-*]
+**Cross-references**: [PLAT-ARCH-008e], [PLAT-ARCH-012], [API-NAME-003], [MOD-LAYER], [MOD-INTEGRATION]
 
 ---
 
@@ -253,13 +253,13 @@ Together the three rules enforce strict downward composition: L1 → L2 → L3-p
 
 **Procedure**:
 
-```bash
+```sh
 # Example: considering adding a dep from iso-9945 tests to linux-standard
-grep -rl "iso9945\|iso-9945\|linux-standard" \
-  ~/Developer/swift-institute/Skills/platform/ \
-  ~/Developer/swift-institute/Skills/modularization/ \
-  ~/Developer/swift-institute/Internal/RULINGS.md \
-  ~/Developer/swift-institute/Internal/inbox.md
+rg -l "iso9945|iso-9945|linux-standard" \
+  swift-institute/Skills/platform/ \
+  swift-institute/Skills/modularization/ \
+  swift-institute/Internal/RULINGS.md \
+  swift-institute/Internal/inbox.md
 ```
 
 If the grep returns a relevant layering rule, the rule governs. If no entry exists, proceed but consider whether the decision warrants a dated one-liner in `Internal/inbox.md` for the reflections pipeline to promote.
@@ -516,18 +516,12 @@ extension ISO_9945.Kernel.Lock.Token {
 
 The rule predates the [PLAT-ARCH-019] supersession; the shadow concern persists for typed-only L2 surfaces — when L2 and L3-unifier each declare a typed overload at the same path, ambiguity surfaces at consumer sites with or without raw companions.
 
-**The shadow-detection grep**:
+**Shadow detection**:
 
-```bash
-# At the L2 typed-form's namespace path Kernel.X.Y:
-find ~/Developer/swift-foundations/swift-kernel/Sources -name "Kernel.X.Y*.swift"
-grep -rn "extension Kernel\.X\.Y" ~/Developer/swift-foundations/swift-kernel/Sources
+- Query the active package for `extension Kernel.X.Y`.
+- Use the source index to query downstream packages for the same declaration.
 
-# Also check sibling L3-unifier packages:
-grep -rn "extension Kernel\.X\.Y" ~/Developer/swift-foundations/{swift-strings,swift-paths,swift-systems,swift-io,swift-threads}/Sources
-```
-
-If any grep returns a match, the L2 typed form is L3-unifier-shadowed. Without `@_disfavoredOverload` on the L2 typed forms, both layers' typed overloads become equally-ranked candidates → ambiguity errors at every site importing `Kernel`.
+If either query returns a match, the L2 typed form is L3-unifier-shadowed. Without `@_disfavoredOverload` on the L2 typed forms, both layers' typed overloads become equally-ranked candidates → ambiguity errors at every site importing `Kernel`.
 
 **Canonical patterns are precondition-bound**: reading a canonical shape from prior code as a rule-without-preconditions is a recurring failure mode. When applying canonical shapes to a new file, the writer MUST check the precondition (for the no-`@_disfavoredOverload` shape: *no other layer declares a typed overload at the same namespace path*).
 
@@ -671,6 +665,6 @@ grep -rn "struct X\|enum X\|typealias X\b" {iso-9945,darwin-standard,linux-stand
 
 **Rationale**: Typealias-collapsed namespaces make the platform package and swift-kernel the same declaration target. Full text (ecosystem landing commits, provenance): rationale archive §[PLAT-ARCH-028].
 
-**Cross-references**: [PLAT-ARCH-008e], [PLAT-ARCH-018], [MOD-027]
+**Cross-references**: [PLAT-ARCH-008e], [PLAT-ARCH-018], [MOD-IMPORT]
 
 ---

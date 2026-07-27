@@ -4,24 +4,6 @@ description: |
   README conventions across the ecosystem: five families, family-routing, voice registers,
   required structure, badges, maturity tiers, org-tier patterns, CI/CD contract.
   Apply when creating or reviewing any README.md file.
-
-layer: implementation
-
-requires:
-  - swift-institute
-
-applies_to:
-  - swift-primitives
-  - swift-standards
-  - swift-foundations
-  - swift-institute
-  - rule-law
-  - swift-law
-  - swift-nl-wetgever
-  - swift-us-nv-legislature
-  - coenttb
-  - readme
-# Amendment/changelog history: rationale archive (Readme Skill Rationale Archive) §Changelog-Provenance (and git history of this file).
 ---
 
 # README
@@ -65,7 +47,7 @@ Plus user accounts (e.g., `coenttb`), which are not orgs at all but a separate G
 
 ### Every Swift package is one repo
 
-The workspace has **no monorepos and no superrepos**. Every Swift package is a single GitHub repo. The local-disk directory at `~/Developer/<org>/` is a clone-mirror of an org's repos as siblings — useful for cross-repo work locally, but not a GitHub artifact and not a README target.
+The workspace has **no monorepos and no superrepos**. Every Swift package is a single GitHub repo. Workspace materialization roots group independent repositories locally; they are not GitHub artifacts or README targets.
 
 Ecosystem orientation is a **published artifact**, not agent-side context: the `swift-institute/Workspace` repository is the front door, carrying the package inventory (`Workspace.json`, the sole name → org → path authority) and machine-checked checkout facts (`workspace doctor`). Its README, not a private instruction file, is the document a newcomer reads. Each org's GH profile (Family G) remains the per-org catalog. When a README needs to point a reader at "where the ecosystem is described", it points there.
 
@@ -99,13 +81,17 @@ Walk this in order. The first match wins.
 4. **Repo is an implemented Swift package** with working code and a public API? → **Family E**.
 5. **Repo is an unimplemented namespace reservation** or scaffold with title + status only? → **Family F**.
 
-(Local-disk grouping READMEs at `~/Developer/<org>/README.md` are out of scope — ecosystem orientation is published in the `swift-institute/Workspace` front door, not in per-directory READMEs.)
+(Local materialization-root READMEs are out of scope — ecosystem orientation is published in the `swift-institute/Workspace` front door, not in generated directory groupings.)
 
 **Step 3 / step 4 collision — a process repo that ships an executable.** Some workspace-tooling repos are *both*: workspace tooling by role, and an implemented Swift package with a public command surface. `swift-institute/Workspace` is the canonical instance — it is the ecosystem front door (step 3) and ships the `workspace` command-line application (step 4). First-match-wins routes it to Family C, whose rules then forbid exactly the content such a repo needs: [README-137] prohibits a Quick Start, and [README-138] caps length at 80 lines. Both are mechanically enforced.
 
 Route these to **Family C**, and apply the executable carve-outs stated in [README-137] and [README-138]. The reader of such a repo is still a maintainer, not a package evaluator — the Family C voice is correct — but a command surface they are expected to run must be documented, and that content is not optional prose to be evicted to a skill.
 
-**Lint enforcement**: the family-routing rules are mechanically enforced by the `validate-readme.yml` reusable workflow + companion `.github/scripts/validate-readme.py`; the workflow reads `readme.family` from each repo's `metadata.yaml` per Decision 7 (clause hoisted from 2026-05-10 changelog entry).
+**Mechanical destination**: centralized Swift repository-policy validation reads
+`readme.family` from each repository's canonical metadata and reports
+family-routing diagnostics. The reusable workflow only invokes that Swift-owned
+predicate; it does not own a second implementation. A legacy validator is
+transitional evidence until this owner lands.
 
 ### Family-specific path conventions
 
@@ -121,7 +107,7 @@ A single GitHub organization typically owns multiple READMEs across families. Fo
 |---|---|---|
 | `swift-institute/.github/profile/README.md` | G (top-level tier) | github.com/swift-institute |
 | `swift-institute/Skills/README.md` | C | github.com/swift-institute/Skills |
-| `swift-institute/Scripts/README.md` | C | github.com/swift-institute/Scripts |
+| `swift-institute/Workspace/README.md` | C | github.com/swift-institute/Workspace |
 | `swift-institute/swift-institute.org/README.md` | C | github.com/swift-institute/swift-institute.org |
 
 (Analogous leaf-org and org-of-orgs example tables — swift-primitives, swift-standards: rationale archive §Family-routing.)
@@ -170,7 +156,7 @@ A paragraph earns its place when it answers the family's evaluation question. Co
 
 ### [README-026] No Internal Rule-ID Citations
 
-**Statement**: README content (any family) MUST NOT cite internal rule IDs (`[MOD-015]`, `[PRIM-FOUND-001]`, `[API-NAME-001]`, `[README-*]`, etc.). Rule IDs are author-oriented; readers don't know what they mean. Implementation rationale belongs in `Research/`; consumer-facing prose names the *behaviour*, not the rule.
+**Statement**: README content (any family) MUST NOT cite internal rule IDs (`[MOD-IMPORT]`, `[PRIM-FOUND-001]`, `[API-NAME-001]`, `[README-*]`, etc.). Rule IDs are author-oriented; readers don't know what they mean. Implementation rationale belongs in `Research/`; consumer-facing prose names the *behaviour*, not the rule.
 
 **Correct**:
 
@@ -188,7 +174,11 @@ This package complies with [PRIM-FOUND-001] and depends on no Foundation imports
 
 **Rationale**: Rule IDs are author-side scaffolding for skill enforcement — the reader has no access to the rule body, and the citation reads as opaque jargon; zero of 15 surveyed first-class Swift OSS READMEs cite internal convention IDs (full text + provenance: rationale archive §[README-026]).
 
-**Lint enforcement**: `validate-readme.py` at `swift-institute/.github/.github/scripts/validate-readme.py:134` scans each repo's README.md (excluding fenced code blocks) for bracketed convention-ID patterns matching skill prefixes; matches are emitted as `README-026` violations. Invoked by `validate-readme.yml` reusable workflow on every public-repo PR/push. Universal scope — applies to all README families regardless of repo class. [VERIFICATION: WF validate-readme.py:134]
+**Mechanical destination**: the centralized Swift repository-policy validator scans
+README prose outside fenced code blocks for bracketed convention IDs and emits
+`README-026`. Universal reusable CI invokes that same predicate for every
+README family. A legacy validator is transitional evidence until this owner
+lands. [VERIFICATION: centralized repository-policy gate]
 
 **Cross-references**: [README-023]; per-family Voice sections.
 
@@ -200,7 +190,7 @@ This package complies with [PRIM-FOUND-001] and depends on no Foundation imports
 
 **Procedure** (for any new family / sub-tier / [README-*] rule):
 
-1. Before authoring the new family or rule body, enumerate existing workspace instances that the rule will govern (`find ~/Developer -name 'README.md' -path '...'` or equivalent).
+1. Before authoring the new family or rule body, enumerate existing instances through the Workspace inventory and repository-policy tool.
 2. If the count is zero, mark the addition `speculative — pending validation` in the changelog and frontmatter.
 3. Identify the validation criterion: the first concrete artifact whose creation will trigger removal of the flag. Cite it explicitly ("retires when the first <X> README ships").
 4. The speculative flag MUST persist until step 3's criterion is met. A rule that has never been applied to a real artifact has accumulated zero empirical pressure; promoting it to MUST risks mandating shape that conflicts with downstream realities the rule could not have anticipated.
@@ -328,7 +318,7 @@ One-line hooks for every rule. Load the linked file when the family is active.
 | [README-132] | Overview section (optional) — 1–2 paragraphs of context between the 1-liner and structure table, when needed |
 | [README-133] | Workflow / Process section — links to skill that governs the workflow |
 | [README-134] | Companion repositories table — peer process repos in the same org |
-| [README-135] | Layout assumption (when scripts depend on disk shape) |
+| [README-135] | Tooling derives layout instead of requiring machine paths |
 | [README-136] | License section — Apache 2.0 link or per-org standard |
 | [README-137] | No installation block, no badges, no Quick Start (this is not a software product) — carve-out for repos that ship an executable |
 | [README-138] | Length budget — 30–50 lines typical; >80 lines suggests content belongs in DocC or `Research/` — carve-out for repos that ship an executable |
@@ -430,7 +420,7 @@ Three org tiers within one family file; the tier determines which subset of rule
 | [README-162] | Structure linter contract — required sections per family |
 | [README-163] | Badge format validator — order, status values, SPI URL shape |
 | [README-164] | Installation-snippet currency — version drift detection |
-| [README-165] | Cross-repo path link validator — sibling-repo references in `~/Developer/` |
+| [README-165] | Cross-repository link validator — canonical repository identities |
 | [README-166] | Inventory auto-generation — package tables derived from `Package.swift` |
 | [README-167] | Reporting shape — drift surfaces as a tracking issue (mirror sync-metadata-nightly) |
 | [README-168] | Discussion-link auto-generation and validation (cross-refs **github-repository** [GH-REPO-090..093]) |

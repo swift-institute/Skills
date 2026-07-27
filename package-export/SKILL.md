@@ -3,17 +3,6 @@ name: package-export
 description: |
   Export Swift packages to single files for LLM consumption (ChatGPT, Claude, etc.).
   Apply when asked to export, dump, or concatenate a package for sharing with an LLM.
-
-layer: process
-
-requires:
-  - swift-institute-core
-
-applies_to:
-  - export
-  - chatgpt
-  - llm
-  - package
 ---
 
 # Package Export for LLM

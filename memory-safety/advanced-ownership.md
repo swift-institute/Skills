@@ -352,7 +352,7 @@ When the Box's witnesses must reach off-protocol members of the substrate (gener
 
 **ADT Tower rider (2026-07-02)**: this law is now a LOAD-BEARING citation of [DS-025] (the D2 rationale — the triangle is why carriers carry no `deinit` and copyability flows from the column). Wall 1 in `Research/adt-tower.md` §3. Provenance: `Research/adt-tower.md` §4.7.
 
-**Cross-references**: [MEM-COPY-001a] (deinit immutability on ~Copyable structs), [MEM-COPY-003] (class wrapping for collections), [MEM-COPY-004] (suppression restatement on the conditional conformance), [MEM-COPY-010], [MEM-REF-002], [MEM-SAFE-027] (the distinct Wall-2 codegen workaround), [DS-002] / [DS-023] / [DS-025] (data-structure variant disposition + the canonical ADT shape); *(pending — Strata→modularization track)* [MOD-PLACE] (placement-calculus hard-floor exception). Research: `conditional-deinit-conditionally-copyable-generics.md`.
+**Cross-references**: [MEM-COPY-001a] (deinit immutability on ~Copyable structs), [MEM-COPY-003] (class wrapping for collections), [MEM-COPY-004] (suppression restatement on the conditional conformance), [MEM-COPY-010], [MEM-REF-002], [MEM-SAFE-027] (the distinct Wall-2 codegen workaround), [DS-002] / [DS-023] / [DS-025] (data-structure variant disposition + the canonical ADT shape), [MOD-LAYER]. Research: `conditional-deinit-conditionally-copyable-generics.md`.
 
 ---
 

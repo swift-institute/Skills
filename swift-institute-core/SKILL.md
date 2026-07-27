@@ -1,20 +1,6 @@
 ---
 name: swift-institute-core
-description: |
-  Swift Institute system manifest and skill index.
-  This meta-skill declares canonical sources and loading order.
-  ALWAYS loaded first when working in Swift Institute repositories.
-
-layer: meta
-
-requires: []
-
-applies_to:
-  - swift
-  - swift6
-  - swift-primitives
-  - swift-standards
-  - swift-foundations
+description: Swift Institute skill index and context router. Apply first in Institute repositories, then load only the task-relevant architecture, implementation, or process skills.
 ---
 
 # Swift Institute Core
@@ -41,9 +27,9 @@ This is the root meta-skill for the Swift Institute ecosystem.
 - **implementation** - [IMPL-*], [IMPL-EXPR-*], [COPY-FIX-*], [COPY-REM-*], [PATTERN-012–062] (sparse), [API-LAYER-*], [SEM-DEP-*] Call-site-first patterns, typed arithmetic, boundary overloads, dependency strategy, ~Copyable remediation (absorbs anti-patterns, design)
 - **conversions** - [IDX-*], [CONV-*] Index<T> patterns, conversion APIs, rawValue access rules (absorbs primitives-conversions)
 - **platform** - [PLAT-ARCH-*], [PATTERN-001–009] Platform code layering (L1–L3), compilation mechanics, Swift 6, C shims
-- **modularization** - [MOD-*], [MOD-EXCEPT-*] Intra-package target decomposition, constraint isolation, layering exceptions
+- **modularization** - [MOD-*] Independent package, product, target, file, ownership, integration, and dependency decisions
 - **memory-safety** - [MEM-COPY-*], [MEM-OWN-*], [MEM-LINEAR-*], [MEM-SAFE-*], [MEM-SEND-*], [MEM-REF-*], [MEM-LIFE-*], [MEM-SPAN-*], [MEM-UNSAFE-*] Ownership, copyability, strict safety, reference primitives, span access, unsafe operation tracking (absorbs advanced-patterns)
-- **existing-infrastructure** - [INFRA-*] Catalog of typed boundary overloads, Standard Library Integration modules, Tagged functors, Ratio scaling
+- **reuse-first** - [REUSE-*] Capability discovery, semantic-owner selection, owner completion, and composition before implementation
 - **ecosystem-data-structures** - [DS-*] Complete catalog of data structures (Memory, Storage, Buffer, Collections) with selection guidance
 - **testing** - [TEST-*] Umbrella: routing, test support infrastructure, file naming, suite categories
 - **testing-swiftlang** - [SWIFT-TEST-*] Swift Testing framework: suites, naming, ~Copyable, async, model testing
@@ -52,9 +38,9 @@ This is the root meta-skill for the Swift Institute ecosystem.
 - **documentation** - [DOC-*] Inline DocC comments, .docc catalogue conventions, code comment quality
 - **readme** - [README-*] README structure, badges, maturity tiers, org-tier patterns
 - **github-repository** - [GH-REPO-*] GitHub-side repository metadata: description templates, topic taxonomy, homepage URL, license auto-detection, repo settings, .github/metadata.yaml source-of-truth, centralized reusable workflows in swift-institute/.github
-- **social-preview** - [SOC-*] GitHub social preview cards: parametric chassis, org brand in metadata.yaml's socialPreview block, local render+upload via Scripts/social-preview.sh
+- **social-preview** - [SOC-*] GitHub social preview cards: parametric chassis, organization brand in metadata.yaml, and the skill-owned rendering workflow
 - **document-markup** - [DOC-MARKUP-*] Document creation using HTML, PDF, and Markdown rendering packages
-- **swift-linter** - [LINT-SETUP-*], [LINT-BUNDLE-*], [LINT-EXCLUDE-*], [LINT-PARENT-*], [LINT-COHORT-*] Consumer-side swift-linter setup: Lint.swift (default) vs Lint/ nested-package (advanced), Bundle.X activation per consumer layer, excluding(rules:) brand-owner vocabulary (Shape γ), // parent: inheritance chain.
+- **swift-linter** - [LINT-*] Mechanical-rule ownership, predicate design, fixtures, exemptions, severity graduation, bundles, consumer setup, and centralized enforcement
 
 ### Process Layer
 - **audit** - Systematic compliance audit of code against skill requirement IDs
@@ -63,7 +49,7 @@ This is the root meta-skill for the Swift Institute ecosystem.
 - **blog-process** - [BLOG-*] Blog post workflows
 - **skill-lifecycle** - Skill creation, update, review, and deprecation
 - **package-export** - [PKG-EXPORT-*] Export packages for LLM consumption
-- **swift-package-build** - [PKG-BUILD-*] Single build boundary for local SwiftPM and Xcode work: machine-wide capacity slots, same-root serialization, isolated concurrent workspace builds, generated/ignored `Package.resolved`, toolchain assertion, Linux/Embedded contexts, and evidence discipline
+- **swift-package-build** - [PKG-BUILD-*] Workspace-owned Swift build boundary, isolated fresh evidence, generated-state discipline, and CI parity
 - **collaborative-discussion** - [COLLAB-*] Multi-agent collaborative discussions
 - **reflect-session** - Structured post-session reflection capture
 - **issue-investigation** - [ISSUE-*] Systematic compiler/toolchain issue investigation: reproduce, reduce, verify, resolve
@@ -77,7 +63,7 @@ This is the root meta-skill for the Swift Institute ecosystem.
 
 ### Requirement ID convention
 
-Requirement IDs follow `[PREFIX-NNN]` with a zero-padded integer. Exception: foundational axioms that name themselves semantically MAY use `[PREFIX-WORD]` (for example `[IMPL-INTENT]`, `[IMPL-COMPILE]`, `[MOD-DOMAIN]`). These are declared axioms, not numbered rules — the word is the axiom's identity. Tools that pattern-match IDs should accept both `[A-Z]+(-[A-Z]+)+` and `[A-Z]+-\d+`.
+Requirement IDs follow `[PREFIX-NNN]` with a zero-padded integer. Foundational decisions may use a stable semantic name (for example `[IMPL-INTENT]`, `[IMPL-COMPILE]`, `[MOD-OWNER]`). Tools that pattern-match IDs accept both forms.
 
 ### Absorption History
 - **naming**, **errors**, **code-organization** → absorbed into **code-surface**
@@ -87,30 +73,28 @@ Requirement IDs follow `[PREFIX-NNN]` with a zero-padded integer. Exception: fou
 
 ---
 
-## Loading Order
+## Context routing
 
-Skills are loaded based on their `requires:` DAG. The order is:
+Do not load a transitive skill graph. Select context progressively:
 
-1. `swift-institute-core` (no requirements)
-2. `swift-institute` (requires: swift-institute-core)
-3. `swift-package` (requires: swift-institute)
-4. `code-surface` (requires: swift-institute)
-5. `platform` (requires: swift-institute)
-6. `memory-safety` (requires: swift-institute)
-7. `modularization` (requires: swift-institute, code-surface)
-8. `conversions` (requires: swift-institute)
-9. `implementation` (requires: swift-institute, code-surface, conversions)
-10. `existing-infrastructure` (requires: swift-institute, implementation, conversions)
-11. `testing` (requires: swift-institute, code-surface)
-12. `testing-swiftlang` (requires: testing)
-13. `testing-institute` (requires: swift-institute-core, testing, platform)
-14. `benchmark` (requires: testing)
-15. `documentation` (requires: swift-institute, code-surface)
-16. `readme` (requires: swift-institute)
-17. `github-repository` (requires: swift-institute, readme)
-18. Process skills (requires: swift-institute or swift-institute-core)
-    - `swift-package-build` (requires: swift-institute-core)
-19. `release-readiness` (requires: swift-institute; cross-references audit, swift-forums-review, skill-lifecycle, github-repository, readme, documentation)
+1. Load this index and **swift-institute** for ecosystem orientation.
+2. Load the one skill whose description directly matches the task.
+3. Follow a cross-reference only when the current decision requires it.
+4. Load detailed companion references only for the active variant or rule.
+5. Prefer Workspace facts, linter diagnostics, compiler output, and CI results
+   over prose that duplicates deterministic state.
+
+Common routes:
+
+| Task | Load |
+|---|---|
+| add or change a capability | **reuse-first**, then the domain owner skill |
+| package/product/target/file change | **modularization**, **swift-package** |
+| implementation inside a target | **implementation** plus one relevant domain skill |
+| tests | **testing**, then **testing-swiftlang** or **testing-institute** as needed |
+| build or test | **swift-package-build** |
+| mechanical rule or exemption | **swift-linter**, **rule-exemptions** |
+| CI architecture | **ci-cd-workflows** |
 
 ---
 

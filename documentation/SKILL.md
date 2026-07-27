@@ -3,20 +3,6 @@ name: documentation
 description: |
   Inline DocC comments and .docc catalogue conventions.
   ALWAYS apply when writing or reviewing documentation comments or .docc articles.
-
-layer: implementation
-
-requires:
-  - swift-institute
-  - code-surface
-
-applies_to:
-  - swift-primitives
-  - swift-standards
-  - swift-foundations
-  - swift-institute
-  - documentation
-  - docc
 ---
 
 # Documentation

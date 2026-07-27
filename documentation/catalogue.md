@@ -56,20 +56,12 @@ Sources/
 
 **Per-symbol article headings**: in the consolidated catalogue, every per-symbol article's `#` heading MUST address the symbol through the umbrella module, not its declaring module. A per-symbol article for `Property.Typed` (declared in `Property_Typed_Primitives`) consolidated into the umbrella catalogue uses `# ``Property_Primitives/Property/Typed`` `, not `# ``Property_Typed_Primitives/Property/Typed`` `. DocC attaches the article as a documentation extension of the symbol as seen through the catalogue's primary module; the umbrella IS the catalogue's primary module.
 
-**CI-runner shape**: CI may invoke SwiftPM directly to emit per-module symbol graphs, followed by a symbol-graph post-processing step and one `xcrun docc convert` on the umbrella catalogue with `--additional-symbol-graph-dir` pointing at a directory containing ONLY the patched umbrella graph. Local reproduction MUST route the SwiftPM build through `~/Developer/swift-institute/Scripts/swift-build package build -- ...`. The post-processing step serves two roles: (a) inject any missing doc comments into the umbrella graph from sibling graphs — defensive no-op under the CI symbol-graph build, guarding against future regression; (b) **isolate** the umbrella graph into a dedicated output directory so `docc convert` can receive only the umbrella — isolation is load-bearing per the "cross-module ambiguity gotcha" below. Reference implementation: `swift-institute/Scripts/patch-umbrella-symbol-graph.py` (stdlib-only Python 3, authored 2026-04-24 under the ecosystem-wide R3 mandate of research `docc-multi-target-documentation-aggregation.md`).
+**CI-runner shape**: The documentation Swift product emits per-module symbol graphs, isolates the umbrella graph, and invokes one `docc convert` with `--additional-symbol-graph-dir`. Local reproduction routes the build arguments through `workspace package build`. Symbol-graph transformation is Swift-owned library behavior with fixtures; CI only schedules it. The transformation (a) injects missing umbrella-visible comments from sibling graphs when needed and (b) gives DocC only the isolated umbrella graph. That isolation is load-bearing per the cross-module ambiguity gotcha below.
 
 **Correct pipeline invocation**:
 ```bash
-# 1. CI runner emits per-module symbol graphs (preserves @_exported doc comments)
-#    Local reproduction passes the same arguments after `swift-build package build --`.
-swift build -c release \
-    -Xswiftc -emit-symbol-graph \
-    -Xswiftc -emit-symbol-graph-dir -Xswiftc "${DOCS_WORK}/symbol-graphs-raw"
-
-# 2. Pool distribution graphs, excluding test support
-mkdir -p "${DOCS_WORK}/symbol-graphs"
-cp "${DOCS_WORK}/symbol-graphs-raw"/*.symbols.json "${DOCS_WORK}/symbol-graphs/"
-rm -f "${DOCS_WORK}/symbol-graphs/<TestSupportModule>.symbols.json"
+# The owning Swift documentation command performs emission, filtering,
+# umbrella isolation, transformation, and conversion as one typed operation.
 
 # 3. Patch umbrella graph with any still-missing doc comments AND isolate it
 #    into its own directory. Output dir contains ONLY the patched umbrella
@@ -103,7 +95,7 @@ xcrun docc convert "Sources/<Umbrella>/<Umbrella>.docc" \
 
 **When NOT to apply**: packages whose downstream consumers genuinely need per-variant `.doccarchive` artifacts (e.g., a hosting pipeline that serves each variant's docs separately). Such cases are rare; most ecosystems want a single distribution archive.
 
-**Rationale**: The source-level multi-target split exists for compile-time dependency-graph control (narrow imports per `[MOD-015]`). None of the justifications for that split apply to documentation fragmentation. Option F in the cited research is the ecosystem-idiomatic pattern — single archive, single sidebar, full per-symbol docs, while retaining the source-level narrow-import benefit.
+**Rationale**: The source-level multi-target split exists for compile-time dependency-graph control (narrow imports per `[MOD-IMPORT]`). None of the justifications for that split apply to documentation fragmentation. Option F in the cited research is the ecosystem-idiomatic pattern — single archive, single sidebar, full per-symbol docs, while retaining the source-level narrow-import benefit.
 
 **Cross-references**: [DOC-020], [DOC-023] (per-symbol article structure), [API-IMPL-005] (one type per file), research `swift-institute/Research/docc-multi-target-documentation-aggregation.md` v1.2.0 (DECISION).
 

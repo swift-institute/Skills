@@ -1,415 +1,117 @@
 ---
 name: swift-package-build
-description: |
-  Build, test, and resolve Swift Institute packages through the machine-wide coordinator. Apply for SwiftPM, xcodebuild, build concurrency, toolchains, or dependency resolution.
-
-layer: process
-
-requires:
-  - swift-institute-core
-
-applies_to:
-  - swift
-  - swift6
-  - swift-build
-  - swiftpm
-  - xcodebuild
-
-created: 2026-05-03
+description: Swift-owned package build, test, resolution, toolchain, and evidence workflow through Workspace. Always apply when running or reviewing SwiftPM operations in the Institute ecosystem.
 ---
 
-# Swift Package Build
+# Swift package build
 
-All local Swift build-capable work crosses one boundary:
+Workspace owns local SwiftPM execution. This skill explains evidence and
+toolchain judgment; `workspace package` owns the command mechanics.
 
-```text
-~/Developer/swift-institute/Scripts/swift-build
+## Route
+
+Use this skill when the task runs, changes, or interprets:
+
+- package builds, tests, executable runs, clean, resolve, update, or manifest
+  evaluation;
+- non-default Swift toolchains, Linux, Embedded Swift, or release mode;
+- a gate whose result will be reported as evidence.
+
+Use **testing** for test design, **issue-investigation** for reproductions,
+**ci-cd-workflows** for hosted matrices, and **swift-linter** for linting.
+
+## Commands
+
+Run from a package root, or supply `--package-path`:
+
+```sh
+workspace package build
+workspace package test
+workspace package resolve
+workspace package update
+workspace package clean
+workspace package run
+workspace package dump-package
 ```
 
-The coordinator owns machine-wide capacity, same-root serialization, workspace
-resolution, Xcode path isolation, and subprocess lifetime. Harness hooks only
-reject bypasses; they are not the lock.
+For evidence:
 
-## Canonical commands
-
-```bash
-# SwiftPM, from the package root
-~/Developer/swift-institute/Scripts/swift-build package build
-~/Developer/swift-institute/Scripts/swift-build package test
-~/Developer/swift-institute/Scripts/swift-build package resolve
-
-# SwiftPM, from elsewhere
-~/Developer/swift-institute/Scripts/swift-build package build \
-  --package-path /absolute/package/path -- --target TargetName
-
-# The sole local Xcode workspace
-~/Developer/swift-institute/Scripts/swift-build workspace build \
-  --scheme ProductName
-~/Developer/swift-institute/Scripts/swift-build workspace test \
-  --scheme TestTargetName
-~/Developer/swift-institute/Scripts/swift-build workspace resolve \
-  --scheme ProductName
-
-# Capacity inspection
-~/Developer/swift-institute/Scripts/swift-build status
-
-# Impact analysis and affected-package builds
-~/Developer/swift-institute/Scripts/swift-build impact -- \
-  --upstream /absolute/upstream/package \
-  --workspace ~/Developer
-
-# Consumer lint via the cached dispatcher + standard runner (preferred)
-~/Developer/swift-institute/Scripts/swift-build lint \
-  --package-path /absolute/consumer/package
-
-# Machine-readable SwiftPM leaves
-~/Developer/swift-institute/Scripts/swift-build package dump-package
-~/Developer/swift-institute/Scripts/swift-build package get-mirror -- \
-  --original https://example.invalid/dependency.git
+```sh
+workspace package build --fresh
+workspace package test --fresh
 ```
 
-Defaults are two concurrent build processes and three SwiftPM jobs per process.
-`SWIFT_BUILD_SLOTS` and `SWIFT_BUILD_JOBS` may override those values for a
-measured experiment. Do not persist a different default without benchmark
-evidence on the target machine.
-
----
-
-### [PKG-BUILD-023] One Workspace, Concurrent Coordinator-Owned Invocations
-
-**Statement**: The only local Xcode integration surface is
-`~/Developer/swift-institute/Internal/institute.xcworkspace`.
-Invoke it only through `swift-build workspace build|test|resolve`. Every
-workspace action requires a concrete scheme before dependency resolution. The
-coordinator:
-
-- reserves one machine-wide build slot for the full process lifetime;
-- serializes package resolution when the workspace or a member manifest changes;
-- includes the scheme in the resolution fingerprint and passes it to Xcode, so
-  one scheme's resolution cannot suppress another scheme's required resolution;
-- disables automatic resolution during the build;
-- assigns each active slot its own persistent DerivedData lane and an isolated
-  result-bundle path, so concurrent builds never share a build database;
-- shares only the prepared source-package cache; and
-- enables Xcode's compilation cache.
+Forward unusual SwiftPM arguments explicitly and repeat the option:
 
-Concurrent workspace builds are permitted through the coordinator. Direct
-`xcodebuild`, sibling workspaces, shared DerivedData paths, background bypasses,
-and hand-managed Xcode build databases are forbidden.
-
-The workspace uses Xcode's bundled toolchain. Do not set `TOOLCHAINS` for it.
-Target names remain unique across the complete graph per [PKG-NAME-014]. New
-packages join the master workspace as FileRefs.
+```sh
+workspace package test \
+  --argument=--filter \
+  --argument Performance
+```
 
----
+Use the `=` form when a forwarded value begins with `-`, so the command parser
+does not mistake that value for a Workspace option.
 
-### [PKG-BUILD-009] Global Capacity and Same-Root Safety
+## Requirements
 
-**Statement**: Parallel builds are allowed only through `swift-build`.
-The machine-wide slot count limits aggregate compiler pressure across agents,
-terminals, SwiftPM roots, and Xcode builds. SwiftPM operations against the same
-package root serialize and reuse that root's default `.build`; operations on
-different roots may run concurrently.
+### [PKG-BUILD-OWNER] One Swift-owned execution boundary
 
-Never use `--ignore-lock`, a machine-global `SWIFTPM_BUILD_DIR`, ad hoc
-background `swift`/`xcodebuild` processes, or a second scheduler. Separate git
-worktrees are separate package roots and are the correct isolation when two
-builds must exercise different source states of one repository.
+Route supported SwiftPM operations through `workspace package`. Do not create a
+repository-local wrapper, revive a Scripts collection, or add Python or shell
+automation. If the typed Workspace surface lacks a required operation, extend
+its owning Swift product and test that extension.
 
-An orchestrator may submit every independent package in one dependency wave,
-then wait at the wave barrier, but submission fan-out is not capacity
-ownership. The orchestrator MUST NOT retain or reacquire a package-root lock or
-global slot around its lifetime. A coordinator-owned launcher that must build
-the orchestrator first releases both the orchestrator root lock and its global
-slot before executing it; only the subsequently submitted leaf actions acquire
-locks and slots. Operational `swift-impact` runs use `swift-build impact`, not
-a nested `package run` from the swift-impact root.
-
-Manifest and mirror inspection used by an orchestrator are leaf actions too:
-route them through `package dump-package` and `package get-mirror`. Their child
-standard output remains machine-readable because coordinator tracing uses
-standard error.
-
-The default budget is deliberately conservative: `2 × 3` permits concurrency
-without multiplying SwiftPM's usual per-process job count across agents. Any
-change requires measured wall time, peak memory, thermal behavior, and failure
-rate for at least `1×8`, `2×4`, `2×3`, `3×2`, and `3×3`.
+### [PKG-BUILD-FRESH] Evidence uses isolated state
 
----
+Use `--fresh` for a build or test result that supports a release, audit,
+benchmark, migration, or correctness claim. Fresh runs use unique scratch state
+and remove that generated state afterward.
 
-### [PKG-BUILD-010] Package.resolved Is Generated, Ignored State
+### [PKG-BUILD-GENERATED] Resolved state is generated
 
-**Statement**: `Package.resolved` MUST NOT be committed anywhere in this
-workspace. Every repository ignores it recursively. Builds and resolution may
-generate or refresh it, but agents MUST NOT hand-edit it, copy candidate pins
-into it, stage it, diff it as an intended source change, or delete it to force
-dependency advancement.
+`Package.resolved` is generated and ignored. Change `Package.swift`, then use
+`workspace package resolve` or `update`. Never hand-edit, copy, delete, stage,
+or commit resolved state to force dependency movement.
 
-Change dependency requirements in `Package.swift`, then run the coordinator's
-`package resolve`, `package update`, build, or test operation. Diagnose the
-manifest, repository identity, mirrors, credentials, and resolver output—not
-individual lockfile pins. CI resolves from the manifest and may retain the
-generated file only as an uncommitted diagnostic artifact.
+### [PKG-BUILD-EVIDENCE] Report the exact measured scope
 
-`--force-resolved-versions` is forbidden in local, Docker, and CI commands: it
-turns ignored ephemeral state into an undeclared input.
+Record the package root, action, toolchain, meaningful forwarded arguments,
+exit status, and whether the run was fresh. A cached green, a partial target,
+or a build that did not run is not evidence for a wider claim.
 
----
+On failure, preserve the first compiler diagnostic and the complete log. Do
+not infer a source defect from a setup, resolution, capacity, or toolchain
+failure.
 
-### [PKG-BUILD-012] Resolution and Builds Share the Same Root Lock
+### [PKG-BUILD-TOOLCHAIN] Toolchain selection is explicit and verified
 
-**Statement**: SwiftPM resolve, update, clean, reset, build, test, and run
-operations use the coordinator's same per-package-root exclusive lock. This
-prevents a resolver from changing root-local generated state while another
-process uses it. Do not run a separate resolution process around an active
-build.
+Use the repository's declared stable toolchain unless the task specifically
+requires another. When selecting a nightly or development toolchain, record
+`swift --version` and confirm that the resolved executable belongs to the
+intended Xcode or toolchain bundle before interpreting results.
 
-For Xcode, the coordinator fingerprints the master workspace plus all member
-`Package.swift` files. A changed fingerprint forces one exclusive dependency
-resolution; unchanged builds share the prepared resolution under a read lock.
+Recheck a nightly-only failure on stable. Treat disagreement as evidence about
+the toolchain boundary, not permission to change unrelated source.
 
----
+### [PKG-BUILD-EMBEDDED] Embedded is a compiled configuration
 
-### [PKG-BUILD-013] Clean-Room and Publication Evidence Uses Source Isolation
+For an Embedded claim, use the declared SDK and compiler mode through forwarded
+Workspace arguments. A text search for imports cannot prove Embedded
+compatibility; compilation is the evidence.
 
-**Statement**: Release/publication evidence runs from a clean checkout or git
-worktree, not by deleting `.build` or `Package.resolved` in a dirty working
-tree. Route the worktree's SwiftPM command through the coordinator and preserve
-its actual exit status. A clean room proves the manifest can resolve from its
-declared URLs without local edits; it does not prove a committed lockfile.
+### [PKG-BUILD-CI] CI and local verification share semantics
 
----
+Hosted CI may use its reusable Swift action directly, but its action,
+toolchain, configuration, and package root must be reproducible through the
+Workspace-owned local interface. Central CI owns matrices and aggregation;
+consumer repositories remain thin callers.
 
-### [PKG-BUILD-014] Dependency Identity Comes From the Manifest and Repository
+## Stop conditions
 
-**Statement**: Diagnose dependency identity from canonical repository URLs,
-package identities, product names, mirrors, and the resolved graph emitted by
-SwiftPM. Do not repair identity problems by editing a `Package.resolved` pin.
-When a dependency changes ownership or URL, update the manifest and verify from
-a clean worktree.
+Stop and report an unmeasured result when:
 
----
-
-### [PKG-BUILD-015] Resolution Failures Are Evidence, Not Pin Work
-
-**Statement**: On a resolution failure, capture the coordinator command, exit
-status, resolver diagnostics, manifest diff, applicable mirror configuration,
-and authentication state. Fix the declared dependency or environment. Never
-manufacture a lockfile, transplant revisions, or perform manual pin surgery.
-
----
-
-### [PKG-BUILD-016] Preserve Command and Exit-Status Evidence
-
-**Statement**: A green claim requires the exact coordinator command and its
-actual exit status. Capture pipeline status from the build process, not a
-trailing formatter. A cached success is valid build evidence but not fresh
-compilation evidence; state which one was measured.
-
-Do not repeatedly rerun a long failure merely to recover diagnostics already
-present in a complete log. Reduce to a focused target or test and retain the
-first trustworthy failure.
-
----
-
-### [PKG-BUILD-017] Bound Apparent Hangs
-
-**Statement**: Distinguish dependency resolution, graph planning, compilation,
-linking, and test execution before calling a build hung. Inspect the process and
-log, and preserve evidence. A bounded SwiftPM leaf uses the coordinator's
-`--timeout-seconds`; its deadline begins only after the package-root lock and a
-global slot have both been acquired. At expiry the coordinator sends TERM to
-the owned process group, waits the configured grace period, escalates to KILL,
-reaps the direct child, and proves the complete process group absent before it
-returns 124 or releases either lock. The caller MUST leave swift-process's own
-timeout nil for coordinator children and MUST NOT kill the coordinator to
-enforce a competing outer deadline.
-
-Never use broad `pkill`, stale PID files, or open-ended polling. A user-requested
-SIGINT or SIGTERM follows the same group-cleanup invariant while preserving the
-signal-derived exit status.
-
----
-
-### [PKG-BUILD-018] Graph-Planning Stalls Escalate with a Reproducer
-
-**Statement**: If SwiftPM remains CPU-active in graph planning beyond the
-bounded window, record a sample, manifest/target counts, toolchain, and the
-smallest reproducer. A workspace scheme may be used as an engine comparison,
-but it still runs through the coordinator.
-
----
-
-### [PKG-BUILD-019] Supersession Swaps Gate the Swapped Surface
-
-**Statement**: A dependency, macro, or engine replacement must build the
-swapped surface before landing. When external state makes that impossible,
-name the un-gated targets and reason explicitly; do not imply green evidence.
-
----
-
-### [PKG-BUILD-020] Full Error Inventory Uses a Controlled Target Sweep
-
-**Statement**: When a full SwiftPM build halts before sibling targets are
-visited, derive the target list from `swift-build package dump-package` and run
-each target serially through the coordinator. Deduplicate diagnostics by
-`file:line:message` and retain each coordinator exit status.
-
----
-
-### [PKG-BUILD-021] Check Capacity Before Interpreting Toolchain Failure
-
-**Statement**: On output-stream failure, malformed target-info JSON, errno 28,
-or unexplained compiler termination, inspect free disk, memory pressure, and
-the coordinator's active-slot state before concluding the source or compiler
-is defective.
-
----
-
-### [PKG-BUILD-025] Consumer Lint Runs Through the Coordinator's Binary Cache
-
-**Statement**: Local consumer lints use `swift-build lint --package-path
-<consumer>`. The coordinator maintains a machine-wide cache of the
-`swift-linter` dispatcher and the standard-runner binary, keyed on a composite
-digest over the local HEADs of the engine and the five standard rule-pack
-repositories plus the compiler banner — the same coordinate CI's
-`publish-ci-binaries.yml` keys the rolling `ci-binaries` release on. A keyed
-HEAD move triggers ONE machine-wide rebake; every subsequent lint runs the
-cached binaries with `SWIFT_LINTER_RUNNER` and `SWIFT_LINTER_PATH` provisioned
-by the coordinator.
-
-The lint holds the CONSUMER's package-root lock — never the swift-linter
-root — so lints of different repositories parallelize and the linter
-repository is contended only during a rebake. Slot policy follows
-[PKG-BUILD-027]: a fast-path-likely dispatch takes no build slot; only a
-consumer that may route to the eval fallback holds one. Pure-baked-bundle
-consumers lint warm in about a second; eval-fallback consumers (inline rules,
-non-baked bundles, SARIF output) keep the full eval pipeline, and the
-coordinator refreshes a stale `.swift-lint/eval` via `swift package update`
-(never by touching its `Package.resolved`) whenever the composite digest or
-the consumer's `Lint.swift` moved. `--rebuild` forces a rebake; `--clean-eval`
-discards the eval project outright. Uncommitted rule-pack edits are invisible
-to the digest (mirror resolution clones HEAD): commit rule changes to lint
-with them.
-
-The legacy `swift-build package run --package-path <swift-linter> -- swift-linter
-<consumer>` form remains valid but serializes every lint on the swift-linter
-root and pays the per-repo eval cost; prefer `swift-build lint`.
-
----
-
-### [PKG-BUILD-027] Prebuilt-Tool Execution Takes No Build Slot
-
-**Statement**: Running a prebuilt binary is not a build — it must not compete
-with builds for machine slots. Slots govern compilation and resolution work
-only; prebuilt-tool execution takes the relevant root lock for correctness
-but no slot. This covers any cached coordinator-owned tool, present and
-future.
-
-**Worked example** (the lint fast path): `swift-build lint` dispatches the
-cached swift-linter binary under the consumer's root lock. A
-fast-path-likely consumer (a pure baked bundle per the dispatcher's
-classifier, conservatively mirrored coordinator-side) runs slot-free — the
-dispatch is a ~1s AST walk that must not queue behind long compiles. A
-consumer that may route to the eval fallback (no readable `Lint.swift`, a
-`// parent:` chain, inline SwiftSyntax rules, manual enables, a non-baked
-bundle) still holds a slot, because the eval genuinely compiles. The bake
-itself and every eval refresh run through `package build`/`update` and are
-slot-governed as ordinary builds. The mirror errs toward TAKING a slot: the
-acceptable residual is an occasional slotted ~1s dispatch, never a routine
-unslotted compile.
-
----
-
-### [PKG-BUILD-026] Toolchain-Change Staleness Is Reconciled, Scoped, and Stamped
-
-**Statement**: For `package build|test|run` the coordinator records the
-compiler banner in `.build/coordinator-compiler-version` after each successful
-action. When the recorded banner differs from the current compiler, it removes
-every `.build/**/Modules-tool` tree before the action — host-tool swiftmodules
-are compiler-version-locked and otherwise fail with "compiled by an older
-compiler" on SwiftSyntax/SwiftDiagnostics, forcing full cleans. A missing
-stamp is a strict no-op: first contact never cleans. If a version-lock failure
-survives the scoped clean, escalate to `swift-build package clean` on that
-root rather than deleting artifacts by hand.
-
----
-
-### [PKG-BUILD-024] Toolchain Scope
-
-**Statement**: Local workspace work uses Xcode's bundled toolchain with no
-`TOOLCHAINS` environment variable. A standalone release or nightly toolchain is
-allowed only for an explicit clean-room, forward-compatibility, Embedded, or CI
-context. Pass it through the coordinator and assert the resolved compiler
-before treating the result as evidence.
-
-### [PKG-BUILD-001] Select Non-Default SwiftPM Toolchains with `TOOLCHAINS`
-
-Use the installed toolchain's bundle identifier, not `xcrun --toolchain`, for
-an explicit alternate-toolchain SwiftPM run. Keep the environment scoped to the
-single coordinator invocation.
-
-### [PKG-BUILD-002] Read the Bundle Identifier from `Info.plist`
-
-Obtain `CFBundleIdentifier` with `defaults read` from the installed
-`.xctoolchain`; never infer it from the directory or snapshot name.
-
-### [PKG-BUILD-003] Verify Build Configuration Before Blaming Source
-
-When compiler output contradicts the selected toolchain's interfaces, first
-verify the resolved compiler, SDK, standard-library path, and environment.
-
-### [PKG-BUILD-004] Toolchain Choice Is Contextual
-
-Use Xcode's bundled compiler for the workspace, a stated standalone release for
-publication clean rooms, a nightly only for explicit forward-compatibility
-spikes, and the CI image's compiler in CI.
-
-### [PKG-BUILD-011] Recheck Nightly Failures on Stable
-
-A nightly compiler or SDK is an experimental variable. Reproduce any nightly
-failure with the stable toolchain before attributing it to source, dependency
-identity, or the coordinator. Record both outcomes.
-
-### [PKG-BUILD-022] Assert Every Explicit Toolchain Selection
-
-`TOOLCHAINS` silently falls back when its identifier is invalid. In the same
-environment used by the coordinator, match `swift --version` on the expected
-build tag—not only the marketing version—before accepting build evidence.
-
----
-
-### [PKG-BUILD-005] Linux Uses an Official Swift Container
-
-Stable Linux validation uses an official `swift:<version>` image. Route the
-outer Docker command through the applicable CI or experiment workflow; inside
-the container, limit SwiftPM jobs to the allocated capacity and do not rely on
-a committed `Package.resolved`.
-
-### [PKG-BUILD-006] Linux Nightly Is Forward-Compatibility Evidence
-
-Use `swiftlang/swift:nightly-main-jammy` only for an explicit nightly lane.
-Nightly failure does not override stable evidence without diagnosis.
-
-### [PKG-BUILD-007] Guard Non-Embedded Source Surface
-
-Code unavailable to Embedded Swift—including reflection, Foundation, and
-unsupported concurrency surface—belongs under `#if !hasFeature(Embedded)`.
-
-### [PKG-BUILD-008] Embedded Builds Use the Declared SDK and Mode
-
-Embedded evidence states the SDK, target, toolchain, and feature mode. It runs
-in an isolated clean room with bounded coordinator capacity; a source guard by
-itself is not build evidence.
-
----
-
-## Cross-references
-
-- **swift-institute-core** owns skill routing.
-- **testing** and **testing-institute** own test design; their build-capable
-  commands are payloads for this coordinator.
-- **benchmark** owns measurement design; build concurrency experiments vary
-  `SWIFT_BUILD_SLOTS` and `SWIFT_BUILD_JOBS` only for the measured invocation.
-- **release-readiness** and **ci-cd-workflows** consume build evidence but do
-  not create alternate local schedulers or lockfile policy.
+- Workspace does not expose the required operation;
+- the selected toolchain cannot be established;
+- dependency resolution fails before compilation;
+- another process or dirty generated state makes the measured scope ambiguous;
+- a command would require manipulating `Package.resolved`.

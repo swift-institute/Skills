@@ -369,7 +369,7 @@ The source-level path *looks like* it's authoring package-A-resident code; the c
 **Pre-flight grep** (per sub-cycle plan stage of L3-policy build-out cycles):
 
 ```bash
-grep -rn 'public typealias.*= ISO_9945\.Kernel\.' ~/Developer/swift-foundations/swift-posix/Sources/
+rg 'public typealias.*= ISO_9945\.Kernel\\.' Sources/
 ```
 
 Each typealiased parent's existing L2 sub-namespaces are out-of-Option-(ii) scope — flag in the plan's empirical-state section so the principal disposition is bounded upfront.
@@ -444,7 +444,7 @@ public func consume(_ bytes: some Sequence<UInt8>) { ... }   // ❌ resolves to 
 
 **Statement**: Platform packages (`darwin-primitives`, `linux-primitives`, `windows-primitives`) MUST keep `{Platform} Primitives Core` as an internal target with no published product. Core contains only the namespace enum (e.g., `public enum Darwin {}`). Variant targets (`Kernel`, `Kernel Event`, `Loader`, `Memory`) MUST add `@_exported public import {Platform}_Primitives_Core` in their `Exports.swift` so the namespace flows to consumers.
 
-**Why**: Per `[MOD-001]` Core SHOULD NOT be published. But L3 packages need the namespace. The `@_exported` re-export from variants solves this without publishing Core.
+**Why**: Per `[MOD-PRODUCT]`, an implementation root is not published merely because variants need it. L3 packages still receive the namespace through the deliberate aggregate product.
 
 **How to apply**: When a consumer needs the `Darwin` / `Linux` / `Windows` namespace, depend on a published variant product (e.g., `Darwin Kernel Primitives`), not Core directly. Composes with `[PLAT-ARCH-026]` — variants are the discovery surface that carries the namespace.
 
@@ -469,4 +469,3 @@ public func consume(_ bytes: some Sequence<UInt8>) { ... }   // ❌ resolves to 
 **Cross-references**: [PLAT-ARCH-013], [PLAT-ARCH-015], [PLAT-ARCH-019], [API-NAME-003]
 
 ---
-

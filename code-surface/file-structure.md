@@ -252,7 +252,7 @@ extension Swift.Optional: Serializable where Wrapped: Serializable {
 
 ---
 
-**Enforcement**: TEXT-ONLY (cross-module associatedtype knowledge — the [MOD-016] per-file-AST class; /promote-rule 2026-07-06): an internal audit record.
+**Enforcement**: TEXT-ONLY (cross-module associatedtype knowledge and per-file SPI boundaries under [MOD-SPI]): an internal audit record.
 
 ### [API-IMPL-020] Explicit `Body = Never` Typealias on Generic Parser/Serializer Leaf Conformers
 
@@ -320,4 +320,3 @@ noun at their package's release-readiness.
 **memory-safety** [MEM-SAFE-029]; **ecosystem-data-structures** [DS-028] (front-door aliases), [DS-025].
 
 ---
-

@@ -87,9 +87,9 @@ Non-umbrella module catalogs (Core, variants) SHOULD remain at baseline [DOC-021
 
 **Rationale**: Readers encountering a multi-module package need a single entry point. The umbrella landing page is that entry — it carries visual affordances and cross-layer navigation that variant-module roots don't need. Placing all entry-point navigation on the umbrella keeps variant-module roots focused on their type catalog.
 
-**Note on "umbrella"**: "Umbrella" here is the DocC catalog sense — a root `.docc` that hosts the landing page and consolidated docs. Distinct from the SwiftPM umbrella target ([MOD-005]) and the testing-routing umbrella skill (`testing`).
+**Note on "umbrella"**: "Umbrella" here is the DocC catalog sense — a root `.docc` that hosts the landing page and consolidated docs. Distinct from the SwiftPM aggregate product ([MOD-PRODUCT]) and the testing-routing umbrella skill (`testing`).
 
-**Cross-references**: [DOC-021], [DOC-081], [DOC-082], [DOC-083], [MOD-005]
+**Cross-references**: [DOC-021], [DOC-081], [DOC-082], [DOC-083], [MOD-PRODUCT]
 
 ---
 
@@ -196,4 +196,3 @@ Only include sections that actually have content — empty group headings are no
 **Cross-references**: [DOC-025], [DOC-063], [DOC-080]
 
 ---
-

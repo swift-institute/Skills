@@ -890,7 +890,7 @@ consumer-language only), **github-repository** `[GH-REPO-090..093]`,
 
 ### [README-018] (DEPRECATED in v3.0.0)
 
-**Status**: DEPRECATED. The original v2.1.0 rule specified the structure of monorepo root READMEs. The workspace has no monorepos and no superrepos — every Swift package is a single GitHub repo, and the local-disk directory at `~/Developer/<org>/` is a clone-mirror, not a "repo" in any GitHub sense.
+**Status**: DEPRECATED. The original v2.1.0 rule specified the structure of monorepo root READMEs. The workspace has no monorepos and no superrepos — every Swift package is a single GitHub repo, and local materialization roots are not repositories in any GitHub sense.
 
 **Content roles redistributed**:
 

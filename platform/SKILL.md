@@ -3,25 +3,6 @@ name: platform
 description: |
   Platform code layering (L1–L3), compilation mechanics, Swift 6 features, C shims, build infrastructure.
   ALWAYS apply when placing platform-specific code, configuring Package.swift, or using platform conditionals/feature flags.
-
-layer: architecture
-
-requires:
-  - swift-institute
-
-applies_to:
-  - swift
-  - swift6
-  - swift-primitives
-  - swift-standards
-  - swift-foundations
-  - kernel
-  - darwin
-  - linux
-  - windows
-  - posix
-  - platform
-# Amendment/changelog history: Research/platform-skill-rationale.md §Changelog-Provenance (and git history of this file).
 ---
 
 # Platform

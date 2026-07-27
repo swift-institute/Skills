@@ -1,16 +1,6 @@
 ---
 name: skill-lifecycle
-description: |
-  Create, edit, and retire skills.
-  Apply when adding a new skill, changing an existing one, or removing one.
-
-layer: process
-requires:
-  - swift-institute-core
-applies_to:
-  - skills
-  - documentation
-  - swift-institute
+description: Create, edit, validate, and retire Swift Institute skills. Apply whenever a skill is added, changed, split, renamed, or removed.
 ---
 
 # skill-lifecycle
@@ -28,16 +18,26 @@ staged deprecation with retention windows — is gone (solo-dev ceremony cut,
 - Keep each skill focused and **prune rather than accrete** — a skill that only grows is
   the ceremony problem. Cut a stale rule when you see it; don't annotate it with dated
   history in the body (that's what git log is for).
-- Requirement IDs are `[PREFIX-NNN]`. Before assigning a new one, grep the skill to
-  confirm the number is free.
+- Keep `SKILL.md` at or below 500 lines. The Workspace context validator
+  enforces this ceiling. Put optional, task-specific detail in a
+  one-level `references/` directory and link each reference directly from the
+  hub with an explicit loading condition.
+- Keep frontmatter to `name` and `description`. Make the description state both
+  the capability and its triggers; it is the routing surface.
+- Requirement IDs are `[PREFIX-NNN]` or a stable semantic axiom such as
+  `[MOD-OWNER]`. Before assigning one, grep the corpus to confirm it is free.
 
 ## Creating a skill
 
-1. Write `<name>/SKILL.md` with frontmatter (`name`, `description`, `layer`, `requires`).
-   The `description` is what the harness shows each session — keep it one or two lines.
+1. Write `<name>/SKILL.md` with `name` and `description` frontmatter. Keep the
+   body procedural and omit knowledge a capable model already has.
 2. Add a public skill to `swift-institute-core/SKILL.md`; add a private operational skill to
    `Internal/Skills/README.md` instead.
-3. Link the complete skill directory into the local harness's skill directory.
+3. Run `workspace context install` from the Workspace package to project the
+   canonical skill roots into the entry-point harness.
+4. Run `workspace context check`; it parses every canonical skill through the
+   Swift `Skill Validation` product before accepting the projection. Run any
+   domain-owner tests affected by changed requirement IDs or enforcement.
 
 Machine-specific configuration, private control-plane paths, credentials operations, and
 fleet-wide mutation workflows belong in `Internal/Skills`; reusable engineering conventions
@@ -45,6 +45,6 @@ belong here.
 
 ## Retiring a skill
 
-Delete the directory and its symlink, and remove it from the `swift-institute-core`
-index. If other skills referenced it, grep for the name and clean the references.
-Git history preserves it.
+Delete the directory and remove it from the `swift-institute-core` index. Clean
+all name and requirement-ID references, then run `workspace context install` to
+reconcile generated links. Git history preserves it.

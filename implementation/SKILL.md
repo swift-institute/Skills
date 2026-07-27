@@ -3,21 +3,6 @@ name: implementation
 description: |
   Intent-over-mechanism and compiler-enforced strictness: expression-first, call-site-first, typed arithmetic, boundary overloads, ownership-first.
   ALWAYS apply when writing or reviewing implementation code.
-
-layer: implementation
-
-requires:
-  - swift-institute
-  - code-surface
-  - conversions
-
-applies_to:
-  - swift
-  - swift6
-  - primitives
-  - standards
-  - foundations
-# Amendment/changelog history: Research/implementation-skill-rationale.md §Changelog-Provenance (and git history of this file).
 ---
 
 # Implementation
@@ -94,7 +79,7 @@ After improving infrastructure, all other call sites also benefit. The infrastru
 | `index * 2` | Indices are ordinals; scaling a position is meaningless | Rethink: do you mean `offset * 2`? |
 | `bounded + .one` returning `Bounded<N>` | Addition on bounded ordinal is partial | `bounded.successor()` (returns `Optional`) |
 
-For the complete catalog of principled absences, see [INFRA-200].
+Apply [REUSE-006] before adding an operation that may be intentionally absent.
 
 **Gap — DO add:**
 
@@ -271,7 +256,7 @@ See also:
 - **code-surface** skill for [API-NAME-*], [API-ERR-*], [API-IMPL-*] naming, errors, file structure
 - **memory-safety** skill for [MEM-*] ownership patterns, ~Copyable mechanics, unsafe marking
 - **testing** skill for [TEST-018] literal conformances in tests
-- **existing-infrastructure** skill for [INFRA-*] catalog of typed operations, integration modules, and principled absences
+- **reuse-first** skill for capability discovery, owner completion, composition, and principled absences
 - **Semantic Dependencies.md** for [SEM-DEP-*] dependency classification rules
 
 ---

@@ -142,7 +142,7 @@ Constraints for the table form: 5–8 rows spanning distinct capability dimensio
 **Correct (single flagship entry — classic anatomy, permitted)**:
 
 ```markdown
-**[swift-html-to-pdf](https://github.com/coenttb/swift-html-to-pdf)** (54 stars)
+**`swift-html-to-pdf`** (54 stars)
 *The fastest HTML to PDF library for Swift.* 1,939 PDFs/second with 35MB memory.
 - Concurrent rendering with WebView pooling
 - Swift 6 strict concurrency
@@ -165,8 +165,8 @@ Constraints for the table form: 5–8 rows spanning distinct capability dimensio
 ```markdown
 ### Developer Tools
 
-- [**swift-resource-pool**](https://github.com/coenttb/swift-resource-pool) (2 stars) - Production-ready resource pooling with FIFO fairness
-- [**swift-throttling**](https://github.com/coenttb/swift-throttling) - Security-first rate limiting with exponential backoff
+- **`swift-resource-pool`** (2 stars) - Production-ready resource pooling with FIFO fairness
+- **`swift-throttling`** - Security-first rate limiting with exponential backoff
 ```
 
 **Constraints**:

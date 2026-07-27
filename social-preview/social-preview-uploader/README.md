@@ -5,14 +5,14 @@ Vendored from [AnswerDotAI/gh-social-preview](https://github.com/AnswerDotAI/gh-
 (ISC license) with the README-screenshot logic stripped — accepts a
 pre-rendered PNG via `--image`.
 
-Used by `Scripts/social-preview.sh` to upload chassis-rendered cards.
+Used by the adjacent `social-preview.sh` to upload chassis-rendered cards.
 GitHub does not expose a public API for this setting; Playwright UI
 automation is the only path.
 
 ## One-time setup
 
 ```bash
-cd swift-institute/Scripts/social-preview-uploader
+cd swift-institute/Skills/social-preview/social-preview-uploader
 npm install                 # installs playwright + downloads Chromium (~150 MB)
 node upload.js init-auth    # opens browser; log in; session saved to disk
 ```
@@ -33,7 +33,7 @@ Headless (no visible browser). Prints `✅ <repo>: uploaded` on success.
 ## Indirect use (via wrapper)
 
 ```bash
-swift-institute/Scripts/social-preview.sh --upload swift-primitives/swift-buffer-primitives
+swift-institute/Skills/social-preview/social-preview.sh --upload swift-primitives/swift-buffer-primitives
 ```
 
 Renders + uploads in one step.

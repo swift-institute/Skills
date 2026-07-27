@@ -1,174 +1,147 @@
 ---
 name: ci-cd-workflows
-description: |
-  CI/CD architecture: three-tier reusable chain, universal matrix, no-cache policy, mass-rollout discipline.
-  Apply when designing/modifying workflows, planning mass changes, or auditing against ecosystem invariants.
-
-layer: process
-
-requires:
-  - swift-institute-core
-
-applies_to:
-  - swift-institute
-  - swift-primitives
-  - swift-standards
-  - swift-foundations
-# Amendment/changelog history: Research/ci-cd-workflows-skill-rationale.md §Changelog-Provenance (and git history of this file).
+description: Design, change, or audit Swift Institute CI, reusable workflows, matrices, security, and cross-repository rollouts. Apply whenever CI behavior or workflow ownership changes.
 ---
 
-# CI/CD Workflows
+# CI/CD workflows
 
-Architecture, invariants, and rollout discipline for Swift Institute CI/CD across the layered package ecosystem. The workflows themselves live in `swift-institute/.github/.github/workflows/` (universal reusables) and `<layer>/.github/.github/workflows/` (layer wrappers); consumer repos carry thin caller `ci.yml` files.
+CI is a centralized execution system, not a collection of copied repository
+scripts. This hub supplies the architecture and decision order. Load one
+companion only when its topic becomes active.
 
-This skill is organized as a navigation hub. The three-tier framing below governs the whole skill and is always in context; detailed rule bodies live in the sibling files listed under **Files**. Claude loads the relevant companion on demand when a topic is active.
+## Ownership
 
-**Source authority**: `swift-institute/Research/ci-centralization-strategy.md` (Tier 2 RECOMMENDATION, 2026-04-22) established the centralization architecture; `swift-institute/Research/ci-cache-strategy-branch-pinned-dependencies.md` (v1.1.0, 2026-05-04) established the no-cache policy. Mass-rollout discipline is grounded in this skill's own provenance section. Extended rationale, evicted provenance, and worked examples: `swift-institute/Research/ci-cd-workflows-skill-rationale.md`.
+### [CI-OWNER] Put each behavior at one executable owner
 
----
+Choose the narrowest owner whose change reaches every intended consumer:
 
-## The Three-Tier Chain
+| Concern | Owner |
+| --- | --- |
+| universal build, test, format, lint, and docs behavior | Institute reusable workflow |
+| layer-specific verification | layer wrapper |
+| repository trigger and concurrency | thin consumer caller |
+| Swift source predicate | swift-linter rule pack |
+| package graph or manifest predicate | owning Swift package-analysis product |
+| workspace facts and local orchestration | Workspace |
 
-CI/CD is organized as a three-tier reusable-workflow chain per [CI-001]. This topology is load-bearing for every rule below — each rule answers "which tier owns this, and how does it flow to the others?"
+GitHub Actions YAML schedules and wires these owners. Custom validation logic
+must be implemented and tested in Swift, not embedded as Python, shell, or
+duplicated YAML expressions.
 
-| Tier | Lives in | Carries | Anchoring rules |
-|------|----------|---------|-----------------|
-| 1 — Consumer thin caller | `<pkg>/.github/workflows/ci.yml` | name + `on:` + `concurrency:` + thin `uses:` jobs with `secrets: inherit` | [CI-031], [CI-030], [CI-059] |
-| 2 — Layer wrapper | `<layer>/.github/.github/workflows/swift-ci.yml` (+ `swift-docs.yml`) | layer-specific verifications; secret transport across org boundaries | [CI-004], [CI-004a], [CI-003] |
-| 3 — Universal reusable | `swift-institute/.github/.github/workflows/swift-ci.yml` | the universal build/test matrix + ecosystem-wide format/lint gates | [CI-002], [CI-010], [CI-054] |
+### [CI-CHAIN] Preserve the three-tier call chain
 
-Three cross-cutting axioms frame the rest: the matrix is the platform contract, never derived from any package ([CI-091]) — its SHAPE is sacred, while its per-push SCHEDULING is tiered per [CI-115] (lint plus one supported release build per push; full contract at tag refs and the nightly `ci-sweep` rotation); CI on this Free-plan workspace fires only on public repos, so **correctness > security > speed** and dollar/minute cost is not an axis ([CI-096], [CI-032], [CI-060]); and runner CONCURRENCY (5 macOS / 20 total per free-plan org) IS a real speed-axis budget — the [CI-096] amendment 2026-07-20 — which is why full-matrix breadth is scheduled, not per-push.
+```text
+consumer caller → layer wrapper → universal reusable
+```
 
----
+- The consumer owns events, concurrency, and a thin `uses:` job.
+- The layer wrapper adds only genuine layer behavior and transports secrets.
+- The universal reusable owns common jobs, matrix selection, and aggregation.
 
-## Files
+An authority sub-organization caller still enters through its parent layer
+wrapper; do not add a fourth reusable-workflow hop.
 
-| Topic | File | Rules |
-|-------|------|-------|
-| Architecture & Reusable Consumption | `architecture.md` | [CI-001]–[CI-004b], [CI-030], [CI-031], [CI-053], [CI-054], [CI-093], [CI-108] |
-| Universal Matrix, Toolchain & L1 Invariants | `matrix.md` | [CI-010]–[CI-013], [CI-091], [CI-114], [CI-115], [CI-092], [CI-020]–[CI-022], [CI-099] |
-| Secrets, Tokens, Visibility & Private-Repo Gates | `secrets-tokens.md` | [CI-032], [CI-058], [CI-059], [CI-060], [CI-109], [CI-094], [CI-095], [CI-112] |
-| Security Hardening, Permissions & Version Pins | `security-hardening.md` | [CI-080], [CI-081], [CI-082], [CI-090], [CI-097], [CI-096], [CI-098], [CI-107] |
-| Caching Policy & Per-Package Configuration | `caching.md` | [CI-040]–[CI-044], [CI-116], [CI-055], [CI-057] |
-| Mass-Rollout Discipline | `mass-rollout.md` | [CI-050], [CI-051], [CI-052], [CI-056], [CI-111], [CI-113] |
-| Workflow-Authoring Gotchas & Parse-Time Failure Classes | `workflow-authoring.md` | [CI-070], [CI-102], [CI-103], [CI-105], [CI-106], [CI-110], [CI-104], [CI-100], [CI-101] |
+### [CI-CALLER] Consumers declare policy, never reimplement mechanics
 
----
+A package caller may declare explicit inputs such as supported platform
+identity. It must not copy setup steps, choose tool versions, or shadow a
+central job. When a package needs behavior that other packages could use,
+change the shared owner first.
 
-## Rule Index
+## Designing a change
 
-One-line hooks for every rule. Load the linked file when the topic is active.
+### [CI-PREDICATE] Promote deterministic prose to Swift
 
-### Architecture & Reusable Consumption (`architecture.md`)
+When a skill sentence can be decided from source, manifests, repository files,
+or a dependency graph:
 
-| ID | Hook |
-|----|------|
-| [CI-001] | Three-tier chain — per-package thin caller → layer wrapper → universal reusable |
-| [CI-002] | Universal reusable owns the matrix + ecosystem-wide format/lint gates; no layer-specific jobs |
-| [CI-003] | Layer-specific verifications live in layer wrappers, not the universal |
-| [CI-004] | Each layer org hosts a `swift-ci.yml` wrapper mirroring the org hierarchy |
-| [CI-004a] | `swift-docs.yml` layer wrappers are REQUIRED for secret transport; route docs through them |
-| [CI-004b] | Sub-org `.github` repos MUST NOT host `swift-ci.yml` (4-level chain limit); future work |
-| [CI-030] | Caller `uses:` refs pin `@main` during active dev; tag/SHA pins forbidden until `@v1` |
-| [CI-031] | Per-package `ci.yml` is the absolute minimum — name + `on:` + `concurrency:` + thin `uses:` jobs |
-| [CI-053] | `swift-docs.yml` derives umbrella/display/bundle/catalog from repo name; overrides accepted |
-| [CI-054] | `format`/`lint` absorbed as parallel jobs in the universal; per-repo workflow files forbidden |
-| [CI-093] | Local format/lint tooling resolves to a `Scripts/<tool>` wrapper on the CI toolchain; no `$PATH` |
-| [CI-108] | A workflow needs a per-repo file only if its trigger/output ties to that repo's diff/branch |
+1. name the semantic owner;
+2. implement a Swift predicate there;
+3. add positive, negative, and exemption fixtures;
+4. expose a stable diagnostic identifier;
+5. call it from the appropriate reusable workflow;
+6. remove duplicated procedural instructions from skills.
 
-### Universal Matrix, Toolchain & L1 Invariants (`matrix.md`)
+Use **swift-linter** for SwiftSyntax predicates and **modularization** plus
+**reuse-first** before creating a new analysis product.
 
-| ID | Hook |
-|----|------|
-| [CI-010] | Universal matrix shape — 4 gating jobs + advisory apple-simulator leg |
-| [CI-011] | Toolchain pins — Swift 6.3 stable + Swift main nightly |
-| [CI-012] | Linux runs in `swift:6.3` / nightly Docker containers; bare-runner install forbidden |
-| [CI-013] | macOS `macos-26` + Xcode 26.4; Windows `windows-latest` + SwiftyLab/setup-swift (SHA-pinned) |
-| [CI-091] | Uniform-platform-matrix doctrine — the matrix is the platform contract, never derived from `platforms:` (platform-identity carve-out: [CI-114]) |
-| [CI-114] | Platform-identity CI declaration — never CI-gate a package on a platform its identity excludes; `platform-support` input with fail-closed token validation; platform emulation to green a leg forbidden |
-| [CI-115] | Tiered verification scheduling — build selects one declared-supported release leg (Linux, then Windows, then macOS); full contract at tags + nightly ci-sweep rotation; ci-ok attests the selected tier |
-| [CI-092] | `swift:6.3` image is minimal — no curl/python3/gh; default shell is `sh -e`, not bash |
-| [CI-020] | Embedded buildability is an L1 invariant — every L1 package builds under `-enable…Embedded` |
-| [CI-021] | `embedded` job carries `continue-on-error: true` during the main-nightly window |
-| [CI-022] | Foundation forbidden in main targets; interop via a `* Foundation Integration` subtarget |
-| [CI-099] | `windows-release` stays gating; `continue-on-error: true` forbidden — Windows is first-class |
+### [CI-PARITY] Local and hosted gates share the same executable boundary
 
-### Secrets, Tokens, Visibility & Private-Repo Gates (`secrets-tokens.md`)
+Hosted CI and local verification must invoke the same Swift-owned behavior.
+`workspace package` owns local package operations. swift-linter owns source
+rules. A green substitute that evaluates a different predicate is not parity.
 
-| ID | Hook |
-|----|------|
-| [CI-032] | Every job in every intra-Institute reusable carries the `!repository.private` visibility gate |
-| [CI-058] | `enable-private-repos` input defaults `true`; consumers opt OUT |
-| [CI-059] | Per-repo `uses:` of intra-Institute reusables include `secrets: inherit` (sub-org caveat: explicit-forward) |
-| [CI-060] | `PRIVATE_REPO_TOKEN` is org-level `--visibility all`; per-repo redundant; free-plan alignment |
-| [CI-109] | Cross-org secret transport — `secrets: inherit` is same-org-only; explicit-forward at org boundaries |
-| [CI-094] | Private-repo pre-publication CI gates satisfied via local clean-build, not Actions (free-plan) |
-| [CI-095] | Rule-activation surface (public pkgs) vs bookkeeping surface (all pkgs); private = inert diagnostic |
-| [CI-112] | "Resolves from scratch" gates require an actual mirror-bypassed clean-room resolve, no substitutes |
+### [CI-EVIDENCE] A gate reports what actually ran
 
-### Security Hardening, Permissions & Version Pins (`security-hardening.md`)
+Every aggregate job must fail when planning, setup, or a required child job
+fails. Advisory jobs are explicitly identified. Skipped jobs are not silently
+treated as full-contract evidence.
 
-| ID | Hook |
-|----|------|
-| [CI-080] | harden-runner as first step, SHA-pinned, `egress-policy: audit` floor; block-mode after soak |
-| [CI-081] | No caller-supplied shell in token-holding reusables; structured inputs only |
-| [CI-082] | Binary-install checksum verification via `sha256sum -c`; re-lock digest on version bump |
-| [CI-090] | Permissions shape per trigger — reusables OMIT top-level; standalone DECLARE a floor |
-| [CI-097] | `workflow_call` reusable MUST NOT declare `permissions: {}` (deny-all → startup_failure) |
-| [CI-096] | CI prioritization axes — correctness > security > speed; cost is not an axis |
-| [CI-098] | Admin-class GitHub ops via web UI; no admin-scope `gh` CLI tokens |
-| [CI-107] | Latest-version pin discipline — pins carry current latest on every touch; digest-pin for privileged refs |
+For a CI claim, record the workflow, selected tier, toolchain, package,
+required/advisory posture, and run result.
 
-### Caching Policy & Per-Package Configuration (`caching.md`)
+## Stable architecture decisions
 
-| ID | Hook |
-|----|------|
-| [CI-040] | No `.build/` cache (single L1-embedded carve-out, exact-match, no restore-keys) |
-| [CI-041] | `Package.resolved` gitignored ecosystem-wide — permanent library convention |
-| [CI-042] | No `restore-keys` partial-prefix matching on any `actions/cache` step |
-| [CI-043] | `.gitignore` is centrally managed by `sync-gitignore.sh`; per-repo edits don't persist |
-| [CI-044] | Tool-binary cache permitted with exact-match-only key on the version env var |
-| [CI-116] | Main-tracking linter binaries ship via the rolling `ci-binaries` release (built once, checksum-verified download), never per-repo cache bakes |
-| [CI-055] | DEPRECATED 2026-05-14 — `UseShorthandTypeNames: false` ecosystem-mandatory (dismissed) |
-| [CI-057] | `.swift-format`/`.swiftlint.yml` are per-package; ecosystem uniformity is not a goal |
+### [CI-MATRIX] The universal matrix is a scheduled platform contract
 
-### Mass-Rollout Discipline (`mass-rollout.md`)
+The universal reusable owns the platform and toolchain contract. Ordinary
+pushes may run a smaller deterministic tier; tags, scheduled sweeps, and
+explicit full dispatch run the full contract. Platform exclusions express
+package identity, never cost or convenience.
 
-| ID | Hook |
-|----|------|
-| [CI-050] | Mass changes across ≥3 repos require per-action authorization; a plan is a roadmap, not a blanket YES |
-| [CI-051] | Surgical commits, dirty-skip discipline — one logical change per commit; skip dirty repos |
-| [CI-052] | Visibility flips / tag ops require explicit "YES DO NOW PUBLIC" / "YES DO NOW TAG" |
-| [CI-056] | Per-package coordinator build verify between a source-modifying transform and push |
-| [CI-111] | Mass rewrite scripts preserve pre-existing transformed forms + require sample diff-inspection |
-| [CI-113] | Toolchain-floor bumps verify every CI execution surface first — workflow updates land before the mass push, one-repo canary before the fleet |
+Load `matrix.md` when changing legs, runners, toolchains, tier selection,
+Embedded Swift, or platform declarations.
 
-### Workflow-Authoring Gotchas & Parse-Time Failure Classes (`workflow-authoring.md`)
+### [CI-SECRETS] Transport credentials explicitly across organization boundaries
 
-| ID | Hook |
-|----|------|
-| [CI-070] | Composite-action call-site eligibility — no in-loop calls; cross-repo `@main` refs are the standard |
-| [CI-102] | Composite-action `description` fields MUST NOT contain `${{ }}` (parse-time HTTP 422) |
-| [CI-103] | `env.*` forbidden in `runs-on:`/`container:` (resolved before env binds → HTTP 422) |
-| [CI-105] | `continue-on-error` invalid alongside `uses:` at job level (startup_failure); use `advisory:` input |
-| [CI-106] | `workflow_call` permissions chain — every level grants equal-or-greater or the chain collapses at parse |
-| [CI-110] | Mixed-trigger workflows null-coerce typed-boolean input forwarding (`== true`) or startup_failure |
-| [CI-104] | Scheduled-workflow canary — exercise `schedule:`-only workflows via explicit `gh workflow run` |
-| [CI-100] | SwiftLint `toggle_bool` rule excluded from the canonical config (prefer `x = !x`) |
-| [CI-101] | No regex-evasion of custom lint rules; escalate + `// swiftlint:disable:next` with reason instead |
+`secrets: inherit` is useful only at a same-organization hop. Cross-organization
+hops explicitly forward the closed credential set. Token-holding workflows
+accept structured inputs and never caller-supplied shell.
 
----
+Load `secrets-tokens.md` for visibility, private repositories, clean-room
+resolution, or credential transport.
 
-## Cross-References
+### [CI-CACHE] Cache immutable tools, not unresolved package graphs
 
-- **github-repository** ([GH-REPO-*]) — per-repository GitHub metadata; the `sync-metadata.yml` reusable workflow family is an analogous metadata-propagation pattern. [GH-REPO-070]–[GH-REPO-072] describe the metadata-workflow architecture.
-- **readme/ci-automation** ([README-160]–[README-167]) — README-related CI workflows (presence sweeps, structure linters, badge validators, inventory generation). Different workflow class from this skill's build/test/lint family; both follow [README-167]'s tracking-issue reporting shape.
-- **swift-package-build** ([PKG-BUILD-*]) — operational build instructions (TOOLCHAINS env var, Linux Docker, Embedded source-guard pattern). The CI containers in [CI-012] and the embedded job in [CI-020] exercise these operations.
-- **primitives** [PRIM-FOUND-001] — the Foundation-free invariant manifested in CI as [CI-022].
-- **swift-institute** [ARCH-LAYER-*] — five-layer architecture; current layer wrappers in [CI-001] correspond to the realised L1–L3 layers, and an L4 wrapper follows only a whole-layer stand-up.
+Do not cache SwiftPM `.build` state for ordinary package jobs and do not use
+partial `restore-keys`. A versioned tool binary may use an exact immutable key.
+`Package.resolved` remains generated and ignored.
 
-### Source authority (research)
+Load `caching.md` when changing caches, generated-state policy, linter binary
+distribution, or per-package format/lint configuration.
 
-- `swift-institute/Research/ci-centralization-strategy.md` (Tier 2 RECOMMENDATION, 2026-04-22, v1.1.0) — established Option A (reusable workflows) + Option D (sync-script) hybrid; permission scoping (Path B); ref-strategy recommendation (`@v1` post-stabilization).
-- `swift-institute/Research/ci-cache-strategy-branch-pinned-dependencies.md` (Tier 2 RECOMMENDATION, 2026-05-04, v1.1.0) — established no-`.build/`-cache policy permanent under the gitignored-`Package.resolved` constraint.
-- `swift-institute/Research/gitignore-sync-strategy.md` — sync-script precedent for [CI-043].
+### [CI-SECURITY] Make dangerous workflow states unrepresentable
+
+Use least privilege, checksum downloaded binaries, pin security-sensitive
+actions by digest, and keep user-controlled strings out of privileged command
+execution.
+
+Load `security-hardening.md` for permissions, runner hardening, downloads,
+action pins, or elevated tokens. Load `workflow-authoring.md` for GitHub
+Actions parse-time and expression constraints.
+
+### [CI-ROLLOUT] Central changes use a canary and measured fan-out
+
+Before changing multiple repositories:
+
+1. inspect dirty state and skip any affected repository;
+2. land and verify the semantic owner;
+3. prove one representative consumer;
+4. inspect the real diff;
+5. fan out only the minimal caller or configuration change;
+6. measure post-state and list skips.
+
+Visibility, tags, releases, archival, and destructive operations retain their
+separate approval gates. Load `mass-rollout.md` for multi-repository work.
+
+## Companion routing
+
+| Active decision | Load |
+| --- | --- |
+| tier placement or reusable call chain | `architecture.md` |
+| platforms, toolchains, runners, Embedded | `matrix.md` |
+| secrets, private repos, clean-room resolve | `secrets-tokens.md` |
+| permissions, downloads, pins | `security-hardening.md` |
+| cache and generated state | `caching.md` |
+| GitHub Actions syntax and expression traps | `workflow-authoring.md` |
+| multi-repository rollout | `mass-rollout.md` |

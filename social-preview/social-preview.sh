@@ -2,15 +2,15 @@
 # social-preview.sh — render and upload a repo's social preview card.
 #
 # Usage:
-#   ./Scripts/social-preview.sh <owner>/<name>            # render + upload (default)
-#   ./Scripts/social-preview.sh <owner>/<name> --no-upload # render only; auto-open Finder + Settings
-#   ./Scripts/social-preview.sh --backfill <owner>         # render + upload all public repos in org
+#   ./social-preview.sh <owner>/<name>            # render + upload (default)
+#   ./social-preview.sh <owner>/<name> --no-upload # render only; auto-open Finder + Settings
+#   ./social-preview.sh --backfill <owner>         # render + upload all public repos in org
 #
 # Reads the org-level brand from <org>/.github/metadata.yaml (socialPreview
 # block: accent + caption), derives the namespace from the package name
 # (kebab → CamelCase, strip layer suffix), renders the PNG via the universal
 # renderer at swift-institute/.github/social-preview/, and uploads via the
-# vendored Playwright uploader at Scripts/social-preview-uploader/.
+# vendored Playwright uploader at social-preview-uploader/.
 #
 # Why local-only?
 # GitHub does not expose a public API for setting the social preview image
@@ -20,7 +20,7 @@
 # manually clicking "Edit" in the UI.
 #
 # First-time setup:
-#   cd Scripts/social-preview-uploader && npm install
+#   cd social-preview-uploader && npm install
 #   node upload.js init-auth                       # one browser login, persisted
 #
 # Dependencies on PATH:
@@ -29,7 +29,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-ORG_ROOT="$(dirname "$SCRIPT_DIR")"          # swift-institute/
+ORG_ROOT="$(dirname "$(dirname "$SCRIPT_DIR")")" # swift-institute/
 DEVELOPER_DIR="$(dirname "$ORG_ROOT")"        # ~/Developer/
 
 RENDERER="$ORG_ROOT/.github/social-preview/render.py"

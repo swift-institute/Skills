@@ -4,20 +4,6 @@ description: |
   Swift Package Index onboarding and package collections.
   Apply when listing packages on SPI, authoring or validating a .spi.yml,
   generating package collections, or planning the tagging cascade for SPI.
-
-layer: process
-
-requires:
-  - swift-institute
-  - github-repository
-  - ci-cd-workflows
-
-applies_to:
-  - swift-package-index
-  - spi
-  - package-collections
-
-created: 2026-07-03
 ---
 
 # Swift Package Index

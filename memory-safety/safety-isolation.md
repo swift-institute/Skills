@@ -573,7 +573,7 @@ public func pointer(at slot: Index) -> UnsafeMutablePointer<Element>   // ❌ us
 **Why**: the ecosystem direction is Span-first — this rule inverts the default: span first, pointer only when the four gates above are all satisfied and documented (rationale archive §[MEM-SAFE-015]).
 
 
-**Cross-references**: [MEM-SAFE-002], [MEM-SAFE-010], [MEM-SAFE-012], [MEM-SAFE-014], [MEM-SAFE-020], [MEM-SAFE-022], [MEM-SPAN-003], [INFRA-109]
+**Cross-references**: [MEM-SAFE-002], [MEM-SAFE-010], [MEM-SAFE-012], [MEM-SAFE-014], [MEM-SAFE-020], [MEM-SAFE-022], [MEM-SPAN-003], [REUSE-003]
 
 ---
 
@@ -734,4 +734,3 @@ unsafe {                              // ❌ does not compile
 **Cross-references**: [MEM-SAFE-001], [MEM-SAFE-002], [MEM-UNSAFE-001]
 
 ---
-

@@ -3,14 +3,6 @@ name: audit
 description: |
   Check code against skill requirement IDs and record findings.
   Apply when auditing convention compliance or when the user invokes /audit.
-
-layer: process
-requires:
-  - swift-institute
-applies_to:
-  - swift-primitives
-  - swift-standards
-  - swift-foundations
 ---
 
 # audit

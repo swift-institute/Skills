@@ -3,20 +3,6 @@ name: swift-institute-ecosystem
 description: |
   Ecosystem tour: three layers (Primitives/Standards/Foundations), Standards per-authority sub-orgs, -standard convergence, layer-placement decision model, cross-cutting disciplines.
   Apply when orienting an agent or pointing to deeper references.
-
-layer: architecture
-
-requires:
-  - swift-institute-core
-
-applies_to:
-  - swift
-  - swift6
-  - swift-primitives
-  - swift-standards
-  - swift-foundations
-
-created: 2026-05-16
 ---
 
 # Swift Institute Ecosystem Tour
@@ -150,7 +136,7 @@ swift-{authority}/swift-{spec-id}           ← spec-direct packages
 
 **Multi-product packages**: many Foundations packages expose multiple library products; consumers depend only on what they need (umbrella vs narrow product). Import precision rules in **modularization** govern when to import the umbrella vs a narrow variant.
 
-**Cross-references**: [ARCH-LAYER-001] in **swift-institute**; [PKG-DEP-001] in **swift-package**; [MOD-015] in **modularization**; `swift-institute.org/Swift Institute.docc/Swift Foundations.md`.
+**Cross-references**: [ARCH-LAYER-001] in **swift-institute**; [PKG-DEP-001] in **swift-package**; [MOD-IMPORT] in **modularization**; `swift-institute.org/Swift Institute.docc/Swift Foundations.md`.
 
 ---
 
@@ -162,7 +148,7 @@ swift-{authority}/swift-{spec-id}           ← spec-direct packages
 |---|------------|------------------|
 | 1 | **No upward dependencies**: packages may compose lower layers and essential same-layer prerequisites through an acyclic graph. Same-layer convenience and cycles are forbidden. Within L1, the stricter tier DAG applies. | [ARCH-LAYER-001] in **swift-institute**, [PRIM-ARCH-002] in **primitives** |
 | 2 | **No Apple `Foundation` in main targets**: applies to all five layers (not just L1). Foundation-adjacent interop lives in opt-in `* Foundation Integration` subtargets. | [PRIM-FOUND-001] in **primitives**, [ARCH-LAYER-007] in **swift-institute** |
-| 3 | **Typed everything**: typed throws (`throws(IO.Error)`); typed indices (`Index<T>`); typed counts/positions (`Cardinal<N>`, `Ordinal<N>`); ownership and lifetime annotations (`~Copyable`, `~Escapable`, `borrowing`/`consuming`, `@_lifetime`); strict memory safety. Before writing arithmetic, conversions, or accessors, check **existing-infrastructure** — the missing operator is usually intentional. | [API-ERR-001] in **code-surface**, [INFRA-*] in **existing-infrastructure**, [MEM-COPY-*] in **memory-safety** |
+| 3 | **Typed everything**: typed throws (`throws(IO.Error)`); typed indices (`Index<T>`); typed counts/positions (`Cardinal<N>`, `Ordinal<N>`); ownership and lifetime annotations (`~Copyable`, `~Escapable`, `borrowing`/`consuming`, `@_lifetime`); strict memory safety. Before writing arithmetic, conversions, or accessors, apply **reuse-first** and preserve principled absences. | [API-ERR-001] in **code-surface**, [REUSE-*] in **reuse-first**, [MEM-COPY-*] in **memory-safety** |
 | 4 | **Nested-namespace, noun-form naming**: `File.Directory.Walk`, not `FileDirectoryWalk`; `Stack.push.front(_:)`, not `stackPushFront(_:)`; specification-mirroring (`RFC_4122.UUID`, not `UUID`). One type per file. | [API-NAME-001], [API-NAME-002], [API-NAME-003], [API-IMPL-005] in **code-surface**, [PKG-NAME-001] in **swift-package** |
 | 5 | **`~Copyable` passes through**: institute containers (Array, Stack, Queue, Deque, Buffer, etc.) support `~Copyable` elements via conditional Copyability. Reaching for `[Element]` when `Element: ~Copyable` is an anti-pattern; use the institute container instead. | [MEM-COPY-*] in **memory-safety**, [DS-021] in **ecosystem-data-structures** |
 
@@ -179,9 +165,9 @@ swift-{authority}/swift-{spec-id}           ← spec-direct packages
 | Name a package / namespace / module / dep | **swift-package** ([PKG-NAME-*], [PKG-DEP-*]) |
 | API surface (naming, errors, file structure) | **code-surface** ([API-NAME-*], [API-ERR-*], [API-IMPL-*]) |
 | Select a data structure (Memory / Storage / Buffer / Collection) | **ecosystem-data-structures** ([DS-*]) |
-| Reuse existing typed infrastructure (boundary overloads, Tagged functors, Ratio scaling) | **existing-infrastructure** ([INFRA-*]) |
+| Find, select, expose, and compose existing capabilities | **reuse-first** ([REUSE-*]) |
 | Ownership, copyability, lifetime, sendability | **memory-safety** ([MEM-*]) |
-| Skill index, harness bets, package locations on disk | **swift-institute-core** ([BET-*]); `~/Developer/CLAUDE.md` |
+| Skill index, harness bets, package locations | **swift-institute-core** ([BET-*]); checkout-root `AGENTS.md` |
 | Public-facing layer descriptions (outside readers) | `swift-institute.org/Swift Institute.docc/{Layers,Swift Primitives,Swift Standards,Swift Foundations,FAQ}.md` |
 | Public framing in user's own voice | `swift-institute.org/Swift Institute.docc/Blog/Restarting-the-Blog.md` and the `Introducing-*` series |
 | Fork heritage decisions | **swift-package-heritage** ([HERITAGE-*]) |
@@ -213,11 +199,11 @@ swift-{authority}/swift-{spec-id}           ← spec-direct packages
 - **code-surface** — Naming, error handling, file structure
 - **memory-safety** — Ownership, `~Copyable`, lifetime safety
 - **ecosystem-data-structures** — Data-structure selection across Memory/Storage/Buffer/Collection
-- **existing-infrastructure** — Typed boundary overloads, Tagged, Ratio
+- **reuse-first** — Capability discovery, owner selection, and composition
 - **swift-package-heritage** — Fork-as-heritage at the git/license/README level
 - **modularization** — Intra-package target decomposition, import precision
 - `swift-institute.org/Swift Institute.docc/` — Public layer descriptions
 - `swift-primitives/Documentation.docc/` — Primitives Tiers, Layering, Requirements
-- `~/Developer/CLAUDE.md` — Workspace-level routing, package locations, package resolution
+- checkout-root `AGENTS.md` — Workspace routing, package locations, and package resolution
 
-**Related-ecosystem cross-reference**: a parallel legal-domain ecosystem lives under [rule-institute](https://github.com/rule-institute) — out of scope for this skill; see `~/Developer/CLAUDE.md` § Legal Skills.
+**Related-ecosystem cross-reference**: a parallel legal-domain ecosystem lives under [rule-institute](https://github.com/rule-institute) — out of scope for this skill; see the checkout-root agent context.

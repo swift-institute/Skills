@@ -3,24 +3,6 @@ name: code-surface
 description: |
   API surface conventions: namespace structure, nested accessors, spec-mirroring, typed throws, error naming, one type per file.
   ALWAYS apply when declaring types, methods, properties, errors, or organizing files.
-
-layer: implementation
-
-requires:
-  - swift-institute
-
-applies_to:
-  - swift
-  - swift6
-  - primitives
-  - standards
-  - foundations
-
-absorbs:
-  - naming
-  - errors
-  - code-organization
-# Amendment/changelog history: Research/code-surface-skill-rationale.md §Changelog-Provenance (and git history of this file).
 ---
 
 # Code Surface Conventions

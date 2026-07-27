@@ -3,16 +3,6 @@ name: swift-pull-request
 description: |
   Submit pull requests to swiftlang/swift: fork, branch, commit, test, PR, CI, reviewers.
   Apply when contributing a fix or feature to the Swift compiler upstream.
-
-layer: process
-
-requires:
-  - swift-institute-core
-
-applies_to:
-  - swiftlang-swift
-  - compiler-contribution
-
 ---
 
 # Swift Pull Request Process
@@ -119,8 +109,9 @@ ls /Library/Developer/Toolchains/
 # Test with the dev toolchain:
 TOOLCHAINS=swift xcrun swiftc -O reproducer.swift -o /tmp/test 2>&1
 
-# Or via SwiftPM:
-TOOLCHAINS=swift ~/Developer/swift-institute/Scripts/swift-build package build -- -c release
+# Or through the Workspace package boundary:
+TOOLCHAINS=swift workspace package build --fresh \
+  --argument=-c --argument release
 ```
 
 **Rationale**: Compiler bugs on released Xcode toolchains may already be fixed on `main`. Deep-diving into compiler source, creating experiments, or preparing a PR for a bug that's already fixed wastes significant effort. This check takes 30 seconds and can save hours.

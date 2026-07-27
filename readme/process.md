@@ -58,7 +58,7 @@ The voice generalizes across process repos: a Skills README and a Blog README op
 | Repo | Title |
 |---|---|
 | `swift-institute/Skills` | `# Skills` |
-| `swift-institute/Scripts` | `# Scripts` |
+| `swift-institute/Workspace` | `# Swift Institute Workspace` |
 | `swift-institute/Audits` | `# Audits` |
 | `swift-institute/Research` | `# Research` |
 | `swift-institute/Experiments` | `# Experiments` |
@@ -210,7 +210,7 @@ The corrected form names the workflow phases by their role rather than by rule I
 | [swift-institute/swift-institute.org](https://github.com/swift-institute/swift-institute.org) | Website + DocC catalog |
 | [swift-institute/Research](https://github.com/swift-institute/Research) | Design rationale and trade-off analysis |
 | [swift-institute/Experiments](https://github.com/swift-institute/Experiments) | Standalone Swift packages backing technical claims |
-| [swift-institute/Scripts](https://github.com/swift-institute/Scripts) | Workspace tooling |
+| [swift-institute/Workspace](https://github.com/swift-institute/Workspace) | Inventory, context installation, and Swift-owned workspace tooling |
 ```
 
 **Constraints**:
@@ -218,52 +218,22 @@ The corrected form names the workflow phases by their role rather than by rule I
 - Linked repos MUST be public; if a companion repo is private, it MUST be marked explicitly rather than presented as a live link.
 - Repo names match the GitHub repo path (org/name) or shorthand (just name) — pick one and stay consistent within the table.
 
-**Decision test**: Would a maintainer arriving at this repo have value from knowing about the linked repos? If yes, the table earns its place. If the repo stands alone (e.g., a single-purpose Scripts repo with no peer process repos), omit.
+**Decision test**: Would a maintainer arriving at this repo have value from knowing about the linked repos? If yes, the table earns its place.
 
 **Rationale**: Process repos in the swift-institute org form a network; cross-linking it in each repo's README orients arriving maintainers without requiring them to navigate the org page (full text: rationale archive §[README-134]).
 
 ---
 
-### [README-135] Layout Assumption (When Scripts Depend on Disk Shape)
+### [README-135] Tooling Derives Layout
 
-**Statement**: When the repo contains scripts or tooling that depend on a specific disk layout, a `## Layout assumption` section MUST document that layout. Omit when the repo's content does not depend on disk position.
+**Statement**: Public tooling README examples MUST use repository-relative
+arguments or typed workspace identities. They MUST NOT require a maintainer's
+home-directory path or a hand-maintained clone layout.
 
-**When to include**:
-
-- The repo is a Scripts/tooling repo whose scripts use relative paths (e.g., `~/Developer/<org>/...`).
-- The README documents how to run scripts that assume a particular clone-mirror structure.
-
-**Correct (Scripts repo)**:
-
-```markdown
-## Layout assumption
-
-The scripts expect the `swift-institute` org as a directory under `~/Developer/`, holding its sub-repos as siblings:
-
-\```
-~/Developer/
-├── swift-institute/
-│   ├── Scripts/                 (this repo)
-│   ├── Skills/
-│   ├── swift-institute.org/
-│   ├── Research/
-│   ├── Experiments/
-│   └── …
-├── swift-primitives/            (clone-mirror of the swift-primitives org)
-├── swift-standards/             (clone-mirror of the swift-standards org)
-└── swift-foundations/           (clone-mirror of the swift-foundations org)
-\```
-
-`SCRIPT_DIR` resolves to `swift-institute/Scripts/`. From there:
-
-- `ORG_ROOT` (org dir) is `swift-institute/`
-- `DEVELOPER_DIR` is `~/Developer/`
-- Other ecosystem clone-mirrors live at `$DEVELOPER_DIR/swift-*` (flat); the institute's Skills repo lives at `$ORG_ROOT/Skills`.
-```
-
-**Decision test**: Does running this repo's scripts/tooling break if the disk layout differs from what the README implies? If yes, document the layout. If the repo has no scripts (Skills, Audits, Research, Experiments, Blog, Swift-Evolution), omit.
-
-**Rationale**: Without the layout block, a fresh maintainer cannot run layout-dependent scripts; no other observed process repo includes this section because no other observed process repo needs it (full text: rationale archive §[README-135]).
+Workspace resolves its physical checkout and inventory-owned materialization
+roots. If a command needs a root, expose an explicit option and document the
+default. A machine-specific layout belongs in generated local context, never a
+public README contract.
 
 ---
 

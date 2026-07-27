@@ -56,9 +56,8 @@ func sort<T: Comparable & Equatable>(_: [T])  // ❌ redundant: Comparable refin
 - `[API-NAME-001c]` (capability-marker protocol) — value-form brand-owners often appear as `Carrier.\`Protocol\`` conformers via the capability-marker recipe.
 - Rule corpus design principle: each excluded rule remains in the corpus and fires on every other consumer. The corpus stays uniform; brand-owners declare their boundary, not bypass the rule.
 
-**Lint enforcement**: AST mechanization TBD. The configuration discipline (which exclusions a brand-owner declares, the per-entry justification comment, the protocol-form vs value-form cardinality split) is codified as `[LINT-EXCLUDE-001]` through `[LINT-EXCLUDE-004]` in the **swift-linter** skill — the linter-side application of the brand-owner vocabulary defined in this rule. Future AST candidates: rationale archive §[API-BRAND-001].
+**Lint enforcement**: AST mechanization TBD. Brand-owner exclusions follow `[LINT-EXEMPTION]` and bundle activation follows `[LINT-BUNDLE]`; the vocabulary itself remains defined here. Future AST candidates: rationale archive §[API-BRAND-001].
 
-**Cross-references**: [API-NAME-001c] (capability-marker protocol); [API-IMPL-008] (minimal type body — companion note covers protocol-witness methods on associatedtype-using storage, the case that arose during the cohort cyclic.Iterator refactor); **swift-linter** skill `[LINT-EXCLUDE-*]` (linter-side application of this vocabulary).
+**Cross-references**: [API-NAME-001c] (capability-marker protocol); [API-IMPL-008] (minimal type body — companion note covers protocol-witness methods on associatedtype-using storage, the case that arose during the cohort cyclic.Iterator refactor); **swift-linter** [LINT-EXEMPTION].
 
 ---
-
