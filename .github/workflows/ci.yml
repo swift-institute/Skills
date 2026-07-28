@@ -25,11 +25,15 @@
 # nothing about the code that produced it, because the callee could change
 # without the caller changing. Pinning makes a run reproducible from its caller.
 #
-# Honest limit: this pins the workflow, not everything it executes. The base it
-# delegates to resolves the validator script from swift-institute/.github at
-# 'main', so the script itself still floats. Closing that needs a ref input on
-# the base workflow, which is a change to shared infrastructure and is being
-# proposed separately rather than folded in here.
+# Both the workflow and the validator script it runs are pinned to the same
+# commit. Pinning only the workflow would leave the script resolving from main,
+# so a green run could not be attributed to any particular version of the
+# checker.
+#
+# What pinning does NOT buy: a pinned checker is reproducible, not correct. The
+# gate this replaced measured the wrong thing entirely and would have done so
+# just as reliably at a fixed commit. That class is caught by the positive
+# controls that run alongside the checker, not by a ref.
 
 name: ci
 
@@ -53,8 +57,12 @@ concurrency:
 
 jobs:
   skill-hygiene:
-    # swift-institute/.github @ 0d0c68f923456b4f791000b872c9b3388bd55926
-    uses: swift-institute/.github/.github/workflows/validate-skill-hygiene.yml@0d0c68f923456b4f791000b872c9b3388bd55926
+    # swift-institute/.github @ 87106b7ae82a3a8a5616174cb117f2a83907e8e8
+    uses: swift-institute/.github/.github/workflows/validate-skill-hygiene.yml@87106b7ae82a3a8a5616174cb117f2a83907e8e8
     with:
       repo: swift-institute/Skills
+      # Same commit as the `uses:` above. Pinning only the workflow would leave
+      # the validator script itself resolving from main, so a green run here
+      # could not be attributed to a version of the checker.
+      validator-ref: 87106b7ae82a3a8a5616174cb117f2a83907e8e8
     secrets: inherit
