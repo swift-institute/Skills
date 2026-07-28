@@ -6,6 +6,10 @@ claim that something is absent.
 Every trap here fails into a clean, confident negative — a zero that looks
 exactly like success. None is a logic error.
 
+These are recorded failures, not a checklist to satisfy. The transferable part is
+the shape: an instrument that can only fail toward silence needs something that
+proves it can speak.
+
 ## Do not hand-roll a probe a tool already answers
 
 Ask in this order. Only the third step is allowed to be a `grep`.
@@ -65,10 +69,10 @@ So control it, at both ends and at the degenerate case:
 
 | Trap | Correct form |
 |---|---|
-| Bare `grep` may be a shell function wrapping `ugrep --ignore-files --hidden` — it honours `.gitignore` and silently under-reports. The same recursive search has returned 62, then 0, then 0 | `/usr/bin/grep`; likewise `/usr/bin/log` |
+| Bare `grep` here is a shell function wrapping `ugrep --ignore-files --hidden -I` — it honours `.gitignore`, skips binaries, and silently under-reports. The same recursive search has returned 62, then 0, then 0 | `/usr/bin/grep`; likewise `/usr/bin/log` |
 | `xargs -a <file>` is GNU-only; BSD xargs exits 1, and piped, the pipeline reports only the last stage's status | `find … -print0 \| xargs -0 …` — also survives spaces in paths, which plain `xargs` word-splits |
 | `/usr/bin/ps` does not exist on macOS | `/bin/ps` |
-| **`/bin` and `/usr/bin` are strictly disjoint** — 37 vs 924 entries, intersection zero. `/bin` only: `cat ps ls cp mv rm date echo`. `/usr/bin` only: `sed grep awk find wc head sort cut xargs stat`. "Prefer `/usr/bin`" is wrong for 8 of those; "prefer `/bin`" is wrong for 10; either wrong guess is exit 127 leaving an empty artifact | An absolute path to a coreutil is a per-tool fact, not a directory preference — there is no rule to remember. Know the tool's path, or use the bare name and let PATH resolve it |
+| **`/bin` and `/usr/bin` are strictly disjoint** — a few dozen entries against several hundred, intersection empty. `/bin` only: `cat ps ls cp mv rm date echo`. `/usr/bin` only: `sed grep awk find wc head sort cut xargs stat`. Either directory preference is wrong for most of the other list, and a wrong guess is exit 127 leaving an empty artifact | An absolute path to a coreutil is a per-tool fact, not a directory preference — there is no rule to remember. Know the tool's path, or use the bare name and let PATH resolve it |
 | **A failed generator still leaves a valid, empty artifact.** `/bin/sed … > out.sh` → exit 127, `out.sh` created, size 0 — the shell creates the redirect target *before* running the command. `bash out.sh` then exits 0, so a test shelling out to the generated script reports success while testing nothing. `set -o pipefail` does not help; the redirect already happened | Assert the artifact is non-empty and differs from baseline before drawing any conclusion, or check the generator's own exit status |
 | **A linter can fall back to a zero-rules configuration** when its manifest path is unset — the engine runs, exits 0, and reports a clean-looking zero having loaded no rules at all | Accept a zero only when the run demonstrably loaded rules: assert `N active rules` with N>0 and files>0, else record UNMEASURED, not clean. An engine's exit status attests that it ran, never that it was configured |
 | `timeout(1)` does not exist on macOS — exits 127 without running | None; restructure the probe |
