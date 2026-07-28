@@ -1,6 +1,6 @@
 # .github/metadata.yaml
 # Triaged by AI-assisted bulk pass (2026-04-29).
-description: "Canonical development conventions for the Swift Institute ecosystem (normative)."
+description: "Development conventions for the Swift Institute ecosystem — naming, errors, memory safety, testing, modularization. Lightweight guides that carry judgment, not a rule register."
 topics:
   - swift-institute
   - skills
