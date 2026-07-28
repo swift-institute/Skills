@@ -5,205 +5,219 @@ description: How Swift is written across the Institute — namespaces and noun n
 
 # Swift
 
+This hub covers what any Swift file in the ecosystem needs. The specialized areas — bytes,
+containers, ownership, unsafe memory, concurrency, platform code — are companions, listed at the
+end.
+
 ## Namespaces and type names
 
-All types use `Nest.Name`; compound type names are forbidden. `File.Directory.Walk`, not `FileDirectoryWalk`. Each adjacent pair must read as "X is a kind of Y" or "X belongs to Y". Depth is not a constraint in either direction: never flatten a semantically correct chain, and never insert a filler level (`POSIX.Kernel.Types.IO.Read` — `Types` names no sub-domain). A namespace containing exactly one type is a variant label — nest it under its parent (`Executor.Cooperative`; `Kernel.Thread.Executor.Polling`, not `Kernel.Thread.Polling.Executor`).
+All types use `Nest.Name`; compound type names are forbidden. `File.Directory.Walk`, not
+`FileDirectoryWalk`. Each adjacent pair must read as "X is a kind of Y" or "X belongs to Y".
 
-When a type sits at the intersection of two real domains and one is strictly larger, the larger domain owns the namespace. The decision turns on whether the leading token is the **subject** the operation processes ("parse the bytes" → `Byte.Parser`, `JSON.Coder`) or the **manner** in which it behaves ("iterate borrowingly", "in chunks" → `Iterator.Borrow`, `Iterator.Chunk`). Manner variants take the noun form, not the gerund. Never reuse a subject's word as a manner word: the bulk iterator yields contiguous spans yet is `Iterator.Chunk`, not `Iterator.Contiguous`, because `Contiguous` already names a memory subject (`Storage.Contiguous`); `Borrow` is likewise reserved for the ownership tier. When a candidate manner word could also name a subject (`Memory`, `Storage`, `Span`, `Contiguous`), pick a different manner word rather than flipping to subject-first. Ownership direction confirms the shape: role-owns depends *down* onto the mode; subject-first depends *up* onto the operation. This is not "noun before verb" — `Parser.Builder` and `Buffer.Allocator` are correct. It fires only when both tokens are domains in their own right.
+Depth is not a constraint in either direction: never flatten a semantically correct chain, and
+never insert a filler level (`POSIX.Kernel.Types.IO.Read` — `Types` names no sub-domain). A
+namespace containing exactly one type is a variant label, so nest it under its parent:
+`Executor.Cooperative`; `Kernel.Thread.Executor.Polling`, not `Kernel.Thread.Polling.Executor`.
 
-Types implementing a specification mirror the spec's terminology under a spec namespace: `RFC_4122.UUID`, `ISO_32000.Page` — never a bare `UUID` or `URL`. L2 Standards optimize for 1:1 spec encodings, so a deterministic transliteration of a spec-defined token is a spec-mirroring name and the compound prohibitions do not apply; invented non-spec identifiers at L2 remain non-conforming. When a domain-correct nested name shadows a stdlib type, keep the name and disambiguate at the call site by module (`Base62_Primitives.String`).
+When a type sits at the intersection of two real domains and one is strictly larger, the larger
+domain owns the namespace. The decision turns on whether the leading token is the **subject**
+the operation processes ("parse the bytes" → `Byte.Parser`, `JSON.Coder`) or the **manner** in
+which it behaves ("iterate borrowingly", "in chunks" → `Iterator.Borrow`, `Iterator.Chunk`).
+Manner variants take the noun form, not the gerund.
+
+Never reuse a subject's word as a manner word. The bulk iterator yields contiguous spans yet is
+`Iterator.Chunk`, not `Iterator.Contiguous`, because `Contiguous` already names a memory subject
+(`Storage.Contiguous`); `Borrow` is likewise reserved for the ownership tier. When a candidate
+manner word could also name a subject (`Memory`, `Storage`, `Span`, `Contiguous`), pick a
+different manner word rather than flipping to subject-first. Ownership direction confirms the
+shape: role-owns depends *down* onto the mode, subject-first depends *up* onto the operation.
+
+This is not "noun before verb" — `Parser.Builder` and `Buffer.Allocator` are correct. It fires
+only when both tokens are domains in their own right.
+
+Types implementing a specification mirror the spec's terminology under a spec namespace:
+`RFC_4122.UUID`, `ISO_32000.Page` — never a bare `UUID` or `URL`. L2 Standards optimize for 1:1
+spec encodings, so a deterministic transliteration of a spec-defined token is a spec-mirroring
+name and the compound prohibitions do not apply; invented non-spec identifiers at L2 remain
+non-conforming. When a domain-correct nested name shadows a stdlib type, keep the name and
+disambiguate at the call site by module (`Base62_Primitives.String`).
+
+Package and top-level namespace naming — the noun rule, the gerund typealias — belongs to the
+`architecture` skill.
 
 ## Member names
 
-Methods, properties, and enum cases must not be compound. Use nested accessors: `dir.walk.files()`, `instance.open.write { }`. `fileprivate`/`private` declarations, `is`-prefixed booleans, and spec-mirroring identifiers are exempt. Swift's ownership, effect, and isolation keywords are never repurposed as identifiers. Two triggers demand a re-check before commit: an internal capital, or a name copied from the stdlib, an SE proposal, or another language.
+Methods, properties, and enum cases must not be compound. Use nested accessors:
+`dir.walk.files()`, `instance.open.write { }`. `fileprivate` / `private` declarations,
+`is`-prefixed booleans, and spec-mirroring identifiers are exempt. Swift's ownership, effect,
+and isolation keywords are never repurposed as identifiers. Two triggers deserve a re-check
+before commit: an internal capital, and a name copied from the stdlib, an SE proposal, or
+another language.
 
-Choose between a nested accessor and a labeled method structurally. Two or more related sub-operations under one root take a `Property.View` accessor (`remove.{first,last,all}`); one operation disambiguated by labels takes a labeled method (`swap(at:with:)`). A `Property.View` wrapper around a single method is ceremony. When a labeled method exists at the layer below, match its name above.
+Choose between a nested accessor and a labeled method structurally. Two or more related
+sub-operations under one root take a `Property.View` accessor (`remove.{first,last,all}`); one
+operation disambiguated by labels takes a labeled method (`swap(at:with:)`). A `Property.View`
+wrapper around a single method is ceremony. When a labeled method exists at the layer below,
+match its name above.
 
-A single-word removal op that can fail on empty returns `Optional` — `pop()`, not `removeLast()`. Borrowing accessors are the carve-out: a `~Copyable` borrow of `Element?` is structurally unavailable, so those keep crashing preconditions. Drop a redundant prefix the namespace already supplies (`Manifest.Dependency.name`). Phantom-type tags take the bare concept name — no `*Tag` suffix, no inner `.Tag`; the surrounding namespace enum *is* the phantom. A phantom generic parameter (never stored, never flowing through an operation) is bound `~Copyable & ~Escapable`. Widening is non-breaking; relaxing a *stored* parameter is breaking — the discriminator is whether any value of that type is stored or passed through an operation. Relaxing a phantom forces companion edits: conditional conformances restate the suppression, and a phantom associatedtype widens in step.
+A single-word removal op that can fail on empty returns `Optional` — `pop()`, not
+`removeLast()`. Borrowing accessors are the carve-out: a `~Copyable` borrow of `Element?` is
+structurally unavailable, so those keep crashing preconditions.
 
-`OptionSet` types use the `.Options` suffix, not `.Flags`. Local bindings use the type's own name or a domain word — `impl`, `obj`, `inst`, `instance` are forbidden. Diagnostics citing an institutional source put the citation in the message: `[<rule_id>] <citation>: <description>`.
+Drop a redundant prefix the namespace already supplies (`Manifest.Dependency.name`).
+Phantom-type tags take the bare concept name — no `*Tag` suffix, no inner `.Tag`; the
+surrounding namespace enum *is* the phantom. A phantom generic parameter — never stored, never
+flowing through an operation — is bound `~Copyable & ~Escapable`. Widening is non-breaking;
+relaxing a *stored* parameter is breaking, and the discriminator is whether any value of that
+type is stored or passed through an operation. Relaxing a phantom forces companion edits:
+conditional conformances restate the suppression, and a phantom associatedtype widens in step.
 
-Typealiases must not be unification bridges — after unifying, call sites use the canonical type. Generic-instantiation typealiases are sanctioned, and so is namespace adoption where the adopting layer builds substantial domain behavior (roughly five or more sibling types, extensions, or methods) on the adopted concept; a typealias that merely shortens a name is the forbidden form. Extensions resolve *through* typealiases, so "we can't nest under X because it's a typealias" is false — write it and let the compiler answer.
+Local bindings use the type's own name or a domain word — `impl`, `obj`, `inst`, `instance` are
+forbidden.
+
+An `OptionSet` type is not named `Flags`, which is C-speak; a linter rule fires on that suffix
+and only on that suffix. `Options` is the default choice and the one to reach for absent a
+reason, but a domain word that names what the set *is* rather than that it is a bag of options
+is in good standing and the corpus uses several — `Memory.Map.Access`,
+`Terminal.Input.Key.Modifiers`, `Kernel.Event.Interest`. Nothing checks that half.
+
+Typealiases must not be unification bridges — after unifying, call sites use the canonical type.
+Generic-instantiation typealiases are sanctioned, and so is namespace adoption where the
+adopting layer builds substantial domain behavior on the adopted concept; a typealias that
+merely shortens a name is the forbidden form. Extensions resolve *through* typealiases, so "we
+can't nest under X because it's a typealias" is false — write it and let the compiler answer.
 
 ## Files and type bodies
 
-One type declaration per file (extensions don't count). The file name is the type's full nested path with dots: `Array.Dynamic.Iterator.swift`. Extension-only files carry a `+` conformance suffix (`Array.Dynamic+Sequence.swift`) or a where-clause discriminator matching the extension. Tests, experiments, and examples are out of scope.
+One type declaration per file; extensions do not count. The file name is the type's full nested
+path with dots: `Array.Dynamic.Iterator.swift`. Extension-only files carry a `+` conformance
+suffix (`Array.Dynamic+Sequence.swift`) or a where-clause discriminator matching the extension.
+Tests, experiments, and examples are out of scope.
 
-Type bodies hold only stored properties, the canonical initializer, and `deinit`; everything else lives in extensions. `~Copyable` generic types may keep nested storage types in the body to avoid constraint poisoning; conditional conformances still go in the same file. Result-builder enums, `Protocol`-sentinel hosts, and SwiftSyntax visitor subclasses satisfy the rule as written.
+Type bodies hold only stored properties, the canonical initializer, and `deinit`; everything
+else lives in extensions. `~Copyable` generic types may keep nested storage types in the body to
+avoid constraint poisoning, and conditional conformances still go in the same file.
+Result-builder enums, `Protocol`-sentinel hosts, and SwiftSyntax visitor subclasses satisfy the
+rule as written.
 
-Moving witnesses to extensions while leaving conformances on the struct declaration creates an associatedtype inference cycle (`unsupported recursion for reference to type alias`) — put the conformance on the extension and fully qualify storage types, keeping marker-only conformances on the declaration. Inside `extension T: P` where `P` declares `associatedtype X`, a bare `X` resolves to the conformer's binding, not to a same-named namespace elsewhere; fully module-qualify any type whose name could collide (`Serializer`, `Parser`, `Coder`, `Body`, `Output`, `Failure`).
+Moving witnesses to extensions while leaving conformances on the struct declaration creates an
+associatedtype inference cycle (`unsupported recursion for reference to type alias`) — put the
+conformance on the extension and fully qualify storage types, keeping marker-only conformances
+on the declaration. Inside `extension T: P` where `P` declares `associatedtype X`, a bare `X`
+resolves to the conformer's binding, not to a same-named namespace elsewhere; fully
+module-qualify any type whose name could collide (`Serializer`, `Parser`, `Coder`, `Body`,
+`Output`, `Failure`).
 
-When a protocol must appear as `Outer.Inner.Protocol` on a generic type, hoist it to module scope and nest a `typealias Protocol`. Self-conformance must use the hoisted name — the canonical path self-references and the compiler reports `circular reference`. Sibling conformers and constraint sites use the canonical path. The hoist idiom is sanctioned for struct carriers too.
+When a protocol must appear as `Outer.Inner.Protocol` on a generic type, hoist it to module
+scope and nest a `typealias Protocol`. Self-conformance must use the hoisted name — the
+canonical path self-references and the compiler reports `circular reference`. Sibling conformers
+and constraint sites use the canonical path. The hoist idiom is sanctioned for struct carriers
+too.
 
-`@retroactive` is scoped to the Swift *package*, not the module — a same-package conformance is rejected with `'retroactive' attribute does not apply`, even across targets. An in-package protocol refining an external one needs both clauses: `extension Int: X, @retroactive Y`.
+`@retroactive` is scoped to the Swift *package*, not the module — a same-package conformance is
+rejected with `'retroactive' attribute does not apply`, even across targets. An in-package
+protocol refining an external one needs both clauses: `extension Int: X, @retroactive Y`.
 
-Generic leaf conformers to `Parser.Protocol` / `Serializer.Protocol` / `Coder.Protocol` (no delegating `body`) must declare `public typealias Body = Never` explicitly, or witness-table emission fails at link time with `Undefined symbols … protocol witness for body.getter`.
+Generic leaf conformers to `Parser.Protocol` / `Serializer.Protocol` / `Coder.Protocol` with no
+delegating `body` must declare `public typealias Body = Never` explicitly, or witness-table
+emission fails at link time with `Undefined symbols … protocol witness for body.getter`.
 
-Element-vending and forwarding property/subscript surfaces use the `_read`/`_modify` coroutine pair, never plain `get`/`set`, wherever the value may be `~Copyable` or a copy is avoidable; properties returning `~Escapable` values use `borrowing get` plus `@_lifetime`. Protocol *requirements* stay `{ get set }` and conformers witness them with coroutines. Do not adopt the experimental unprefixed `read`/`modify` spelling.
+Element-vending and forwarding property and subscript surfaces use the `_read` / `_modify`
+coroutine pair, never plain `get` / `set`, wherever the value may be `~Copyable` or a copy is
+avoidable; properties returning `~Escapable` values use `borrowing get` plus `@_lifetime`.
+Protocol *requirements* stay `{ get set }` and conformers witness them with coroutines. Do not
+adopt the experimental unprefixed `read` / `modify` spelling.
 
-Public stored value types in the storage tower are `@frozen` from birth; views, iterators, and snapshots stay unfrozen until cross-module partial consumption is demonstrated. A capability seam — a protocol minted so generic algorithms can range over a family — is a deletable convenience. Canonical spellings stay concrete; existentials of the seam (`any X`) are forbidden; the seam never becomes a product's public spelling. When minting one, mint the canonical triple: noun namespace, nested `Protocol`, gerund typealias (`Memory.Pool` / `Memory.Pool.Protocol` / `Memory.Pooling`), homed on the agent noun, never on the deverbal noun.
+Public stored value types in the storage tower are `@frozen` from birth; views, iterators, and
+snapshots stay unfrozen until cross-module partial consumption is demonstrated.
+
+A capability seam — a protocol minted so generic algorithms can range over a family — is a
+deletable convenience. Canonical spellings stay concrete; existentials of the seam (`any X`) are
+forbidden; the seam never becomes a product's public spelling. When minting one, mint the
+canonical triple described in `architecture`, homed on the agent noun and never on the deverbal
+noun.
 
 ## Errors
 
-Every throwing function uses typed throws. `throws`, `throws(any Error)`, and `Self.Error` in a `throws(...)` clause outside a protocol are forbidden. When a stored closure can throw user-domain errors, make the containing type generic over the error type. Error types nest as `Domain.Error` and conform to the explicitly qualified `Swift.Error`. Cases describe the failure condition (`invalidHeader(expected:found:)`), never the recovery action.
+Every throwing function uses typed throws. `throws`, `throws(any Error)`, and `Self.Error` in a
+`throws(...)` clause outside a protocol are forbidden. When a stored closure can throw
+user-domain errors, make the containing type generic over the error type. Error types nest as
+`Domain.Error` and conform to the explicitly qualified `Swift.Error`. Cases describe the failure
+condition (`invalidHeader(expected:found:)`), never the recovery action.
 
-Calling a stdlib `rethrows` function from a `throws(E)` context requires an explicit `throws(E)` annotation on the closure — without it Swift infers `any Error`. Only some stdlib `rethrows` functions preserve typed throws: `map`, `withUnsafeBytes(of:)`, `withUnsafeMutableBytes(of:)`, and `Mutex.withLock` do; `compactMap`, `flatMap`, `filter`, `forEach`, `reduce`, `contains(where:)`, `allSatisfy`, `first(where:)`, `sorted(by:)`, `min(by:)`, `max(by:)`, `drop(while:)`, `prefix(while:)` do not. Do not add `@_disfavoredOverload` twins for the ones that work. For the rest, materialize a `Result<T, E>` inside the closure and `try result.get()` outside.
+Calling a stdlib `rethrows` function from a `throws(E)` context requires an explicit `throws(E)`
+annotation on the closure — without it Swift infers `any Error`, and the diagnostic you get is
+"thrown expression type 'any Error' cannot be converted to error type 'E'".
 
-**Untyped-callee boundary.** When the callee's error is untyped — a cross-module API such as `FileManager.removeItem(at:)` or `try await task.value` — every form violates something: `try?` fires the try-optional rule, a bare `do`/`catch` fires the typed-catch rule, `do throws(any Error)` fires the existential rule, and `do throws(E)` does not compile. Keep the `try?` and add `// swift-linter:disable:next try optional` with a `// REASON:` naming the untyped callee. No lint rule can decide this. When the callee *is* typed, `do throws(E) { … } catch { }` is correct and `try?` is not.
+Only some stdlib `rethrows` functions preserve typed throws even then. On the toolchain in hand
+at the time of writing, `map`, `filter`, `withUnsafeBytes(of:)`,
+`withUnsafeMutableBytes(of:)`, and `Mutex.withLock` do; `compactMap`, `flatMap`, `forEach`,
+`reduce`, `contains(where:)`, `allSatisfy`, `first(where:)`, `sorted(by:)`, `min(by:)`,
+`max(by:)`, `drop(while:)`, and `prefix(while:)` do not. This membership changes as the stdlib
+adopts typed throws, so treat the list as a starting point and settle a specific case with a
+one-file `swiftc -typecheck` probe rather than from memory. Do not add `@_disfavoredOverload`
+twins for the ones that work; for the rest, materialize a `Result<T, E>` inside the closure and
+`try result.get()` outside.
 
-Public `throws(...)` clauses name the public API path with explicit generic parameters, never a `__`-prefixed hoisted internal. A shared lifecycle-error typealias is adopted only when every case of the shared type is actually produced. Under typed throws, catch with the implicit binding: `catch where error.isInterrupted`; writing `catch let error where …` erases to `any Error`.
+**Untyped-callee boundary.** When the callee's error is untyped — a cross-module API such as
+`FileManager.removeItem(at:)` or `try await task.value` — every form violates something: `try?`
+fires the try-optional rule, a bare `do` / `catch` fires the typed-catch rule, `do throws(any
+Error)` fires the existential rule, and `do throws(E)` does not compile. Keep the `try?` and add
+`// swift-linter:disable:next try optional` with a `// REASON:` naming the untyped callee. No
+lint rule can decide this; that is why the suppression exists rather than an exemption. When the
+callee *is* typed, `do throws(E) { … } catch { }` is correct and `try?` is not.
 
-An error enum nested in a generic type whose parameter it never uses is accidentally generic: the `@error` SIL result carries a type parameter and trips `FunctionSignatureOpts` under `-O -enable-default-cmo`, aborting the release build of the package and of every consumer. Hoist the enum to non-generic module scope and keep `typealias Error` on the generic type. The shape is necessary but not sufficient — the crash also needs an eliminable argument, a SIL-level property no syntactic check sees — so treat a finding as a candidate and confirm with a release build.
+Public `throws(...)` clauses name the public API path with explicit generic parameters, never a
+`__`-prefixed hoisted internal. A shared lifecycle-error typealias is adopted only when every
+case of the shared type is actually produced. Under typed throws, catch with the implicit
+binding: `catch where error.isInterrupted`; writing `catch let error where …` erases to `any
+Error`.
+
+An error enum nested in a generic type whose parameter it never uses is accidentally generic:
+the `@error` SIL result carries a type parameter and trips `FunctionSignatureOpts` under `-O
+-enable-default-cmo`, aborting the release build of the package and of every consumer. Hoist the
+enum to non-generic module scope and keep `typealias Error` on the generic type. The shape is
+necessary but not sufficient — the crash also needs an eliminable argument, a SIL-level property
+no syntactic check sees — so treat a finding as a candidate and confirm with a release build.
 
 ## Intent over mechanism
 
-Every line reads as *what* is accomplished, never *how*. Intent is the domain operation — initialize, move, insert, compare, iterate. Mechanism is offset computation, pointer arithmetic, rawValue extraction, bitPattern conversion, manual index construction; it belongs inside operators, overloads, accessors, and boundary methods. When mechanism leaks into a call site, the infrastructure is incomplete — improve the infrastructure.
-
-Write the ideal expression first. If it does not compile, ask whether the absence is *principled*. It is principled when the operation would violate a mathematical property: `count - count` (subtraction on naturals is not total — `count.subtract.saturating(other)`), `index * 2` (scaling a position is meaningless), `bounded + .one` returning `Bounded<N>` (use `successor()`). It is a gap when the operation preserves the types' properties: `count + .one`, `slot < capacity`, a missing `Int` bridge on a valid pointer operation.
-
-Express every invariant the type system can carry at compile time. Prefer single expressions to intermediate bindings; extract named functions, not locals. Keep the execution model uniform at a given structural level — never mix immediate and deferred. Iteration climbs the ladder: bulk operation, then iteration infrastructure, then a typed `while`, never a raw counter loop. Push `Int` to the edge. Reach for ecosystem dependencies before ad-hoc implementations, and ask whether the component needs to exist at all. When converting a protocol to a witness struct with stored closures, call sites lose argument labels (`set(attribute:)` degrades to `setAttribute`) — add `@inlinable` labeled convenience methods forwarding to the stored closures.
-
-## Byte discipline
-
-`UInt8` and `Byte` are **siblings**, not refinement-related. `UInt8` is the stdlib arithmetic carrier; `Byte` is the institute byte-domain twin carrying equality, hash, comparison, and bitwise — but no arithmetic. `UInt8` must not conform to `Byte.Protocol`, and `Byte` must not conform to any stdlib arithmetic protocol. `Binary.Serializable`/`Binary.Parseable` witnesses use `Buffer.Element == Byte`; stdlib-interop forwarders carrying `@_disfavoredOverload` are the only exemption.
-
-For a conformer with `rawValue: UInt8` storage, classify by domain. Participating in arithmetic (`- 1`, `* 4`, `% n`, magnitude `<`) → stays `UInt8`; bridge via `.underlying` at the conformance boundary, but the witness signature still retypes to `Byte`. Purely bit-field, kind-tag, or opaque byte → retype the storage to `Byte`. `OptionSet` or anything requiring `RawValue: FixedWidthInteger` → stays `UInt8`. Wider arithmetic raw values stay `UInt16`/`UInt32`. A publicly exposed opaque byte payload is `[Byte]` primary with a `[UInt8]` `@_disfavoredOverload` forwarder. A codec's alphabet table is `[ASCII.Code]`; its sparse 256-entry decode lookup is `[UInt8?]`, typing validity instead of a magic 255 sentinel. No AST rule can make this call — arithmetic happens in method bodies, not at the storage declaration.
-
-`Byte` is canonical across the L1 byte domain. `UInt8` is permitted only where necessary (compiler- or protocol-required, carrier axis `Byte.underlying`, shift counts, bit-cast bridges, stdlib boundary types) or where the domain genuinely is arithmetic. New byte-domain APIs take `[Byte]`/`Span<Byte>`/`Byte` only and must **not** add ergonomic `[UInt8]` forwarders — callers bridge with `.map(Byte.init)`. A genuine stdlib-interop forwarder carries `@_disfavoredOverload`; without it an unannotated `Array(s)` call site cannot decide between the `[Byte]` and `[UInt8]` forms and Swift will sometimes prefer the `UInt8` one, silently unwinding the byte typing. Forwarders declared as extensions **on stdlib types** live in the package's `* Standard Library Integration` target; forwarders on institute types stay put.
-
-Promote at the boundary, not at the destination: a byte-domain body declares its accumulator as `Byte` from construction; lift a parameter's type rather than bridging inside the body. A forwarder file existing only to bridge to a `[Byte]` primary in a sibling file is migration debt. The one sanctioned bridge is at an unpacking iterator boundary where bytes enter integer accumulation. `extension UInt8` must not declare `.ascii`-namespace members — `ASCII.Code` is the canonical typed ASCII substrate. In ASCII-strict contexts (0x00–0x7F) prefer `ASCII.Code`; UTF-8 or raw binary that may exceed 0x7F is `Byte`. In a cohort migration, classify each site by domain first — never blanket-assign to `Byte`.
-
-The shipped integer↔bytes codec is `bytes(endianness:)` / `init?(bytes:endianness:)` on `FixedWidthInteger`. Adopt it; do not mint a parallel selector. Two traps: the default is `.little`, so a big-endian site that omits `.big` **silently corrupts**; and `init?(bytes:)` guards correctly — the trap is the *slice* `buf[i..<i+n]` firing first, so guard the buffer, not the optional. Under `MemberImportVisibility` the SLI's re-export surfaces the `Binary.Endianness` type but not its `.big`/`.little` cases — a consuming file must import `Binary_Endianness_Primitives` directly as well. Separately, `Standard_Library_Extensions` does not re-export `Byte_Primitives`.
-
-## Typed indices and conversions
-
-`Index<Element>` is `Tagged<Element, Ordinal>` with a phantom `Element` bound `~Copyable & ~Escapable`. `Index<T>.Offset` wraps a signed displacement, `Index<T>.Count` an unsigned count. Tagged is a functor, and the conversion preference is strict — attempt each tier before descending:
-
-1. `retag` — same raw value, different domain (`bitOffset.retag(Byte.self)`). Zero-cost.
-2. `map` — same tag, transformed raw value.
-3. Typed arithmetic for composed operations — `.zero + count`, `index + .one`, `end - start`.
-4. Typed initializer at a system boundary — `try Index(int)`, `Ordinal(uint)`.
-5. `rawValue` / `__unchecked` — last resort, same-package internals only, requires justification.
-
-`retag` does not apply across different scales. For a known ratio use the count chain — `.zero + Index<A>.Count(sourceIndex) * .ratio` — entirely non-throwing. You cannot scale a point in affine geometry, only a magnitude, which is why the `Count(index)` step is type-theoretically necessary even though numerically a no-op. When a signed displacement is also involved, add it to the chain and propagate failure with typed throws rather than an internal `try!`.
-
-`.rawValue` and `.position` access is confined to extension initializers and same-package implementations. `Int(bitPattern: index.position.rawValue)` — the multi-level reach-through — is always wrong; so is `Int(x.underlying.rawValue)` inside a typed-seam body. When a raw loop genuinely needs an `Int` seed, derive the bound through the typed API and descend once via `Int(clamping:)`. Comparisons happen at the semantic type level (`#expect(index == 3)`).
-
-Arithmetic uses the typed operators. `Int(bitPattern:)` is valid only for C APIs, stdlib APIs requiring `Int`, and debug output. `Count - Count` has no `-` by design — use `.subtract.saturating(_:)`. Bounds-check with `index < count`; iterate with `(.zero..<count)`. When wrapping a stdlib collection, store the typed `Index<Element>` as the primary position and derive the raw index only at the subscript boundary. Compile-time-constant index values are bare integer literals (`slab[0] = x`) via the tagged-primitives SLI carve-out; a runtime int keeps explicit construction.
-
-Cross-domain conversion respects domain separation: different phantom types exist precisely so `Index<Bit>` and `Index<Byte>` cannot be compared or mixed. Values entering from stdlib `Int`-returning properties (`bitWidth`, `MemoryLayout<T>.stride`) are legitimate boundary conversions.
-
-## Choosing a data structure
-
-Containers compose in four layers, each adding one concern: Memory (raw allocation) → Storage (element lifecycle) → Buffer (mutation semantics and state) → ADT (user-facing API). Most code uses an ADT. Drop to Buffer for direct mutation control, to Storage when building a new Buffer discipline, to Memory only for allocator work. Select by laws and ownership behavior, not by familiar spelling, and confirm against live source.
-
-Choose the ADT family by access pattern first. A variant is not a new family: allocation placement (heap default, `Small<n>` inline-bytes with heap spill, `Inline<n>` fixed element count), capacity (growable default, `Bounded` with typed overflow), and ownership (unique move-only default, `Shared` for CoW) are three free axes, declared as front-door typealiases and never hand-written. Which variants exist per family is consumer-pulled. `Small<n>` counts **bytes**; `Inline<n>` counts **elements**. A semantic sibling — distinct observable laws, like an insertion-ordered dictionary — is a separate package, not a variant.
-
-Institute containers pass `~Copyable` through: base variants are `~Copyable` and gain `Copyable` conditionally when the element is. Never frame a container question as "can stdlib `Array` hold this?" and fall back to `[String]` citing a typed-system gap. The axis is resource-shaped (wants `~Copyable` → institute container) versus data-shaped (happy Copyable → stdlib array is fine).
-
-Before proposing a new primitive at any layer, demonstrate that composition over the existing catalogue does not cover the case and state which property it lacks. `stdlib.ManagedBuffer` is vestigial but its replacement does not exist yet — direct use is the right interim choice; wrapping it in a ceremony-only Storage primitive is the premature-primitive trap. **Naming-confusion trap:** code calling itself a "slab allocator" usually implements a LIFO free-list with generation tokens, which is an *arena*. `Buffer.Slab` is bitmap-tracked with no generation tokens; `Buffer.Arena` has the generation tokens that give use-after-free detection. Match by algorithmic requirement — free list? generation tokens? O(1) alloc and dealloc? — never by the label in a comment.
-
-Liveness and teardown live in the single-allocation leaf, never in the buffer, for inline and heap, dense and sparse alike. Pick the leaf and compose the one generic buffer rather than reaching for a concrete `.Inline`/`.Small` *buffer* type. Tower ops must not hardcode a memory leaf: prefer a seam-generic form, then an allocation-generic pin fenced on growability, and only then a thin ownership twin. A public mutating op calls the CoW gate exactly once at entry, before its first write; seam-generic helpers never gate and must say so in their doc comment. Double-gating and an ungated helper write are both defects.
-
-Iteration flows from the column, never re-implemented per family: a container is iterable exactly when its column vends borrowing iteration. A move-only element can be borrow-iterated but never consume-iterated. Multipass iteration is claimed only where the column vends it. A type conforming to both the store and buffer seams and consumed as an ADT column must honor the seam ledger — initialize increments count by one, move decrements it, the element subscript leaves it alone, none of them changes capacity — and prove it by running the shipped law suite from its own tests. The bound cannot express this contract, so a conformer that satisfies both without ledgering corrupts silently.
-
-## Ownership
-
-Types representing a resource with a lifecycle — descriptors, handles, allocations, locks — are natively `~Copyable`, with ownership on the type itself. Wrapper adapters (`Owned<Tag>`) are only for types from modules you cannot change. Prefer `~Copyable` for new types; `Copyable` is the choice that needs a reason. Annotate `consuming`/`borrowing`/`inout` explicitly wherever ownership is not obvious. Ownership is not an overload axis — do not ship `borrowing` and `consuming` twins of the same operation.
-
-Never degrade a `~Copyable` value to its raw representation to avoid the cascade. If a `~Copyable` value appears in an enum case, a stored field, or a generic argument, make the container `~Copyable` too. Extracting `_raw`/`_rawValue` on one side of a call, layer, or closure boundary and reconstructing on the other voids the close-on-drop guarantee; any `_raw`/`init(_rawValue:)` outside the wrapper's own file is a review finding. `Swift.Error` requires `Copyable`, so move-only values never go in error payloads — return a non-throwing outcome enum. Language features carry ownership; never bespoke `Raw`/`Borrow` shadow types or raw-`Int` overloads. For recursive value-type indirection use `Reference<T>`/`Owned<T>`, never an ad-hoc `_Box` class.
-
-Suppression does not propagate: every extension, protocol refinement, and conformance re-imposes `Copyable` on any suppressed parameter it fails to restate. Three sharp edges — a bare conformance to a marker protocol with zero requirements still Copyable-pins the capability; conditional `Copyable`/`Sendable` conformances must key on the parameter itself (`where S: Copyable`), never on a projection, which is rejected for suppressible protocols but legal on plain extensions; and Copyable-element tests mask the defect entirely, so suites over `~Copyable`-generic APIs must include a move-only instantiation. Other walls: conformances split across files need to move into the type's file; compound constraints plus a separate file plus the Lifetimes flag can fail at module emission; `Sequence`/`Collection` requirements have no `~Copyable` workaround — vend a borrowing `forEach`.
-
-## Deinit and consuming
-
-`deinit` on a `~Copyable` struct grants *immutable* access to `self`, like `borrowing`; `consuming func` grants mutable access. So `Optional.take()` works in `consuming` and fails in `deinit`. The canonical deinit idiom for an `Optional<~Copyable>` field is `guard case .some = _field else { return }` — read the discriminator, never the payload.
-
-A `consuming func` that does not `discard self` still runs `deinit` on the remaining stored properties. When a consuming operation has already extracted the resource, track it (`Atomic<Bool>`, or an Optional field niled in the consuming op) and guard `deinit` on it. `discard self` requires trivially-destroyed stored properties, so a closure-bearing `~Copyable` type uses the Optional-field + guarded-deinit shape.
-
-A value type with a user `deinit` cannot conform to `Copyable`, even conditionally, and a conditional `deinit` is not expressible. A generic struct wanting (a) a generic substrate field, (b) conditional Copyability, and (c) automatic cleanup gets any two. The escape is to relocate (a)+(c) into a private `final class Box`. Keep exactly one cleanup-truth-holder per discipline — the deinit lives on the Box *or* on a self-cleaning concrete substrate, never both. For an inline `@_rawLayout` substrate a class Box is wrong (it reintroduces the heap); put the occupancy oracle and deinit in the move-only leaf.
-
-Linear types (exactly-once) are `~Copyable` + `consuming func` + a trapping `deinit`; affine types (at-most-once) are the same with a silent `deinit`. A refcounted box wrapping move-only storage must drain elements in its own class `deinit` through public mutating API and close with `_fixLifetime(self)`. Under `-O`, once `isKnownUniquelyReferenced` has been applied, the optimizer devirtualizes the final release and omits the user deinit of a generic-namespace-nested `~Copyable` struct while still destroying its fields — elements leak while their bytes are freed. An empty `deinit {}` does not restore it; a non-trivial `AnyObject?` field does not either.
-
-The cross-package `@_rawLayout` deinit-skip needs a `_deinitWorkaround: AnyObject?` marker placed by shape: at the substrate leaf when the `@_rawLayout` leaf lives in another module, on the type itself for same-module direct `@_rawLayout`. Never add a buffer-level workaround over a nested `@_rawLayout` substrate — that SIGSEGV-miscompiles. The naked skip is debug-only (release specializes past it), and debug leaks are still leaks, so the workaround stays. Never replace `@_rawLayout` storage with `InlineArray<n, Optional<Element>>` — Optional requires `Element: Copyable` and adds a per-element tag, destroying both properties `@_rawLayout` was chosen for.
-
-CoW machinery — clone strategy, drain — is captured at construction, where `Element: Copyable` is statically visible, and cannot be recovered downstream. Split constructors and every generic construction helper on element copyability. A single `~Copyable`-generic form statically selects the strategy-less overload even when the caller's element is concretely Copyable, producing a box that works while unique and traps on the first post-fork mutation. The same split is mandatory for any overload that *replaces* a shared box. A `where S == Wrapper<E, Concrete<E>>` same-type method pin only derives conditional conformances conditional on suppressions; a conformance conditional on a protocol bound does not derive through such a pin, so a type consumed through method pins carries its protocol obligations in the declaration's generic bounds.
-
-## Unsafe containment and Span
-
-Enable `.strictMemorySafety()` on every target. `unsafe` is an expression keyword like `try`, not a block. Mark each unsafe operation individually, wrap the whole expression from the left including the assignment destination, and remember `unsafe` does not propagate into closures.
-
-Place `@safe` boundaries as low as possible: maximize absorbers, minimize propagators. The acid test is whether a caller can use the complete public API without writing `unsafe`. A type encapsulating unsafe storage takes `@safe`, never `@unsafe` — `@unsafe struct` makes `self` unsafe and warns on every ordinary member access inside the type's own methods. `@unsafe` belongs on escape hatches and on public properties vending raw pointers. Every `@safe` declaration and every `nonisolated(unsafe)` declaration must carry an adjacent invariant disclosure — `// SAFETY:` / `// WHY:` lines in the leading trivia with no blank line between, or a `## Safety Invariant` doc section — stating what makes the claim sound and citing the `@unchecked Sendable` category when categorizable. The disclosure is required even when the attribute suppresses no diagnostic. `nonisolated(unsafe)` statics genuinely accessed concurrently need real synchronization.
-
-Unsafe pointer storage on a `@safe` type is `private`/`internal`. On an `~Escapable` type a public pointer property is structurally safe; on an `Escapable` type it is a dangling pointer waiting to happen. The Span family is the primary interface for contiguous memory, matched to the access mode: `Span` reads the initialized region, `MutableSpan` mutates in place, `OutputSpan` via `withOutputSpan(addingCapacity:)` appends into uninitialized capacity. `MutableSpan` is undefined over uninitialized memory, but that no longer justifies a raw pointer. Vend spans as properties (`var span: Span<Element> { @_lifetime(borrow self) borrowing get }`), not `withSpan(_:)` closures — `Span` is `~Escapable`, so the type system already scopes it.
-
-A raw pointer is admitted only when all of: no span fits (C string / FFI / allocator substrate — "uninitialized tail" is not such a case), it lives at the deepest layer and is never re-exported upward, it is `@unsafe` and closure-scoped when it is an accessor, and an adjacent `// WHY:` states which interop boundary forces it. A retained unsafe accessor cites the specific compiler limitation *and* a `REMOVE-WHEN:` condition. Never ship both a safe and an unsafe public overload. At L3 consumer sites, copy a span with indexed iteration rather than `withUnsafePointer` + `UnsafeBufferPointer` + `Array(buffer)`; at L1/L2 sites interfacing with C the unsafe form remains correct.
-
-Match the addressing seam to the index domain. Spans witness the *initialized prefix* `[0, count)`. A container computing positions in the full allocation `[0, capacity)` — wrapped rings, head-offset layouts, sparse slabs — must read and write through the per-slot subscript. A count-bounded read inside a wrap-capable discipline is invisible until the structure actually wraps, so suites that only exercise head-at-zero states pass with the defect present.
-
-On a measured hot path, span-first costs the *derivation*. Per-access derivation recomputing `count` through an initialization ledger is hostile — hoist it out of the loop or cheapen it to a header-word read. Hoisting is currently blocked in places: a live `mutableSpan` pins the whole struct, so sibling-property mutation under a hoisted span is an exclusivity error and `deinit` rejects hoisted spans outright. Do not cache addresses in generic code over a storage seam — derive per access, including in `deinit`; an inline-backed resource moves its bytes with the value, so a cached base dangles after a move. A cached base is lawful only behind a concrete heap-pinned path. An owned region's `unsafe` has two surfaces: the allocation floor (alloc/free plus the lifetime-held base) is permanent; the span-vending surface is what a safe-owning-span feature would retire. A read-only regime must not conform to a write-capable region protocol — reads ride `Span`.
-
-## Lifetime views
-
-`~Escapable` views are the ecosystem infrastructure and supersede new `with*` closure APIs for borrowed access to a `~Copyable` resource. Add a `with*` overload only as a verified compiler-limitation fallback with a TRACKING comment. `~Escapable` values cannot be stored in class stored properties or captured in `@escaping` closures. When a view must live behind a class property, use `~Copyable` alone — the `_read` coroutine scope prevents escape and `~Copyable` prevents aliasing. They *can* be async function parameters and survive `await`. A `~Escapable` value produced inside an inner `_read` coroutine cannot be yielded from an outer one — return a Copyable projection or use closure-based access. When an annotation such as `~Escapable` is semantically redundant and triggers a known optimizer crash, omit it until the compiler is fixed. `@_lifetime` is version-skewed: 6.2.x requires it on mutating methods with `~Escapable` self, while 6.4-dev rejects it when the return type is Escapable.
-
-## Concurrency isolation
-
-Non-Sendable is the default; avoid viral Sendability. Start at the top of the isolation hierarchy (actor) and move down only with a documented constraint. A `~Copyable` struct whose stored properties are all Sendable uses plain `Sendable`; `@unchecked` is about a non-Sendable field, never about `~Copyable` itself.
-
-Classify every `@unchecked Sendable`: A synchronized (document the mechanism), B ownership transfer, C thread-confined (should become `~Sendable`; deferred), D structural workaround where the type is provably safe but inference cannot see it. Category D is a narrow hatch, not a bucket. The conformance clause carries bare `@unchecked Sendable` — never `@unsafe @unchecked Sendable`; `@unsafe` goes on the type or member declaration. A justification citing a compiler limitation carries `WHY:`, `WHEN TO REMOVE:`, and `TRACKING:`. Describe the risk accurately: `@unchecked` removes the compiler's data-race prevention.
-
-Prefer region-based isolation to Sendable constraints. Use `sending T` on boundary-crossing parameters and returns rather than `T: Sendable`. Do not put `& Sendable` on a protocol associatedtype — the transport decision belongs to the consumer. At the combinator layer, `: Sendable` on the struct, `where Upstream: Sendable`, `@Sendable` on stored closures, and `where Self: Sendable` on the extension form one coupled cascade — drop all four together. Conditional Sendable written as `extension C: Sendable where T: Sendable` is fine; the same bound as `struct C<T: Sendable>` is not, because it binds at instantiation.
-
-Never add `Element: Sendable` to dodge a region-merge diagnostic in a `withLock` closure — repair the transfer with an `Ownership.Slot` intermediary or restructure. A `Sequence` of non-Sendable elements entering a lock is staged through `Ownership.Slot(Array(elements))` before the lock and taken inside; `sending` on the parameter alone is not enough, because the capture merges with the `inout sending State` region. A `Mutex.withLock` wrapper declares `(inout sending State) throws(E) -> sending R`. **Hazard:** `mutex.withLock { $0 }` compiles even when `State` is non-Sendable and hands a region-disconnected alias out of the lock with no diagnostic — a real, undiagnosed race. Return a Sendable snapshot instead, or move a move-only value out via the Slot + `inout sending` path.
-
-`~Copyable` values cannot be captured in `@Sendable` or `@escaping` closures — including `TaskGroup.addTask`, `Task.detached`, and `withTaskCancellationHandler.onCancel`. To reach an actor with a `borrowing ~Copyable` parameter, take an `isolated Actor` parameter on a private helper. To dispatch blocking work without forcing `T: Sendable`, use `withCheckedContinuation` plus `Task<Void, Never>(executorPreference:)`. A closure *capture* cannot be consumed even in a non-escaping closure — thread the payload as a `consuming` closure *parameter* (`withUnique(consuming: payload) { column, payload in … }`). Copyable payloads mask this: the "consume" silently copies, so an API only tested with Copyable elements breaks on its first move-only client. Inside a lock, do a pure state transition and return a `~Copyable` action enum; run side effects outside the lock via `switch consume action`, or you invite reentrancy and deadlock.
-
-## Platform stack
-
-**L2 spec packages** encode a kernel's published API exactly as its authority documents it (POSIX/IEEE 1003.1, Linux epoll/io_uring, Darwin kqueue/mach, Win32/IOCP). ISA specs are L2 too — they encode a vendor manual, not hardware primitives. L2 mirrors the spec and adds no policy. **L3-policy packages** wrap one L2 sibling and add opinion: EINTR retry, partial-IO loops, error normalization. A pure re-export file at L3-policy is a feature — it reserves the namespace slot for policy that lands later; policy always delegates to L2 and never re-implements a syscall. **L3-unifier packages** provide one cross-platform API, anchored by `swift-kernel`. **L3-domain** packages compose unifiers only.
-
-Composition directions: unifier → policy and unifier → unifier allowed; domain → unifier canonical; domain → policy forbidden (go through the unifier); policy → unifier and policy → domain forbidden (upward). The single sanctioned policy-to-policy edge is Darwin → POSIX and Linux → POSIX, because those platforms extend the POSIX subset. Windows is not POSIX. Darwin → Linux is never permitted. A POSIX spec package must not depend on the Linux or Darwin spec packages, including from test targets. Domain-specific cross-platform unification and its spec dependencies belong in the domain package — the kernel unifier stays domain-neutral. Creating a new platform package, or a shared platform-namespace anchor when one platform grows a second L2 spec, requires architectural approval — sibling L2 packages otherwise re-declare the platform root and produce duplicate symbols.
-
-## Kernel vocabulary
-
-`swift-kernel` anchors `public enum Kernel {}` and `Kernel.Error`. Every platform package extends that shared namespace rather than declaring a root of its own — no `LinuxKernel`, no `KqueueEventNotification`. Each L2 platform package additionally declares its own platform root (`public enum Darwin`, `Linux`, `` Windows.`32` ``, `ISO_9945` with `typealias POSIX`) following `Platform.Domain.Concept`.
-
-`Linux.Kernel` and `Darwin.Kernel` are each their own `public enum` in their own L2 spec package — **not** typealiases to `ISO_9945.Kernel`. POSIX-shared content stays under `ISO_9945.Kernel.X` and is consumed by re-export or L3-policy composition, never by namespace identity. L2 spec and L3-policy namespaces are genuinely distinct nominal types; the split is asymmetric per platform.
-
-Consumers above L3 write `import Kernel` and nothing else. A platform conditional in consumer code means the unifier is missing a capability — extend the unifier. Each level re-exports the level below with `@_exported public import` in its `Exports.swift`, so `Kernel` is the single entry point.
-
-## Conditionals
-
-`#if os(...)` is confined to L3 `Exports.swift` files and `Package.swift` dependency conditions. Inside a package that only compiles on one platform, the package boundary *is* the conditional. L1 primitives are unconditionally platform-agnostic: no conditional implementations, no conditional storage. When storage shape differs per platform, define the type per L3-policy (or L2 where a spec package exists) and unify the name by typealias at the unifier.
-
-An L3 unifier may put `#if os(...)` on a public enum case when the wrapped type comes from a platform-specific spec and a stub would be dishonest — allowed only when no consumer switches exhaustively and there is at most one conditional case per enum. A non-platform package may carry `#if` only when it owns the varying concept, reaches the platform solely through `import Kernel`, selects a domain strategy rather than a syscall, and cannot push the variation down without the kernel absorbing domain semantics. Path separators, kqueue-vs-epoll strategy, and Windows permission models qualify; syscall dispatch never does.
-
-Placement test — **who defined the types?** They defined it (man page, spec chapter, SDK doc) → L2. We defined it as vocabulary → L1. We composed it → L3. Before classifying a cross-platform type as L3-placed, grep the L2 spec packages for `extension <Namespace>.<Type>`; any hit blocks L3 placement, since L2 cannot import upward.
-
-Use `#if os()` for platform identity, never `#if canImport()`: `os()` is evaluated against the target triple and is deterministic; `canImport()` depends on module resolution. Reserve `canImport` for genuinely optional modules like `SwiftUI`.
-
-## Platform C and typed surfaces
-
-L2 spec packages are the **exclusive** home for `import Darwin`/`Glibc`/`Musl`/`WinSDK`. L3-policy, L3-unifier, and L3-domain packages must not import platform C at all; they compose L2's typed API. Inside L2 the raw libc calls stay `private`/`fileprivate`/`internal`. C shims are minimal, isolated C targets under `_Shims/include/`, and every platform gets its **own** header file even when the C function is identical — a shared header with `__APPLE__`/`__linux__` branches breaks independent compilability. Duplication is deliberate.
-
-No platform C type appears in any exposed signature — parameter, return, associated type, or generic constraint — and there is no `@_spi` exception. Test: can a consumer write their code without importing the platform's C module? L2 wrappers must model the domain, not rename raw fields — a `_fd: Int32` or `_rawFlags: UInt32` accessor is forbidden; each semantic use of a C union field gets its own type. Syscalls called from another type's `deinit` use the typed throwing form via `try?`.
-
-`Kernel.Descriptor` is the single cross-platform name, reached by a chain composing exactly one tier per link: the canonical `~Copyable` struct with native storage and close-on-drop `deinit` at L2, a `public typealias` at L3-policy, another at the L3-unifier. `swift-kernel` never references an L2 spec package directly and never declares a `Descriptor` of its own. Types whose raw representation genuinely differs (thread IDs, process IDs, scheduler tokens) are defined per L2 package at native width in stdlib types — never normalized into one widened L1 type, never using the C typedef as the raw value. For a universal concept with platform-specific constants, L1 declares an empty OptionSet shell (type, `rawValue`, `init`) and each L2 adds its constants by extension; a POSIX-only concept is defined in the POSIX spec package outright.
-
-Errors are typed at every platform boundary: `throws(<Namespace>.Error)`, with L3-policy normalizing platform error codes into them. Every reference to a stdlib protocol the ecosystem also uses as a namespace is written qualified — `Swift.Error`, `Swift.Sequence`, `Swift.Collection` — because a transitive dependency can introduce the shadowing later.
-
-## Package settings
-
-Packages pin `swift-tools-version: 6.3`, `swiftLanguageModes: [.v6]`, and current platform minimums. `ExistentialAny`, `InternalImportsByDefault`, and `MemberImportVisibility` are required upcoming features on every package; memory-critical packages may add the `Lifetimes` and `LifetimeDependence` experimental features. `InternalImportsByDefault` makes import visibility a module contract: a type named in an `@inlinable` declaration must be imported with `public import`, consistently across the module's files.
-
-Expose several small `.library` products rather than one aggregate. Keep implementation-root targets (holding only the namespace enum) internal and unpublished; variant targets carry the namespace outward with `@_exported public import`. Declare libraries the platform does not link automatically, always conditioned (`.linkedLibrary("uuid", .when(platforms: [.linux]))`); Linux needs `-luuid`, Darwin and Windows link theirs by default. Platform-specific `.product` dependencies carry `condition: .when(platforms:)`. SwiftPM normalizes spaces in target names to underscores (`"Darwin Kernel Standard"` imports as `Darwin_Kernel_Standard`) — never mix spaces and underscores in one name. When a namespace collides with a system module, qualify by module at the use site. When a package's tests would create a cycle with `swift-testing`, put them in a nested `Tests/Package.swift`. Guard known-absent features proactively with `#if !hasFeature(Embedded)` around `Codable`, existentials, and reflection-dependent code.
-
-## Platform traps
-
-- Kernel shared-memory protocol counters — io_uring head/tail and anything like them — stay raw `UInt32` with a typed mask for slot extraction. The fullness check `sqEntries &- (tail &- head)` depends on `UInt32` wrapping at 2^32; widening to a 64-bit index type breaks the wrap and the check silently stops being correct. Do not reach for collection-index infrastructure here.
-- Declaring a nested type through a typealiased namespace adds it to the *foreign* module: with `ISO_9945.Kernel = Kernel_Primitives_Core.Kernel`, an `extension ISO_9945.Kernel { struct Descriptor }` actually declares `Kernel_Primitives_Core.Kernel.Descriptor` and silently conflicts with anything already there. Resolve the alias chain and grep the foreign module before declaring. The same mechanism means sub-namespaces under a typealiased L3-policy parent cannot be method-wrapped at L3-policy, and that an L3 extension on such a namespace *is* the L2 extension — adding a unifier delegate with the same signature is a redeclaration, not composition.
-- Before adding an L3-unifier method whose name matches the spec-literal L2 name reachable through the `Kernel` alias, land the disambiguation in the same change: mark the L2 typed form `@_disfavoredOverload` so the unifier wins.
-- POSIX `si_code` subgroups (`FPE_*`, `ILL_*`, `SEGV_*`, `BUS_*`, `CLD_*`, `SI_*`) import as `Int` on glibc and `Int32` on Darwin. Wrap case labels — `case Int32(FPE_INTDIV):` — or Linux fails to compile.
-- A pure Swift struct is not `@objc`-representable and cannot appear as `UnsafeMutablePointer<T>?` in a `@convention(c)` signature, however layout-compatible it is. `@convention(c, cType:)` does not help. Keep the callback on `OpaquePointer?` and bind the typed wrapper on the callback's first line.
-- Platform `System` targets extend `System` from `System_Primitives` directly. Do not create `Darwin.System` / `Linux.System` / `Windows.System` namespace enums.
+Every line reads as *what* is accomplished, never *how*. Intent is the domain operation —
+initialize, move, insert, compare, iterate. Mechanism is offset computation, pointer arithmetic,
+rawValue extraction, bitPattern conversion, manual index construction, and it belongs inside
+operators, overloads, accessors, and boundary methods. When mechanism leaks into a call site,
+the infrastructure is incomplete — improve the infrastructure.
+
+Write the ideal expression first. If it does not compile, ask whether the absence is
+*principled*. It is principled when the operation would violate a mathematical property: `count
+- count` (subtraction on naturals is not total — `count.subtract.saturating(other)`), `index *
+2` (scaling a position is meaningless), `bounded + .one` returning `Bounded<N>` (use
+`successor()`). It is a gap when the operation preserves the types' properties: `count + .one`,
+`slot < capacity`, a missing `Int` bridge on a valid pointer operation.
+
+Express every invariant the type system can carry at compile time. Prefer single expressions to
+intermediate bindings; extract named functions, not locals. Keep the execution model uniform at
+a given structural level — never mix immediate and deferred. Iteration climbs the ladder: bulk
+operation, then iteration infrastructure, then a typed `while`, never a raw counter loop. Push
+`Int` to the edge.
+
+Reach for ecosystem dependencies before ad-hoc implementations, and ask whether the component
+needs to exist at all — the `composition` skill is the fuller version of that question.
+
+When converting a protocol to a witness struct with stored closures, call sites lose argument
+labels (`set(attribute:)` degrades to `setAttribute`) — add `@inlinable` labeled convenience
+methods forwarding to the stored closures.
+
+## Elsewhere
+
+- `UInt8` vs `Byte`, the integer↔bytes codec, typed indices and conversions —
+  [bytes-and-indices.md](bytes-and-indices.md).
+- Container families, variant axes, the four-layer tower —
+  [data-structures.md](data-structures.md).
+- `~Copyable`, `~Escapable`, `deinit`, `consuming`, CoW construction —
+  [ownership.md](ownership.md).
+- `@safe` / `@unsafe`, raw pointers, the Span family — [unsafe-and-span.md](unsafe-and-span.md).
+- `Sendable`, `@unchecked`, actors, `Mutex` — [concurrency.md](concurrency.md).
+- Platform stack, kernel vocabulary, conditionals, platform C — [platform.md](platform.md).
+- Tools-version pins, upcoming features, products, linking —
+  [package-settings.md](package-settings.md).
