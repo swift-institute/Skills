@@ -89,8 +89,13 @@ A security-sensitive finding never appears in a public draft or a public issue. 
 it first, then route it to a private destination.
 
 Set an issue type on every issue: `Task`, `Bug`, or `Feature`. Those three are the org's
-enabled types; there is no fourth to choose. Labels are stock GitHub defaults and carry no
-Institute meaning — do not encode routing, priority, or ownership in one.
+enabled types; there is no fourth to choose. Labels carry no Institute meaning on human-filed
+work — do not encode routing, priority, or ownership in one. They are not all stock defaults:
+the sweep workflows label their bot-filed divergence reports to name which sweep filed them,
+so `swift-institute/.github` carries six minted labels beside the nine GitHub ships. A sweep
+that keys control flow off such a label fails silently when the label is absent — one searched
+`--label` for a label that had never been created, so its close-when-clean path could not fire
+even on a clean fleet. Match the issue title instead.
 
 Tracking lives on one org-level board, **Institute Work**,
 `https://github.com/orgs/swift-institute/projects/2`.
