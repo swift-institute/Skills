@@ -38,8 +38,7 @@ workspace package test --argument=--filter --argument "Suite or test"
 ```
 
 In a fresh clone the bootstrap `swift run --package-path Application workspace …` compiles the whole
-dependency graph and is silent for several minutes. It is not hung. After the executable exists, run
-everything through it.
+dependency graph and is silent for several minutes. It is not hung.
 
 ## Evidence
 
@@ -86,8 +85,10 @@ Bare `grep` in this shell is a ugrep wrapper that honours `.gitignore` and silen
 `/usr/bin/grep` when the result is evidence. Target directories contain spaces, so quote paths and
 expect word-splitting bugs in any loop over `find` output. Imports frequently live in umbrella
 `exports.swift` files, often as `@_exported public import`, so a grep for `import X` in consumer files
-under-reports. A shell chain joined on `&&` reports "did not run" and "ran, found nothing"
-identically: split the chain, or check exit status per stage.
+under-reports.
+
+Before any large sweep, census, or absence claim, read [instrument-traps.md](instrument-traps.md) — the
+full reference, every entry a failure mode that returns a confident zero.
 
 ## swift-linter
 
