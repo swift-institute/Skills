@@ -6,7 +6,7 @@ description: GitHub Actions and continuous integration for Institute packages �
 # CI/CD
 
 Institute CI is a deny-by-default control plane. Resolve what a workflow is allowed to do before
-writing it; nothing about an existing file establishes permission.
+writing it.
 
 ## The three tiers
 
@@ -17,6 +17,15 @@ validation predicate. The wrapper adds only invariants shared by every package i
 universal reusable owns the common build/test matrix, format, lint, docs, planning, and aggregation.
 Sub-orgs route through their parent layer's wrapper; there is no fourth tier. Per-package
 repositories carry `ci.yml` only — standalone `swift-format.yml` and `swiftlint.yml` must not exist.
+
+Tier follows the event: `workflow_dispatch` runs the full tier, a pull request does not. Verify
+unmerged work by dispatching the full tier on the branch and fast-forwarding only when green — a
+pull request silently downgrades platform coverage.
+
+Never relax, exclude, or `continue-on-error` the Windows leg: it is the fleet's only
+assertions-enabled compiler, and therefore its only SIL-validity gate. A platform leg is dropped
+only by an identity declaration — the package's specification excludes that platform — never as a
+cost measure.
 
 ## Whitelist
 
@@ -37,27 +46,20 @@ and an allowed grant is not permission for every `uses:` target.
 - A job with job-level `uses:` cannot carry `continue-on-error`. Model advisory posture as a typed
   input interpreted inside the called workflow.
 - `secrets: inherit` does not cross an organization boundary. Same-org callers may inherit;
-  cross-org calls forward only the declared closed set. Better: a central workflow minting a
-  short-lived `swift-institute-bot` installation token scoped to the exact repositories and
-  permissions.
+  cross-org calls forward only the declared closed set.
 - `restore-keys` is forbidden on every `actions/cache` use — a cache matches its complete key or
   misses. Do not cache ordinary SwiftPM `.build` at all: branch dependencies plus uncommitted
   `Package.resolved` mean no key can prove it represents the resolved graph. Only immutable
   versioned tool binaries earn an exact-key cache, and the install must still verify the digest.
 
-A claim that a package resolves off-machine requires an actual clean, mirror-bypassed resolve from
-canonical sources; a reachability probe and a mirror-backed build are different evidence.
-
 ## Private repositories
 
-Private repositories must not trigger CI. The chain currently gates on credentials rather than
-visibility, so a private repository can start runs that cannot produce signal; closing that gap is a
-design requirement. Until it closes, run the same Swift-owned executables locally through Workspace
-and record the substitution and its scope.
+Private repositories do not run CI: every job in the universal reusable is guarded on repository
+visibility. Run the same Swift-owned executables locally through Workspace instead, and record the
+substitution and its scope.
 
 ## Reading results
 
 Evaluate a run at the run level (`conclusion`), not per job; patching source in reaction to a
 failing `continue-on-error` job is churn. Do not dispatch a workflow while Actions is disabled on
-the repository: runs queued in that state are unrecoverable — `gh api -X DELETE /actions/runs/<id>`
-returns 403, `cancel` returns 500, `rerun` returns 403.
+the repository: runs queued in that state are unrecoverable — delete, cancel, and rerun all fail.

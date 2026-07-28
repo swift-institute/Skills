@@ -17,9 +17,9 @@ L1 Primitives    swift-{concept}-primitives   What must exist?
 ```
 
 All three are Apache 2.0. Components (L4) and Applications (L5) are reserved names, not
-residences. L3 is the top realized layer; extractions land in Foundations unless a layer is
-deliberately being stood up. A `swift-components/*` or `swift-applications/*` directory
-records an intention — never cite one as precedent or as ownership evidence.
+residences — a `swift-components/*` or `swift-applications/*` directory records an intention,
+never precedent or ownership evidence. L3 is the top realized layer; extractions land in
+Foundations unless a layer is deliberately being stood up.
 
 Placement test: can you point to an external man page, spec chapter, or SDK document defining
 this type's surface? Yes → L2. No → L1 if it is an atomic prerequisite, L3 if it composes.
@@ -46,8 +46,9 @@ prohibited; repository scope decides whether they may be changed.
 
 ## Foundation-freedom
 
-No package's main target at any layer imports `Foundation` or `FoundationEssentials` or uses
-Foundation types. Primitives must additionally be deployable on Swift Embedded: no reflection,
+No package's main target at any layer imports the Foundation module family — `Foundation`,
+`FoundationEssentials`, `FoundationNetworking`, `FoundationXML` — or uses Foundation types.
+Primitives must additionally be deployable on Swift Embedded: no reflection,
 no Objective-C interop, no runtime features absent in embedded contexts.
 
 The single exception is a target whose name ends in `Foundation Integration`. It may import
@@ -66,9 +67,6 @@ swift-incits, and vendor orgs swift-arm-ltd, swift-intel, swift-riscv, swift-mic
 swift-standards itself holds the convergence packages, `swift-{concept}-standard`, which
 absorb spec revisions so consumers importing the stable module never change. Convergence
 packages are policy-free — opinion lives in Foundations.
-
-Spec types mirror spec terminology: `RFC_4122.UUID`, not `UUID`; `ISO_32000.Page`, not
-`PDFPage`. The spec namespace is the type's identity.
 
 - A package's location comes from its inventory entry in Workspace — never infer it from the
   package name, never determine it by scanning the tree.
