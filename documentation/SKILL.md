@@ -18,7 +18,7 @@ A feature's documentation lives in four layers, each reaching a different reader
 | Topical article | `.docc/{Topic}.md` | someone learning a concept spanning symbols | task-oriented prose, decision matrices |
 | Tutorial | `.docc/{Name}.tutorial` | a first-time reader | learning by doing |
 
-Author each fact in exactly one layer and reference it from the others. API contract belongs inline; decision matrices belong in topical articles; historical rationale, research summaries, and experiment links belong in `.docc` articles and must never appear in inline `///`. Duplication is a smell unless it is a deliberate mirror of a contract the reader needs in-context.
+Author each fact in exactly one layer and reference it from the others. API contract belongs inline; decision matrices belong in topical articles; historical rationale, research summaries, and experiment links belong in `.docc` articles and must never appear in inline `///`. Never invent a rationale: where one is unrecorded, say so and say that none should be inferred. Duplication is a smell unless it is a deliberate mirror of a contract the reader needs in-context.
 
 ## .docc catalogues
 
@@ -40,7 +40,7 @@ xcrun docc convert "Sources/<Umbrella>/<Umbrella>.docc" \
     --output-path "${DOCS_WORK}/archives/<Umbrella>.doccarchive"
 ```
 
-Symbol-graph emission, umbrella isolation, patching, and conversion are one Swift-owned operation; CI only schedules it. Reproduce locally through `workspace package build`, never raw `swift build`.
+Symbol-graph emission, umbrella isolation, patching, and conversion are one Swift-owned operation; CI only schedules it.
 
 ### Tutorials
 
@@ -119,5 +119,3 @@ Link a receipt per claim, not one blanket "see the experiments" link at the bott
 No whimsy. No internal rule IDs or skill names in public prose — restate the principle in general terms. Cut content that documents internal editorial or organizational decisions: why the launch was structured this way, which package graduated out of which, post-meta ledes, and links that ground nothing load-bearing.
 
 Ownership and reference primitives are escape hatches for what the language cannot express — the preferred approach is always `borrowing`, `consuming`, `~Copyable`, `~Escapable`. They may ship, but they must never be the flagship, the lead blog topic, or the featured example; their absence from most code is the point.
-
-Publishing and deploying are separately authorized actions.
