@@ -16,6 +16,15 @@
 #
 # Listing an owner also arms its namespace: because Internal/Skills is here,
 # any OTHER Internal/<name> reference will now be reported.
+#
+# What is watched, stated at its true size rather than a flattering one:
+# references under any swift-* or rule-* namespace, which covers 54 of the
+# fleet's 59 organisation namespaces, plus any owner already listed here. The
+# remaining five are unrelated ventures and a personal account, and they are
+# NOT watched and cannot be -- a public file naming them would be the
+# disclosure it is meant to guard against. Whether a watched reference actually
+# discloses anything is still not judged by anything mechanical; that part is
+# unenforced, and the person who catches it is whoever writes the sentence.
 
 # Public sibling repositories in the Institute ecosystem.
 swift-institute/.github
