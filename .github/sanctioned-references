@@ -1,0 +1,31 @@
+# sanctioned-references — cross-repository references this public corpus is
+# knowingly allowed to contain.
+#
+# One `owner/name` per line; `#` introduces a comment.
+#
+# This list does NOT assert that a reference is harmless. Nothing mechanical can
+# decide that: naming a private repository's existence can be perfectly fine,
+# while describing its contents would be a disclosure, and no pattern separates
+# the two. What the check asks is only whether a reference is NEW. Anything not
+# listed here stops the build, so the judgement is made by the person adding the
+# mention, in the change that adds it, while the intent is still in front of
+# them. That is the whole mechanism.
+#
+# Adding a line is therefore a decision, not a formality. If you are listing a
+# reference to make a red build go away, that is the moment the check exists for.
+#
+# Listing an owner also arms its namespace: because Internal/Skills is here,
+# any OTHER Internal/<name> reference will now be reported.
+
+# Public sibling repositories in the Institute ecosystem.
+swift-institute/.github
+swift-institute/Experiments
+swift-institute/Issues
+swift-institute/Research
+swift-institute/Workspace
+swift-institute/swift-institute.org
+
+# Private. The README names this repository's existence so that a reader can
+# tell why some skills are absent from the public corpus. Its existence is the
+# only thing published; nothing about its contents belongs here.
+Internal/Skills
