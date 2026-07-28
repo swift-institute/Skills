@@ -5,61 +5,94 @@ description: GitHub Actions and continuous integration for Institute packages �
 
 # CI/CD
 
-Institute CI is a deny-by-default control plane. Resolve what a workflow is allowed to do before
-writing it.
+Institute CI is a deny-by-default control plane. Resolve what a workflow is allowed to do
+before writing it, because the whitelist is what decides, not what compiles.
 
 ## The three tiers
 
-Package CI flows through three tiers, which are semantic owners, not templates:
-`package thin caller → layer wrapper → universal reusable`. The caller owns only admitted events,
-concurrency, a `uses:` job, and typed inputs — no `runs-on`, `steps`, tool setup, matrix, or
-validation predicate. The wrapper adds only invariants shared by every package in its layer. The
-universal reusable owns the common build/test matrix, format, lint, docs, planning, and aggregation.
-Sub-orgs route through their parent layer's wrapper; there is no fourth tier. Per-package
-repositories carry `ci.yml` only — standalone `swift-format.yml` and `swiftlint.yml` must not exist.
+Package CI flows through three tiers, which are semantic owners rather than templates:
+`package thin caller → layer wrapper → universal reusable`.
+
+The caller owns only admitted events, concurrency, a `uses:` job, and typed inputs — no
+`runs-on`, `steps`, tool setup, matrix, or validation predicate. The wrapper adds only the
+invariants shared by every package in its layer. The universal reusable owns the common
+build/test matrix, format, lint, docs, planning, and aggregation. Sub-orgs route through their
+parent layer's wrapper; there is no fourth tier. A per-package repository carries `ci.yml`
+only — standalone `swift-format.yml` and `swiftlint.yml` do not exist.
 
 Tier follows the event: `workflow_dispatch` runs the full tier, a pull request does not. Verify
-unmerged work by dispatching the full tier on the branch and fast-forwarding only when green — a
-pull request silently downgrades platform coverage.
+unmerged work by dispatching the full tier on the branch and fast-forwarding only when green. A
+pull request silently downgrades platform coverage, so a green PR is not the evidence it looks
+like.
 
-Never relax, exclude, or `continue-on-error` the Windows leg: it is the fleet's only
-assertions-enabled compiler, and therefore its only SIL-validity gate. A platform leg is dropped
-only by an identity declaration — the package's specification excludes that platform — never as a
-cost measure.
+Never relax, exclude, or `continue-on-error` the Windows leg. It is the fleet's only
+assertions-enabled compiler, and therefore its only SIL-validity gate. A platform leg is
+dropped by an identity declaration — the package's specification excludes that platform — never
+as a cost measure.
+
+## Pin what a green tick is evidence about
+
+A `uses:` reference to `@main` is a floating ref: the callee can change without the caller
+changing, so a past green proves nothing about the code that produced it. Pin a caller to a
+commit, and be honest about how far the pin reaches — pinning a reusable workflow does not pin
+a script that workflow resolves at runtime from somewhere else. Where the pin stops is worth
+stating in the file, since the next reader will otherwise assume it does not.
 
 ## Whitelist
 
 Actions are deny-by-default: repository-policy classifies every workflow file, local action,
-trigger, job, and `uses:` reference against a typed whitelist. Only three classes are admissible —
-an allowed package-local trigger with a thin caller, an allowed tool-owned reusable workflow or
-action, or a typed exemption with exact repository and path scope. An existing file, a successful
-run, or a copied template establishes nothing; an allowed file is not permission for every trigger,
-and an allowed grant is not permission for every `uses:` target.
+trigger, job, and `uses:` reference against a typed whitelist. Only three classes are
+admissible — an allowed package-local trigger with a thin caller, an allowed tool-owned
+reusable workflow or action, or a typed exemption with exact repository and path scope.
+
+An existing file, a successful run, or a copied template establishes nothing. An allowed file
+is not permission for every trigger, and an allowed grant is not permission for every `uses:`
+target.
 
 ## Traps GitHub will not warn you about
 
-- A `workflow_call` workflow must not declare workflow-level `permissions: {}` — the reusable-call
-  intersection caps every caller at zero. Put least privilege on the job that performs the
-  operation.
+- A `workflow_call` workflow must not declare workflow-level `permissions: {}` — the
+  reusable-call intersection caps every caller at zero. Put least privilege on the job that
+  performs the operation.
 - `env.*` is unavailable in `runs-on` and `container`; those resolve before job environment
-  bindings. Use a literal, matrix value, or input.
-- A job with job-level `uses:` cannot carry `continue-on-error`. Model advisory posture as a typed
-  input interpreted inside the called workflow.
+  bindings. Use a literal, a matrix value, or an input.
+- A job with job-level `uses:` cannot carry `continue-on-error`. Model advisory posture as a
+  typed input interpreted inside the called workflow.
 - `secrets: inherit` does not cross an organization boundary. Same-org callers may inherit;
   cross-org calls forward only the declared closed set.
-- `restore-keys` is forbidden on every `actions/cache` use — a cache matches its complete key or
-  misses. Do not cache ordinary SwiftPM `.build` at all: branch dependencies plus uncommitted
-  `Package.resolved` mean no key can prove it represents the resolved graph. Only immutable
-  versioned tool binaries earn an exact-key cache, and the install must still verify the digest.
+- `restore-keys` is forbidden on every `actions/cache` use — a cache matches its complete key
+  or it misses. Do not cache ordinary SwiftPM `.build` at all: branch dependencies plus
+  uncommitted `Package.resolved` mean no key can prove it represents the resolved graph. Only
+  immutable versioned tool binaries earn an exact-key cache, and the install must still verify
+  the digest.
+
+## What a check is evidence of
+
+A check that has never been observed to fail is not evidence that the thing it names is absent
+— it is evidence of nothing at all. Every gate needs a control that makes it fire, run on
+every change to the gate. This is the same discipline as a positive control on a local probe,
+and it fails the same way when skipped: a broken checker and a clean corpus produce identical
+output.
+
+Relatedly, a check's name is not its predicate. When a finding fires, read the condition it
+actually tested; when one does not fire, the guarantee you have is that condition's absence and
+nothing broader.
 
 ## Private repositories
 
-Private repositories do not run CI: every job in the universal reusable is guarded on repository
-visibility. Run the same Swift-owned executables locally through Workspace instead, and record the
-substitution and its scope.
+Private repositories do not run CI: every job in the universal reusable is guarded on
+repository visibility. On an org without billing this is not a policy choice but the only
+workable shape — a gate that fired there could never report. Run the same Swift-owned
+executables locally through Workspace instead, and record the substitution and its scope.
 
 ## Reading results
 
 Evaluate a run at the run level (`conclusion`), not per job; patching source in reaction to a
-failing `continue-on-error` job is churn. Do not dispatch a workflow while Actions is disabled on
-the repository: runs queued in that state are unrecoverable — delete, cancel, and rerun all fail.
+failing `continue-on-error` job is churn.
+
+`gh run view --log-failed` is run-scoped, not job-scoped — it returns the failed-step logs of
+every failing job in the run, so sampling them and labelling the result with one platform's
+name manufactures a dominant cause that does not exist in that job. Pass `--job <id>`.
+
+Do not dispatch a workflow while Actions is disabled on the repository: runs queued in that
+state are unrecoverable, and delete, cancel, and rerun all fail.

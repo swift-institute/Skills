@@ -31,15 +31,15 @@ Cut where meaning already separates:
 
 - what varies independently — two parts that change on different schedules are two units;
 - what has its own reason to change — one unit, one source of change;
-- what a different consumer would want alone — if any plausible consumer wants half, that
-  half is a unit;
+- what a different consumer would want alone — if any plausible consumer wants half, that half
+  is a unit;
 - what carries its own invariants — an invariant that only some of the code must uphold marks
   its own boundary;
 - what could be understood, named, and tested without the rest.
 
-Place each unit at the narrowest owner that can host it without reversing the dependency
-graph. Prefer an owner extension or a trait-gated conformance for integration; add a new
-target or package only for a real import, dependency, or release boundary.
+Place each unit at the narrowest owner that can host it without reversing the dependency graph.
+Prefer an owner extension or a trait-gated conformance for integration; add a new target or
+package only for a real import, dependency, or release boundary.
 
 ## Signals a unit is doing too much
 
@@ -56,18 +56,24 @@ Correctness alone drives split, reshape, extraction, and removal decisions.
 
 - Consumer count and adoption are evidence to inspect, never owners or drivers. "Only one
   consumer" and "zero consumers" are not reasons to defer, proceed, remove, or doubt, at any
-  phase.
+  phase — and a count derived from manifests is a lower bound anyway, since `@_exported`
+  re-exports let a consumer bind a package's types without naming it in any manifest.
 - "Cleaner", "smaller", "more modular", and module count are not sufficient reasons on their
   own. Name the ownership, consumer, compilation, release, or dependency property that
-  improves.
+  improves. If you cannot name one, the change is a preference.
 - Do not resolve a protocol-level relaxation goal by adding a non-conforming sibling type
-  alongside the original; that preserves the blocker as latent debt.
+  alongside the original; that preserves the blocker as latent debt while looking like
+  progress.
 - Exhaust public API, co-location, owned integration, and package-level access before reaching
   for SPI; unavoidable SPI stays local, explicit, and tracked.
 
 ## Deletion gate
 
-Before deleting a package, module, or unit, prove both: the code is already committed and so
-git-recoverable — never destroy uncommitted exploratory work — and it is dead at build level,
-where a clean build after removal is the proof and a grep is not. Never delete another
-session's work in flight.
+Before deleting a package, module, or unit, prove both:
+
+- The code is already committed, and so git-recoverable. Never destroy uncommitted exploratory
+  work — it is the one state no later command recovers.
+- It is dead at build level. A clean build after removal is the proof; a grep is not, for the
+  same re-export reason above.
+
+Never delete another session's work in flight.
