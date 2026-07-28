@@ -1,11 +1,35 @@
-# ci.yml — per-repo consumer for the universal skill-description lint.
+# ci.yml — per-repo consumer for the skill publication-hygiene gate.
 #
-# Per [CI-001] three-tier shape, this consumer carries only triggers and
-# delegates to the universal reusable in swift-institute/.github.
+# This consumer carries only triggers and delegates to the reusable workflow in
+# swift-institute/.github.
 #
-# Triggers on PRs and pushes that touch SKILL.md frontmatter, plus manual
-# dispatch for ad-hoc audits. Concurrency cancels in-flight runs on the
-# same ref to keep PR feedback fast.
+# What is gated, and what is deliberately not
+#
+# The checks cover mechanical, objective facts: does the frontmatter parse, does
+# each skill have a name and a description, does every relative link resolve, and
+# is anything published that should not have been. They cover NOTHING about the
+# writing — no length ceiling, no line cap, no required section, no opinion about
+# tone or structure. Skills are lightweight guides that carry judgment rather
+# than prescription.
+#
+# Why the triggers are wider than the gate they replace
+#
+# The retired job fired only on '**/SKILL.md'. Three of the five checks read
+# every markdown file, and companion documents are where progressive disclosure
+# puts the detail — so a companion-only edit has to be gated too, or the check
+# that most needs to run is the one that never does.
+#
+# Why the reusable is pinned to a commit rather than @main
+#
+# Its predecessor pinned '@main'. That is a floating ref: a green tick proved
+# nothing about the code that produced it, because the callee could change
+# without the caller changing. Pinning makes a run reproducible from its caller.
+#
+# Honest limit: this pins the workflow, not everything it executes. The base it
+# delegates to resolves the validator script from swift-institute/.github at
+# 'main', so the script itself still floats. Closing that needs a ref input on
+# the base workflow, which is a change to shared infrastructure and is being
+# proposed separately rather than folded in here.
 
 name: ci
 
@@ -15,11 +39,11 @@ on:
     tags:
       - '*'
     paths:
-      - '**/SKILL.md'
+      - '**/*.md'
       - '.github/workflows/ci.yml'
   pull_request:
     paths:
-      - '**/SKILL.md'
+      - '**/*.md'
       - '.github/workflows/ci.yml'
   workflow_dispatch: {}
 
@@ -28,8 +52,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  skill-descriptions:
-    uses: swift-institute/.github/.github/workflows/lint-skill-descriptions.yml@main
+  skill-hygiene:
+    # swift-institute/.github @ 0e222819d3acc7445b0afee9ceb7c4b155bd1a94
+    uses: swift-institute/.github/.github/workflows/validate-skill-hygiene.yml@0e222819d3acc7445b0afee9ceb7c4b155bd1a94
     with:
-      skills-paths: '.'
-      ceiling: 250
+      repo: swift-institute/Skills
+    secrets: inherit
