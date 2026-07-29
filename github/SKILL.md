@@ -8,6 +8,19 @@ description: Institute GitHub repository state — visibility and exposure, meta
 GitHub is an Institute control plane. Resolve live state before writing to it, and route
 cross-repository convergence through `swift-institute-bot` rather than by hand.
 
+## Route package behavior separately from Institute control-plane integration
+
+The repository that owns a reusable package owns its portable functionality: formats,
+reporters, rule execution, and autofix mechanics. Institute-specific workflow wiring,
+GitHub mutations, Issue and Project admission, bot identity and permissions, rate-limit
+policy, and cross-repository control-plane automation belong to `swift-institute/.github`.
+A tool being consumed by CI does not make it the owner of the Institute integration around
+that tool. If a proposal mixes these concerns, split it into exact-owner work items and
+cross-link them.
+
+Workflow structure and CI behavior remain governed by the [CI/CD skill](../ci-cd/SKILL.md);
+this skill owns the GitHub control-plane boundary and its mutations.
+
 ## Visibility and exposure
 
 Visibility is a fact to resolve, never an assumption:

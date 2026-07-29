@@ -8,6 +8,17 @@ description: GitHub Actions and continuous integration for Institute packages â€
 Institute CI is a deny-by-default control plane. Resolve what a workflow is allowed to do
 before writing it, because the whitelist is what decides, not what compiles.
 
+## Route package behavior separately from Institute integration
+
+Package repositories own reusable functionality and reporting, including formats, rule
+execution, and portable autofix mechanics. `swift-institute/.github` owns Institute-specific
+workflow wiring and cross-repository control-plane automation, including GitHub mutations,
+Issue and Project admission, bot identity and permissions, and rate-limit policy. A tool
+consumed by CI does not thereby own the Institute integration around it. Split mixed proposals
+into exact-owner work items and cross-link them. The [GitHub skill](../github/SKILL.md) defines
+the GitHub control-plane boundary; this skill defines CI workflow structure, authorization,
+and evidence.
+
 ## The three tiers
 
 Package CI flows through three tiers, which are semantic owners rather than templates:
