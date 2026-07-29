@@ -138,15 +138,22 @@ gh project item-add 2 --owner swift-institute --url <issue-url>
 ```
 
 An actionable Issue's one authoritative Project membership edge is its sole programme
-admission fact. One Project-only `Priority` is its sole programme priority fact. Never copy
-Priority to labels, milestones, Issue bodies, or another Project. The Project's built-in
-columns for Issue facts are live views of that same Issue object, not copied stores.
+admission fact. One Project-only `Priority` is its sole programme priority fact. Membership
+and Priority are the only Project-owned facts. Never copy Priority to labels, milestones,
+Issue bodies, or another Project. The Project's built-in columns for Issue facts are live
+views of that same Issue object, not copied stores.
 
-Keep built-in Status unset: there is no Project `Done`, `Cancelled`, or `Blocked` mirror.
-Do not add Phase initially. Any future non-terminal programme field requires an explicit
-principal decision before it becomes authoritative. Inspect Project fields and item values
-live when operating on them; do not freeze their inventory, options, or implementation-time
-availability in doctrine.
+Issue open or closed state plus close reason is the sole completion state. Keep built-in
+Status unset: there is no Project `Done`, `Cancelled`, or `Blocked` mirror. Do not add Phase.
+The open Programme view derives from `is:issue is:open`; Active work derives from open Issues
+with assignees; and programme history remains visible in a Done view derived from
+`is:issue is:closed reason:completed`. Do not copy these Issue facts into Project fields.
+
+A genuine completed exact-owner Issue remains a Project row: completion ends the work, not
+its programme membership or history. A superseded, stale, duplicate, or routing predecessor
+closed as not planned has no Project row. Removal of those rows is authority cleanup, not a
+second completion signal. Inspect Project fields and item values live when operating on them;
+do not freeze their inventory, options, or implementation-time availability in doctrine.
 
 Draft Project items are ephemeral intake. Convert an accepted draft to its exact-owner Issue
 before it becomes actionable, and never retain both. Pull requests are normally linked
