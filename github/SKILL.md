@@ -95,9 +95,16 @@ gh workflow run sync-metadata.yml -R swift-institute/.github -f repo=<owner>/<re
 
 ## Issues and tracking
 
-Open work goes to public issues on the repository that owns it; there is no central work
-register. `swift-institute/Issues` holds minimum reproducers for Swift toolchain and compiler
-bugs only — a reproducer goes there even when the defect surfaced while working elsewhere.
+Every actionable human work item has exactly one live technical work object: an Issue in the
+repository that exactly owns the work. The Issue is the sole authority for the problem and
+observable outcome, assignees, native hierarchy and dependencies, discussion and history,
+linked implementation, open or closed state and close reason, and completion or cancellation.
+Do not copy any of those facts into another work record.
+
+`Workspace` Issues own only technical work whose exact owner is `Workspace`.
+`swift-institute/Issues` owns only isolated Swift compiler or toolchain reproducers and
+maintenance of that repository — a reproducer goes there even when the defect surfaced while
+working elsewhere. Neither repository is a central programme register.
 
 Every issue is filed through a form propagated from `swift-institute/.github`: `bug.yml` for
 unexpected behaviour in Institute code, `change.yml` for a concrete actionable proposed
@@ -114,14 +121,15 @@ it first, then route it to a private destination.
 
 Set an issue type on every issue: `Task`, `Bug`, or `Feature`. Those three are the org's
 enabled types; there is no fourth to choose. Labels carry no Institute meaning on human-filed
-work — do not encode routing, priority, or ownership in one. They are not all stock defaults:
+work — do not encode routing, priority, ownership, or programme state in one. They are not all
+stock defaults:
 the sweep workflows label their bot-filed divergence reports to name which sweep filed them,
 so `swift-institute/.github` carries six minted labels beside the nine GitHub ships. A sweep
 that keys control flow off such a label fails silently when the label is absent — one searched
 `--label` for a label that had never been created, so its close-when-clean path could not fire
 even on a clean fleet. Match the issue title instead.
 
-Tracking lives on one org-level board, **Institute Work**,
+Programme admission and programme priority live on one org-level Project, **Institute Work**,
 `https://github.com/orgs/swift-institute/projects/2`.
 
 ```sh
@@ -129,15 +137,34 @@ gh issue create -R <owner>/<repo>          # form-driven; no blank issues
 gh project item-add 2 --owner swift-institute --url <issue-url>
 ```
 
-Project fields are live state. Inspect the board's fields and item values before making a field
-claim; do not duplicate their inventory or options here. The built-in Status field is unused
-and must remain unset unless a mechanically governed workflow defines and enforces its meaning.
-Add the item and leave Status alone.
+An actionable Issue's one authoritative Project membership edge is its sole programme
+admission fact. One Project-only `Priority` is its sole programme priority fact. Never copy
+Priority to labels, milestones, Issue bodies, or another Project. The Project's built-in
+columns for Issue facts are live views of that same Issue object, not copied stores.
 
-Per-repository boards stay disabled — a board scoped to one repository cannot represent work
-crossing the layer graph; enabling one requires principal authorization. Issues opened by
-`swift-institute-bot` report machine-detected divergence: do not board them and do not
-hand-close them, since they close when the convergence that filed them lands.
+Keep built-in Status unset: there is no Project `Done`, `Cancelled`, or `Blocked` mirror.
+Do not add Phase initially. Any future non-terminal programme field requires an explicit
+principal decision before it becomes authoritative. Inspect Project fields and item values
+live when operating on them; do not freeze their inventory, options, or implementation-time
+availability in doctrine.
+
+Draft Project items are ephemeral intake. Convert an accepted draft to its exact-owner Issue
+before it becomes actionable, and never retain both. Pull requests are normally linked
+implementation for the Issue, not additional Project rows.
+
+Each programme item belongs to exactly one authoritative Project. Multiple Projects are
+permitted only when deterministic, non-overlapping governance, access, or lifecycle scopes
+give every item exactly one home. Never create mirrored portfolio views, overlapping
+memberships, or fields that must synchronize across Projects. Per-repository Projects remain
+disabled unless such a scope has principal approval.
+
+Issues opened by `swift-institute-bot` report machine-detected convergence or divergence.
+Keep them off Project and never hand-close them; their owning workflow closes them when the
+reported state converges.
+
+Project descriptions contain the stable authority contract and links to canonical doctrine.
+Do not put volatile counts, copied rulings, live field inventories, or other programme facts
+in a description.
 
 ## Social preview cards
 
