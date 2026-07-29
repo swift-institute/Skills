@@ -129,12 +129,10 @@ gh issue create -R <owner>/<repo>          # form-driven; no blank issues
 gh project item-add 2 --owner swift-institute --url <issue-url>
 ```
 
-The board defines Status and Priority fields and **no item on it sets either** — every row is
-unset. This skill used to print their vocabulary as convention, which made setting Status look
-like the practice. It is not: doing so produces the only classified row on an otherwise
-unclassified board, where it compares to nothing and therefore says nothing. Add the item and
-leave the fields alone. If the board is ever given a vocabulary that is used, it will arrive
-with something enforcing it rather than as prose here.
+Project fields are live state. Inspect the board's fields and item values before making a field
+claim; do not duplicate their inventory or options here. The built-in Status field is unused
+and must remain unset unless a mechanically governed workflow defines and enforces its meaning.
+Add the item and leave Status alone.
 
 Per-repository boards stay disabled — a board scoped to one repository cannot represent work
 crossing the layer graph; enabling one requires principal authorization. Issues opened by
