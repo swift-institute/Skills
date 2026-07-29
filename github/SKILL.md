@@ -42,6 +42,30 @@ Commit with explicit pathspecs (`git commit -- <paths>`), re-read `git diff --ca
 --name-only` immediately before committing, and prove isolation with `git show --stat` after.
 Never `git add -A`; never stash another actor's work.
 
+**The `--name-only` read-back is necessary and not sufficient — keep it, and add `git diff
+--quiet`.** `--name-only` answers *"is this path in the commit?"* The question that matters is
+*"does the committed blob match my working tree?"* Those differ precisely for renamed-then-edited
+files, because `git mv` stages the rename and later content edits are not staged — so the path
+appears in the read-back on the strength of its rename alone, with an old body. That is every
+file in a rename refactor, i.e. exactly the operation this guard exists for. It has now shipped a
+non-compiling commit twice, the second time to a session that had read the warning that morning
+and was actively trying to avoid it.
+
+After staging and before committing, run `git diff --quiet`: a clean exit means the index matches
+the working tree, and anything else names what would be left behind. It also catches the other
+failure mode explicit pathspecs invite — omitting a directory outright, which is easy when you
+enumerate paths by hand. Then verify against the committed tree, never the worktree:
+
+```sh
+git diff --quiet || git diff --name-only     # nothing left unstaged
+git show HEAD:<path>                         # the blob that actually shipped
+git grep -n '<old-token>' HEAD -- .          # plus a positive control
+```
+
+A local build, test run and lint pass can all be green against a correct working tree while the
+commit is wrong. No amount of pre-commit testing detects this; only reading the committed tree
+does.
+
 Run `git log --oneline origin/main..HEAD` before every push, habitual ones included. A push is
 a decision about every unpushed commit on the branch, not only about the one you just made.
 
