@@ -16,9 +16,7 @@ GitHub mutations, Issue and Project admission, bot identity and permissions, rat
 policy, and cross-repository control-plane automation belong to `swift-institute/.github`.
 A tool being consumed by CI does not make it the owner of the Institute integration around
 that tool. If a proposal mixes these concerns, split it into exact-owner work items and
-cross-link them. For example, `swift-foundations/swift-linter#9` routes the general linter
-question to the linter repository, while the Institute integration is tracked by
-`swift-institute/.github#83`.
+cross-link them.
 
 Workflow structure and CI behavior remain governed by the [CI/CD skill](../ci-cd/SKILL.md);
 this skill owns the GitHub control-plane boundary and its mutations.

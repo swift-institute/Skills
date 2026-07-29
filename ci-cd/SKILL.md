@@ -17,8 +17,7 @@ Issue and Project admission, bot identity and permissions, and rate-limit policy
 consumed by CI does not thereby own the Institute integration around it. Split mixed proposals
 into exact-owner work items and cross-link them. The [GitHub skill](../github/SKILL.md) defines
 the GitHub control-plane boundary; this skill defines CI workflow structure, authorization,
-and evidence. The routing example is `swift-foundations/swift-linter#9` for package behavior
-and `swift-institute/.github#83` for Institute integration.
+and evidence.
 
 ## The three tiers
 
