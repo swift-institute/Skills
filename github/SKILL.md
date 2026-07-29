@@ -1,6 +1,6 @@
 ---
 name: github
-description: Institute GitHub repository state — visibility and exposure, metadata and settings convergence through the bot, issues and the org project board, research documents and where a finding is recorded, release gates and tagging authorization, Swift Package Index listing, social preview cards, and package fork heritage. Apply when a repository setting or visibility changes, when work is filed or tracked, when a finding or design rationale is written down, or when a package is tagged, published, listed, forked, or made public. Workflow files and CI behavior belong to the ci-cd skill.
+description: Institute GitHub repository state — visibility and exposure, metadata and settings convergence through the bot, issues and the org project board, release gates and tagging authorization, Swift Package Index listing, social preview cards, and package fork heritage. Apply when a repository setting or visibility changes, when work is filed or tracked, or when a package is tagged, published, listed, forked, or made public. Workflow files and CI behavior belong to the ci-cd skill.
 ---
 
 # GitHub
@@ -116,46 +116,6 @@ Per-repository boards stay disabled — a board scoped to one repository cannot 
 crossing the layer graph; enabling one requires principal authorization. Issues opened by
 `swift-institute-bot` report machine-detected divergence: do not board them and do not
 hand-close them, since they close when the convergence that filed them lands.
-
-## Research and findings
-
-A finding goes to the `Research/` directory of the repository that owns it.
-`swift-institute/Research` holds findings whose conclusions are not one package's to act on —
-cross-package and ecosystem-wide work, and the arrangement of the ecosystem itself. Most packages
-already carry their own `Research/`; the central repository is the named exception, not the
-default destination.
-
-Ownership follows conclusions, not occasion. Ask what would have to change if the finding were
-acted on: one package makes it that package's, more than one makes it central. The Embedded-Wasm
-feasibility paper was written to answer a question about `swift-html`, but its conclusions are a
-172-package closure and blockers spread across all three layers — central research that a
-`swift-html` question occasioned. A document has one home; the repository that occasioned it
-links to it rather than holding a copy.
-
-Every `Research/` directory carries an `_index.json` manifest, and scope is recorded there. In a
-package the manifest declares scope once for the whole directory; centrally each document declares
-its own, because reach varies document to document. Roughly half the central entries leave it
-unset, so the field does not yet answer the ownership question for work already filed — recording
-it as documents are added is what makes the answer readable without re-reading the document.
-
-Research and issues are one question asked of different objects: what would have to change. An
-issue is what someone must do — it meets the filing bar above and goes to whoever must act.
-Research is what was learned, and goes where its conclusions reach; one document can raise issues
-on several owners and still be central itself. A finding that raises no issue is finished work
-with a home, not a loose end: the manifest's status vocabulary carries recommendations, decisions
-and deferrals so that a document nobody must act on today is filed rather than left open. A
-question with no finding behind it yet is neither, and goes to org discussions.
-
-One half of this is checkable and one is not. Whether a document states a problem and an
-observable proposed outcome for a named repository can be settled by reading it, and so can
-whether a manifest entry records a scope. Whether a finding's conclusions reach one package or
-several is judgement, and nothing checks it.
-
-`Research/` holds reasoning, not instruments. A script that produces a measurement is source: it
-belongs with the package's own sources, or in `swift-institute/Experiments` alongside the
-standalone packages that back technical claims. The document interpreting the measurement is the
-research. This holds for every package including the workspace coordinator, whose `Research/`
-keeps its design corpus and stays for the same reason any package's does.
 
 ## Social preview cards
 
