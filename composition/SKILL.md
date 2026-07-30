@@ -78,5 +78,9 @@ machine because the parent is always exactly there.
   that is the authoritative prune signal.
 - Test Support spine dependencies are exempt: absence from literal imports means the spine
   needs `@_exported public import`, not that the dependency is dead.
+- A separate **product** gates linking, never resolution — SwiftPM resolves a package's
+  `dependencies:` whole, whatever the consumer imports. To keep a dependency out of consumers'
+  resolve, gate it with a **package trait**, off by default, and `condition:` the dependency on
+  it. Verify by resolving and counting, never by reading the manifest.
 
 `Package.resolved` is generated state; the `workspace` skill owns what may be done to it.
