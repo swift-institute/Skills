@@ -101,6 +101,11 @@ executables locally through Workspace instead, and record the substitution and i
 Evaluate a run at the run level (`conclusion`), not per job; patching source in reaction to a
 failing `continue-on-error` job is churn.
 
+Wait for a terminal run or enumerate additional jobs only while the result can change the
+decision. Once an exact-head source or policy blocker fixes the verdict, record the existing run
+and stop unrelated CI watching and matrix classification. A clean verdict may require every
+required gate; a blocked verdict needs enough CI evidence to define the blocker and its owner.
+
 `gh run view --log-failed` is run-scoped, not job-scoped — it returns the failed-step logs of
 every failing job in the run, so sampling them and labelling the result with one platform's
 name manufactures a dominant cause that does not exist in that job. Pass `--job <id>`.

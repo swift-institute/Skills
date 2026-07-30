@@ -31,9 +31,10 @@ workspace verify  --consumer <c> --dependency <d>
 workspace restore --consumer <c> --dependency <d>
 ```
 
-Add `--fresh` to `build` or `test` whenever the result will be reported. Forward SwiftPM
-arguments by repeating `--argument`, using the `=` form whenever the forwarded value begins with
-`-` or the parser claims it as a Workspace option:
+Add `--fresh` when a chosen `build` or `test` result will be reported as newly originated
+evidence. Freshness makes that result admissible; it does not require every task or reviewer to
+originate another run. Forward SwiftPM arguments by repeating `--argument`, using the `=` form
+whenever the forwarded value begins with `-` or the parser claims it as a Workspace option:
 
 ```sh
 workspace package test --argument=--filter --argument "Suite or test"
@@ -44,8 +45,15 @@ whole dependency graph and is silent for several minutes. It is not hung.
 
 ## Evidence
 
-A cached green is not evidence. Use `--fresh` for any release, audit, migration, benchmark, or
-correctness claim.
+A cached green is not newly originated evidence. Use `--fresh` for a new local release, audit,
+migration, benchmark, or correctness result. Exact-head evidence from another task remains
+usable when its command, root, toolchain, revision, exit status, and provenance are reported as
+task-attributed rather than re-labelled as independently checked.
+
+Choose the smallest command that can change the decision. A fresh test normally compiles the
+tested target, so do not add a separate fresh build unless it answers a different material
+question. Once a decisive blocker fixes the next action, stop unrelated verification rather
+than filling out an evidence inventory.
 
 A zero from the wrong root is not evidence either, so record what the run was: the package root,
 the action, the toolchain, the forwarded arguments, the exit status, and whether it was fresh.
