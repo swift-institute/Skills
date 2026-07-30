@@ -109,9 +109,9 @@ gh workflow run sync-metadata.yml -R swift-institute/.github -f repo=<owner>/<re
 
 Every actionable human work item has exactly one live technical work object: an Issue in the
 repository that exactly owns the work. The Issue is the sole authority for the problem and
-observable outcome, assignees, native hierarchy and dependencies, discussion and history,
-linked implementation, open or closed state and close reason, and completion or cancellation.
-Do not copy any of those facts into another work record.
+observable outcome, classification (org-scoped issue type), assignees, native hierarchy and
+dependencies, discussion and history, linked implementation, open or closed state and close
+reason, and completion or cancellation. Do not copy any of those facts into another work record.
 
 `Workspace` Issues own only technical work whose exact owner is `Workspace`.
 `swift-institute/Issues` owns only isolated Swift compiler or toolchain reproducers and
@@ -152,11 +152,11 @@ gh issue create -R <owner>/<repo>          # form-driven; no blank issues
 gh project item-add 2 --owner swift-institute --url <issue-url>
 ```
 
-An actionable Issue's one authoritative Project membership edge is its sole programme
-admission fact. One Project-only `Priority` is its sole programme priority fact. Membership
-and Priority are the only Project-owned facts. Never copy Priority to labels, milestones,
-Issue bodies, or another Project. The Project's built-in columns for Issue facts are live
-views of that same Issue object, not copied stores.
+An actionable Issue's one authoritative Project membership edge, created at an explicit
+admission decision, is its sole programme admission fact. One Project-only `Priority` is its
+sole programme priority fact. Membership and Priority are the only Project-owned facts. Copies
+of either fact are forbidden in labels, milestones, Issue bodies, and other Projects. All other
+Project columns are live views of Issue facts, never copied stores.
 
 Assessment and admission are distinct. An assessed Goal stays off Project until a separate
 admission decision creates its membership and Priority. An off-Project Goal is therefore absent
@@ -176,8 +176,8 @@ second completion signal. Inspect Project fields and item values live when opera
 do not freeze their inventory, options, or implementation-time availability in doctrine.
 
 Draft Project items are ephemeral intake. Convert an accepted draft to its exact-owner Issue
-before it becomes actionable, and never retain both. Pull requests are normally linked
-implementation for the Issue, not additional Project rows.
+before it becomes actionable, and never retain both. Pull requests are never Project rows; they
+are linked implementation for the Issue.
 
 Each programme item belongs to exactly one authoritative Project. Multiple Projects are
 permitted only when deterministic, non-overlapping governance, access, or lifecycle scopes
