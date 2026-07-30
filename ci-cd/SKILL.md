@@ -89,6 +89,9 @@ Relatedly, a check's name is not its predicate. When a finding fires, read the c
 actually tested; when one does not fire, the guarantee you have is that condition's absence and
 nothing broader.
 
+A claim that a package resolves off-machine requires an actual clean resolve from canonical
+sources. A reachability probe tests a weaker property and is not evidence for it.
+
 ## Private repositories
 
 Private repositories do not run CI: every job in the universal reusable is guarded on
