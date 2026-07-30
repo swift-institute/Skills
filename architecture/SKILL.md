@@ -98,6 +98,14 @@ is the shape in full.
 
 - A protocol nested in a generic type is a compiler error — hoist it to module scope as
   `__<Namespace>Protocol` and bind the namespace typealias to it.
+- The namespace typealias binding is available only when the namespace is a **non-generic** type,
+  or a generic **nominal** type. It is NOT available when the namespace's public spelling is a
+  [DS-028] generic front-door **typealias**: member-type lookup does not look through an unbound
+  generic typealias on any toolchain (swift-institute/Issues#81), and the family noun cannot carry
+  both a generic and an arity-0 declaration (`invalid redeclaration`, verified). A family fronted
+  by `X<E>` therefore has **no** `X` namespace to nest into; its capability protocol stays a
+  top-level, non-underscored protocol, as `Iterable`, `Buildable`, and `Initiable` already do. A
+  generic front-door alias may appear as a member-lookup base only in its **bound** form.
 - The shape applies only when a concrete value type backs the namespace. A pure capability or
   marker protocol with no backing value type stays top-level; an empty namespace shell invents
   structure that is not there.
