@@ -165,6 +165,12 @@ that no Goal exists.
 
 Issue open or closed state plus close reason is the sole completion state. Keep built-in
 Status unset: there is no Project `Done`, `Cancelled`, or `Blocked` mirror. Do not add Phase.
+
+A `Closes #N` trailer in a commit pushed directly to the default branch closes the Issue at
+push time, before any CI run at that commit concludes (observed repeatedly, 2026-07-30).
+Where an Issue's stated outcome requires green CI evidence, land with a plain commit message
+and close only in a post-green action with the run link; a trailer-closed Issue whose run
+then fails is reopened with the evidence, not left closed.
 The open Programme view derives from `is:issue is:open`; Active work derives from open Issues
 with assignees; and programme history remains visible in a Done view derived from
 `is:issue is:closed reason:completed`. Do not copy these Issue facts into Project fields.
