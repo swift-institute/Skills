@@ -26,11 +26,11 @@ this skill owns the GitHub control-plane boundary and its mutations.
 Visibility is a fact to resolve, never an assumption:
 
 ```sh
-gh repo view <owner>/<repo> --json visibility
+gh api repos/<owner>/<repo> --jq .visibility
 ```
 
-Run it before writing to a repository. It costs a second, and it is the only thing standing
-between a private-repository internal and a public commit.
+Resolve it through an authenticated REST read before writing to a repository. It costs a second,
+and it is the only thing standing between a private-repository internal and a public commit.
 
 What must never reach a public repository: machine paths, private-repository internals,
 credentials, and control-plane secrets. Whether a given payload contains one of those is a
@@ -55,24 +55,23 @@ Commit with explicit pathspecs (`git commit -- <paths>`), re-read `git diff --ca
 --name-only` immediately before committing, and prove isolation with `git show --stat` after.
 Never `git add -A`; never stash another actor's work.
 
-**The `--name-only` read-back is necessary and not sufficient — keep it, and add `git diff
---quiet`.** `--name-only` answers *"is this path in the commit?"* The question that matters is
-*"does the committed blob match my working tree?"* Those differ precisely for renamed-then-edited
-files, because `git mv` stages the rename and later content edits are not staged — so the path
-appears in the read-back on the strength of its rename alone, with an old body. That is every
-file in a rename refactor, i.e. exactly the operation this guard exists for. It has now shipped a
-non-compiling commit twice, the second time to a session that had read the warning that morning
-and was actively trying to avoid it.
+**The `--name-only` read-back is necessary and not sufficient.** It answers *"is this path in
+the commit?"* The question that matters is *"does the committed blob match my intended working
+tree?"* Those differ for renamed-then-edited files because `git mv` stages the rename and later
+content edits are not staged. They also differ for a newly created file, because an untracked
+path appears in neither `git diff --quiet` nor the staged-path read-back.
 
-After staging and before committing, run `git diff --quiet`: a clean exit means the index matches
-the working tree, and anything else names what would be left behind. It also catches the other
-failure mode explicit pathspecs invite — omitting a directory outright, which is easy when you
-enumerate paths by hand. Then verify against the committed tree, never the worktree:
+After staging and before committing, use both guards below. `git diff --quiet` detects tracked
+content left unstaged. The status read detects untracked paths; account for every untracked path
+inside the intended scope without staging another actor's work. Then verify against the committed
+tree, never the worktree:
 
 ```sh
-git diff --quiet || git diff --name-only     # nothing left unstaged
-git show HEAD:<path>                         # the blob that actually shipped
-git grep -n '<old-token>' HEAD -- .          # plus a positive control
+git diff --quiet || git diff --name-only        # no tracked content left unstaged
+git status --short --untracked-files=all        # account for intended untracked paths
+git diff --cached --name-only                   # only intended paths are staged
+git show HEAD:<path>                            # the blob that actually shipped
+git grep -n '<old-token>' HEAD -- .             # plus a positive control
 ```
 
 A local build, test run and lint pass can all be green against a correct working tree while the
@@ -119,11 +118,11 @@ Do not copy any of those facts into another work record.
 maintenance of that repository — a reproducer goes there even when the defect surfaced while
 working elsewhere. Neither repository is a central programme register.
 
-Every issue is filed through a form propagated from `swift-institute/.github`: `bug.yml` for
-unexpected behaviour in Institute code, `change.yml` for a concrete actionable proposed
-outcome, `documentation.yml` for documentation defects and gaps. Change template content in
-`swift-institute/.github`, never per-repository. Open-ended questions and early design work go
-to `https://github.com/orgs/swift-institute/discussions` instead.
+Every technical issue is filed through a form propagated from `swift-institute/.github`:
+`bug.yml` for unexpected behaviour in Institute code, `change.yml` for a concrete actionable
+proposed outcome, `documentation.yml` for documentation defects and gaps. Change template
+content in `swift-institute/.github`, never per-repository. Open-ended questions and early
+design work go to `https://github.com/orgs/swift-institute/discussions` instead.
 
 An actionable issue needs a stated problem *and* an observable proposed outcome. An
 implementation sketch alone does not satisfy the form — it says what to do without saying how
@@ -132,10 +131,13 @@ anyone would know it worked.
 A security-sensitive finding never appears in a public draft or a public issue. Characterize
 it first, then route it to a private destination.
 
-Set an issue type on every issue: `Task`, `Bug`, or `Feature`. Those three are the org's
-enabled types; there is no fourth to choose. Labels carry no Institute meaning on human-filed
-work — do not encode routing, priority, ownership, or programme state in one. They are not all
-stock defaults:
+Set an issue type on every issue. Technical exact-owner work uses `Task`, `Bug`, or `Feature`.
+An Institute-level observable outcome is a `Goal` Issue in `swift-institute/.github`; give each
+Goal its own public capable assessment before programme admission. Filing and assessing a Goal
+do not assign it, create technical children, authorize execution, or admit it to the Project.
+
+Labels carry no Institute meaning on human-filed work — do not encode routing, priority,
+ownership, or programme state in one. They are not all stock defaults:
 the sweep workflows label their bot-filed divergence reports to name which sweep filed them,
 so `swift-institute/.github` carries six minted labels beside the nine GitHub ships. A sweep
 that keys control flow off such a label fails silently when the label is absent — one searched
@@ -155,6 +157,11 @@ admission fact. One Project-only `Priority` is its sole programme priority fact.
 and Priority are the only Project-owned facts. Never copy Priority to labels, milestones,
 Issue bodies, or another Project. The Project's built-in columns for Issue facts are live
 views of that same Issue object, not copied stores.
+
+Assessment and admission are distinct. An assessed Goal stays off Project until a separate
+admission decision creates its membership and Priority. An off-Project Goal is therefore absent
+from Project views by design; report its Issue URL and disposition directly rather than implying
+that no Goal exists.
 
 Issue open or closed state plus close reason is the sole completion state. Keep built-in
 Status unset: there is no Project `Done`, `Cancelled`, or `Blocked` mirror. Do not add Phase.

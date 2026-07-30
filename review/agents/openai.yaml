@@ -1,0 +1,4 @@
+interface:
+  display_name: "Independent Review"
+  short_description: "Review exact heads with proportional evidence"
+  default_prompt: "Use $review to independently review this pull request and return a guarded verdict."
