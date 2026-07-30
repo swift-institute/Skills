@@ -169,6 +169,13 @@ The open Programme view derives from `is:issue is:open`; Active work derives fro
 with assignees; and programme history remains visible in a Done view derived from
 `is:issue is:closed reason:completed`. Do not copy these Issue facts into Project fields.
 
+Assignment is written at dispatch (ruling on `swift-institute/.github#68`, 2026-07-30): the
+coordinator assigns the principal identity when work on an admitted Issue is dispatched — to a
+fleet agent or to itself — and removes it if work stops without closing the Issue. An open
+Issue's assignee therefore asserts "in flight now", not eventual responsibility; closing the
+Issue is the only completion cleanup the view needs. The report-only reconciler lists assigned
+open rows each run so a stale in-flight claim stays observable.
+
 A genuine completed exact-owner Issue remains a Project row: completion ends the work, not
 its programme membership or history. A superseded, stale, duplicate, or routing predecessor
 closed as not planned has no Project row. Removal of those rows is authority cleanup, not a
