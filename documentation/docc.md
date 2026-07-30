@@ -3,6 +3,14 @@
 Companion to the `documentation` skill. Read this when writing a `.docc` article
 or tutorial, building a documentation archive, or checking a deployed docs site.
 
+## No manifest restatement
+
+A `.docc` article must not restate facts derivable from the package manifest —
+target lists, dependency versions, platform floors, product enumeration. The
+manifest and the evaluated-manifest command are the projection; an article
+carries judgment, rationale, and usage the manifest cannot express. (Added per
+https://github.com/swift-institute/.github/issues/126, 2026-07-30.)
+
 ## Catalogue naming
 
 A `.docc/` directory must be named for its module. DocC associates catalogues by

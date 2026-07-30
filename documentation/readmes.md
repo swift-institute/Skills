@@ -37,17 +37,24 @@ document its default instead.
 
 ## Sub-package structure scales with maturity
 
-- **Minimum, always** — title, development-status badge, one-liner, `##
-  Installation`, `## License`.
+- **Minimum, always** — title, ~~development-status badge~~ (struck in part,
+  superseded by https://github.com/swift-institute/.github/issues/126,
+  2026-07-30), one-liner, `## Installation`, `## License`.
 - **Standard, once there is a public API** — plus Key Features, Quick Start,
-  Architecture, Platform Support.
+  Architecture, ~~Platform Support~~ (struck, superseded by
+  https://github.com/swift-institute/.github/issues/126, 2026-07-30).
 - **Complete, at v1.0 or with external users** — plus Error Handling, Related
   Packages.
 
-The development-status badge is the first badge line, directly after the H1, and
-uses the standard status vocabulary (`status-active--development-blue`, not an
-improvised `status-beta-yellow`). Platform Support cells use only `Full support`,
-`Supported`, `Planned`, `Possible`, `Not supported`.
+~~The development-status badge is the first badge line, directly after the H1,
+and uses the standard status vocabulary (`status-active--development-blue`, not
+an improvised `status-beta-yellow`).~~ Superseded in full by
+https://github.com/swift-institute/.github/issues/126 (2026-07-30): one
+unfalsifiable claim copied fleet-wide. ~~Platform Support cells use only `Full
+support`, `Supported`, `Planned`, `Possible`, `Not supported`.~~ Superseded in
+full together with the Platform Support requirement above by
+https://github.com/swift-institute/.github/issues/126 (2026-07-30): the
+platform matrix is derived from the manifest, not authored prose.
 
 Placeholder READMEs carry a title, a one-line scope, and a status from exactly
 `Pre-implementation`, `Namespace-reservation`, `Unnecessary`, `Archived`. The

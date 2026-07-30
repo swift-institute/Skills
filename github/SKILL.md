@@ -206,6 +206,15 @@ Project descriptions contain the stable authority contract and links to canonica
 Do not put volatile counts, copied rulings, live field inventories, or other programme facts
 in a description.
 
+### Durable coordinates in comments and records
+
+A comment or record that references another repository, issue, commit, or person cites a
+durable coordinate — a commit-SHA permalink, a canonical URL, or a container-scoped issue
+number — paired with a display-name gloss, never a bare display name alone. Comments are
+never edited, so a bare name that later renames or moves is a defect with no cheap fix; a
+durable coordinate carries the reference through the rename. (Added per
+https://github.com/swift-institute/.github/issues/126, 2026-07-30.)
+
 ## Social preview cards
 
 GitHub exposes no API for a repository's social preview image. The only path is browser
