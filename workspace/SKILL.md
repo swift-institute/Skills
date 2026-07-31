@@ -43,6 +43,31 @@ workspace package test --argument=--filter --argument "Suite or test"
 In a fresh clone the bootstrap `swift run --package-path Application workspace …` compiles the
 whole dependency graph and is silent for several minutes. It is not hung.
 
+## Local-build policy
+
+Local iteration runs through coordinated paths only — `workspace package build|test|lint`, never
+raw `swift build`/`swift test`/package-administration commands. The machine-wide
+`swiftpm-build-coordinator` flock serializes every coordinated SwiftPM build; no session bypasses,
+kills, or replaces it.
+
+Interactive concurrency is capped, not uncapped, whenever another session shares the machine. Pass
+`--jobs <n>` on `workspace package build|test` so a coordinated build leaves cores free for
+co-tenant sessions — start at half the machine's cores and adjust from there by observed
+contention, never uncapped while another session is on the machine. This is gated on the flag
+actually being installed: until the local `workspace` binary carries `--jobs`, local building
+stays halted machine-wide and every session verifies through CI instead — a push for iteration
+signal, a full-tier dispatch for closure. Once `--jobs` is installed, the halt lifts for capped
+coordinated builds only.
+
+`workspace build` — one `xcodebuild` invocation over the merged `institute.xcworkspace` graph — is
+the quiet-point integration check, not an iteration tool. It is the only local path that sees
+unpushed cross-package edits, so its blast radius includes concurrent source edits anywhere else
+in the checkout. Run it at quiet points only, never during active lane work.
+
+CI full-tier `workflow_dispatch` is the sole evidence of record for issue closure. A local green,
+capped or not, is iteration signal — never closure evidence. `gh run rerun` re-executes a pinned
+old snapshot and is void as closure evidence; dispatch a fresh run.
+
 ## Evidence
 
 A cached green is not newly originated evidence. Use `--fresh` for a new local release, audit,
