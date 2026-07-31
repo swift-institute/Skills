@@ -91,3 +91,19 @@ not read a clean validator run as proof that the prose rules hold.
 The general form is worth carrying: where a check's condition is narrower than
 the rule it is named for, a finding asserts only the narrow condition. Read what
 fired, not what it was named after.
+
+A second, separate layer sits beside the Python validator: Swift
+repository-policy's advisory predicates, which check documentation surfaces the
+validator does not touch — `REPO-DOCS-001` (SPI-published placeholder DocC
+catalogues, https://github.com/swift-institute/.github/issues/132, landed at
+swift-institute/.github@dee5c6b6f1a2d863d64ce80c50b55ae401a89a43) and
+`REPO-README-001`/`REPO-README-002` (status badge / Platform Support heading
+advisories, https://github.com/swift-institute/.github/issues/133, landed at
+swift-institute/.github@3a95953dbf625d8b81ec680df67d179ab6fb2d1c). All three
+are report-only: they populate a `SurfaceReport`'s `advisories` list, which its
+`passed` property never reads, so a finding never fails the check — it only
+flags a documentation surface a ratified decision has not caught up with yet.
+Their authoritative implementation, not this prose, is what to trust when the
+two disagree:
+https://github.com/swift-institute/.github/blob/7810501c462cf2d4bcb850910317adff3d941240/Tools/RepositoryPolicy/Sources/Repository%20Policy/Repository.Policy.Surface.swift
+(`Repository.Policy.Surface.swift` in swift-institute/.github).
