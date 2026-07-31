@@ -54,6 +54,12 @@ No package's main target at any layer imports the Foundation module family — `
 Primitives must additionally be deployable on Swift Embedded: no reflection, no Objective-C
 interop, no runtime features absent in embedded contexts.
 
+L1 primitives packages carry no macro targets, for the same reason: a macro target pulls in
+`swift-syntax` and a host compiler plugin, neither of which is deployable on Swift Embedded. A
+capability that needs a macro belongs at a higher layer, with the macro target owned there. The
+mechanical check — no `.macro` target in an L1 `Package.swift` — is Workspace-owned
+(swift-institute/Workspace#90).
+
 The single exception is a target whose name ends in `Foundation Integration`. It may import
 Foundation, it must be a leaf product, and no core target may depend on it directly or
 transitively. The exception covers the target class, never a per-file waiver — a core file that
