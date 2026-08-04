@@ -41,13 +41,44 @@ assertions-enabled compiler, and therefore its only SIL-validity gate. A platfor
 dropped by an identity declaration — the package's specification excludes that platform — never
 as a cost measure.
 
-## Pin what a green tick is evidence about
+## What a green tick is evidence about
 
-A `uses:` reference to `@main` is a floating ref: the callee can change without the caller
-changing, so a past green proves nothing about the code that produced it. Pin a caller to a
-commit, and be honest about how far the pin reaches — pinning a reusable workflow does not pin
-a script that workflow resolves at runtime from somewhere else. Where the pin stops is worth
-stating in the file, since the next reader will otherwise assume it does not.
+Not every runtime input earns identity the same way. Classify each one into exactly one of
+three classes and treat it accordingly — conflating them is how a fail-open evidence gap gets
+built by accident:
+
+- **Identity-pinned** — full commit SHA (actions) or digest (containers, binaries). Third-party
+  actions, Institute composite actions, containers, and immutable tool archives are always in
+  this class, with no exception. `uses: actions/checkout@v4` is a mutable tag and is prohibited;
+  only `uses: actions/checkout@<40-char-sha>` is admissible. Be honest about how far the pin
+  reaches — pinning an action does not pin a script that action resolves at runtime from
+  somewhere else. Where the pin stops is worth stating in the file, since the next reader will
+  otherwise assume it does not.
+- **Tracked, verified, recorded** — resolved at runtime, verified against a published manifest,
+  fails closed on mismatch, and records the identity it resolved to. The `ci-binaries` linter
+  channel is this class: it is never pinned to one `LINTER_RELEASE` tag, but every run verifies a
+  checksum/manifest before trusting the binary it downloaded and records what it verified.
+- **Unpinnable, recorded only** — nothing to pin at all; record the resolved environment and
+  never claim it as an immutable identity. Hosted runner images (`macos-26`, `ubuntu-latest`, and
+  similar labels) are this class: the label is a moving target, so record the resolved image
+  version the run actually used, not the label, and never treat two runs on the "same" label as
+  the same environment.
+
+Intra-Institute reusable-workflow hops (package thin caller → layer wrapper → universal
+reusable) are a permanent case outside those three classes, not a fourth class: they stay on
+floating `@main` at every hop, permanently, with no pin, no tag, and no override path. This is
+not a transitional state awaiting a release boundary — there is no future phase in which these
+hops become pinned, and no caller pin wave or pin-promotion machinery may be built to advance
+one toward a commit.
+
+The evidence signal is not the `@main` ref string — it is what GitHub's own run object resolved
+that hop to. GitHub records the resolved commit SHA of every reusable-workflow hop a run actually
+took. Read `referenced_workflows` on the run: for each `@main` hop, it carries that resolved SHA
+alongside the source ref. Evidence is that pair, source ref plus resolved SHA, together — read
+the resolved SHA only from the run that reports it, never assumed or carried over from a
+different run. An empty or unavailable `referenced_workflows` list is `UNMEASURED`, not a clean
+or passing result; never substitute the current tip of `main` for a resolution the run didn't
+report.
 
 ## Whitelist
 
