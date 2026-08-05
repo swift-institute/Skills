@@ -125,10 +125,25 @@ sources. A reachability probe tests a weaker property and is not evidence for it
 
 ## Private repositories
 
-Private repositories do not run CI: every job in the universal reusable is guarded on
-repository visibility. On an org without billing this is not a policy choice but the only
-workable shape — a gate that fired there could never report. Run the same Swift-owned
-executables locally through Workspace instead, and record the substitution and its scope.
+Private package CI is zero-signal by design: every job in the universal reusable is
+guarded on repository visibility, and on an org without billing a gate that fired there
+could never report. A private repository's green package CI is therefore never evidence.
+
+The evidence path is central trusted verification. The control plane's private-verification
+sweep enumerates private ordinary repositories (R10-positive-controlled), dispatches each
+exact private head to the trusted verifier, and the verifier executes Workspace against
+that head, seals a leak-safe envelope (`workspace verification seal`/`check`), and
+publishes exactly one `verification / workspace` check-run on the exact subject head with
+the dispatch's request-id as its `external_id`. Public surfaces stay opaque: run titles
+and artifacts carry the request-id and binding digest only, never a private coordinate.
+Stale heads, replayed requests, and invalid payloads fail closed before publication.
+
+Private repositories cannot carry branch rulesets on the current plan (platform-refused;
+Ruling R33 records the 403 readbacks as the absence control), so `verification / workspace`
+is the private convergence signal rather than a required-check context. The G1 seal
+contract currently runs reduced under Ruling R34 (lint not required; inventory digest
+unmeasured, both Workspace-side causes); the Swift-native follow-up programme owns the
+restoration and its activation gate is a green full-contract run.
 
 ## Reading results
 
