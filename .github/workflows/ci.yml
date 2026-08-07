@@ -57,12 +57,12 @@ concurrency:
 
 jobs:
   skill-hygiene:
-    # swift-institute/.github @ f7b80500eb969a68f8ce670185b142c28522fae3
-    uses: swift-institute/.github/.github/workflows/validate-skill-hygiene.yml@f7b80500eb969a68f8ce670185b142c28522fae3
+    # swift-institute/.github @ e39688f1a832307ae072a94d8a33a8139e133314
+    uses: swift-institute/.github/.github/workflows/validate-skill-hygiene.yml@e39688f1a832307ae072a94d8a33a8139e133314
     with:
       repo: swift-institute/Skills
       # Same commit as the `uses:` above. Pinning only the workflow would leave
       # the validator script itself resolving from main, so a green run here
       # could not be attributed to a version of the checker.
-      validator-ref: f7b80500eb969a68f8ce670185b142c28522fae3
+      validator-ref: e39688f1a832307ae072a94d8a33a8139e133314
     secrets: inherit
