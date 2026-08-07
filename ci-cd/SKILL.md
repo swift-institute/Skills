@@ -24,12 +24,13 @@ Institute-authored CI semantics are Swift, owned by packages under `Tools/` in
 `pull-request-transaction` (kebab-case package roots, per the house convention). Workflow YAML
 is wiring: triggers, `uses:`, permissions, and typed inputs. A semantic `run:` block —
 classification, policy, mutation, or verdict logic embedded in a workflow or a companion
-script — belongs in one of those packages instead. The absence of Python, shell, and Node
-semantics is the Goal's gated end-state, not the present state: the port programme
-(swift-institute/.github#404, under Goal #358) is still converting them, and the measured
-state at the F18 review cut was 90 tracked non-Swift files in `swift-institute/.github`
-(86 `.py`, 4 `.sh`) — so treat this as the direction of travel and check the current
-inventory before asserting purity.
+script — belongs in one of those packages instead. Institute-authored CI semantics in
+`swift-institute/.github` are Swift, with exactly three named exception categories:
+22 files transferred out of Institute semantics by continuous-wisdom ruling, 13 fixture
+stubs that are test corpus data pinned by a guard test, and the small retained-typed set
+recorded per file in the `terminalCensus` of
+`SWIFT-NATIVE-PROGRAMME/swift-purity-receipt.json` (at 1f8e2737) — consult that receipt,
+not this skill, for the exact inventory before asserting purity.
 
 ## One hop, one artifact
 
