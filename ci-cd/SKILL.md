@@ -26,7 +26,8 @@ is wiring: triggers, `uses:`, permissions, and typed inputs. A semantic `run:` b
 classification, policy, mutation, or verdict logic embedded in a workflow or a companion
 script — belongs in one of those packages instead. Institute-authored CI semantics in
 `swift-institute/.github` are Swift, with exactly three named exception categories:
-22 files transferred out of Institute semantics by continuous-wisdom ruling, 13 fixture
+22 files transferred out of Institute semantics by the CW ruling (the Workspace-owned
+predicate-script transfer class, ported under TX-APP1W), 13 fixture
 stubs that are test corpus data pinned by a guard test, and the small retained-typed set
 recorded per file in the `terminalCensus` of
 `SWIFT-NATIVE-PROGRAMME/swift-purity-receipt.json` (at 1f8e2737) — consult that receipt,
