@@ -36,23 +36,37 @@ verdict or the required fix.
 
 ## Return the verdict
 
-When an actionable blocker is established, determine the smallest sufficient
-fixer scope, then preflight the review payload before its first POST: the event
-is explicit, the body is non-empty after trimming, and the reviewed commit
-matches the guarded head. Submit one precise exact-head review, read it back,
-and stop unrelated local verification, CI watching, and matrix enumeration.
-Leave the PR open and draft unless authority says otherwise.
+When an actionable blocker or other non-clean verdict is established, determine
+the smallest sufficient fixer scope, then preflight the review payload before
+its first POST: the event is explicit, the body is non-empty after trimming,
+and the reviewed commit matches the guarded head. The independent reviewer may
+publish one precise exact-head `COMMENTED` review as `coenttb`, then read it
+back. That review is evidence, never approval. Do not dispatch a bot-approval
+transaction for a non-clean verdict; stop unrelated local verification, CI
+watching, and matrix enumeration. Leave the PR open and draft unless authority
+says otherwise.
 
 A clean verdict requires the relevant source, policy, and required gates to be
-satisfied at the exact head. If landing authority is explicit, re-guard the
-head, state, owning Issue, gates, and merge policy immediately before the merge;
-then use the permitted merge method and read back the merged revision and Issue
-state.
+satisfied at the exact head. When the brief authorizes formal approval or
+landing of a `coenttb`-authored PR, it must also authorize the workflow dispatch
+required to obtain that approval. A brief that authorizes bot approval while
+forbidding that dispatch is contradictory and must be corrected before the
+review mutation.
 
-Formal approval may be unavailable when reviewer and author share an identity.
-Do not change identity to manufacture approval. Record an independent
-`COMMENTED` verdict when repository policy permits task-level independence, and
-merge only when the review brief explicitly authorizes landing.
+The canonical
+[`review-pr-transaction`](https://github.com/swift-institute/.github/blob/main/.github/workflows/review-pr-transaction.yml)
+workflow is the sole distinct-reviewer route for such a PR. Construct its
+complete exact `accepted-plan`, dispatch it, and, when the task requires
+terminal delivery, follow that one run in the foreground to its terminal
+conclusion. Then read back a `swift-institute-bot[bot]` `APPROVED` review at the
+guarded head. This bounded approval transaction is not passive CI watching or
+matrix polling, and the workflow never merges.
+
+Never use `gh pr review --approve` as `coenttb` on a `coenttb`-authored PR, and
+never change or synthesize a reviewer identity locally. If merge authority is
+separately explicit, re-guard the head, state, owning Issue, gates, approval,
+and merge policy immediately before the merge; then use the permitted merge
+method and read back the merged revision and Issue state.
 
 ## Preserve the boundary
 
