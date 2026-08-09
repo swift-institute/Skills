@@ -40,8 +40,10 @@ whenever the forwarded value begins with `-` or the parser claims it as a Worksp
 workspace package test --argument=--filter --argument "Suite or test"
 ```
 
-In a fresh clone the bootstrap `swift run --package-path Application workspace …` compiles the
-whole dependency graph and is silent for several minutes. It is not hung.
+In a fresh clone, from the institute-application checkout root, the bootstrap `swift run
+institute install` (no `--package-path`; the repository is the package, and the executable is
+`institute`) compiles the whole dependency graph and is silent for several minutes. It is not
+hung.
 
 ## Local-build policy
 
