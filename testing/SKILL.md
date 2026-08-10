@@ -154,19 +154,19 @@ missing — use `.never` in CI, where recording a snapshot means asserting nothi
 Filter while iterating, then run the affected package fresh when reporting:
 
 ```sh
-workspace package test --argument=--filter --argument "Behavior"
-workspace package test --fresh
+institute package test --argument=--filter --argument "Behavior"
+institute package test --fresh
 ```
 
 A filtered run proves only that filter. For what a run has to satisfy before it counts as
 evidence — including why a gate covering `canImport`-conditional suites has to start from a
-clean worktree — see the `workspace` skill.
+clean worktree — see the `institute` skill.
 
 TSan legs on packages whose dependency closure carries `~Copyable & ~Escapable`
 lifetime-dependent accessor projections use the carved invocation:
 
 ```sh
-workspace package test --argument=--sanitize=thread \
+institute package test --argument=--sanitize=thread \
   --argument=--scratch-path --argument=.build-tsan \
   --argument=-Xswiftc --argument=-Xllvm \
   --argument=-Xswiftc --argument=-sil-disable-pass=lifetime-dependence-diagnostics

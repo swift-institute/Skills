@@ -44,7 +44,7 @@ Each of these is a sign the search stopped early, not a thing to fix locally:
 - a dependency avoided by copying the depended-on capability.
 
 "No result" is not evidence unless you show the search root and a positive control. Never
-accept an unexplained zero from an ecosystem sweep — the `workspace` skill's instrument-traps
+accept an unexplained zero from an ecosystem sweep — the `institute` skill's instrument-traps
 reference is a catalogue of the ways one is produced.
 
 When an Institute package is insufficient, improve that package. Do not reach for Apple
@@ -83,4 +83,4 @@ machine because the parent is always exactly there.
   resolve, gate it with a **package trait**, off by default, and `condition:` the dependency on
   it. Verify by resolving and counting, never by reading the manifest.
 
-`Package.resolved` is generated state; the `workspace` skill owns what may be done to it.
+`Package.resolved` is generated state; the `institute` skill owns what may be done to it.

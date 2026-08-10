@@ -113,7 +113,8 @@ observable outcome, classification (org-scoped issue type), assignees, native hi
 dependencies, discussion and history, linked implementation, open or closed state and close
 reason, and completion or cancellation. Do not copy any of those facts into another work record.
 
-`Workspace` Issues own only technical work whose exact owner is `Workspace`.
+`institute-application` Issues own only technical work whose exact owner is
+`institute-application`, and the same holds for each of the other `institute-*` repositories.
 `swift-institute/Issues` owns only isolated Swift compiler or toolchain reproducers and
 maintenance of that repository — a reproducer goes there even when the defect surfaced while
 working elsewhere. Neither repository is a central programme register.

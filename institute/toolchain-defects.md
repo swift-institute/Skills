@@ -1,6 +1,6 @@
 # Investigating a toolchain failure
 
-Companion to the `workspace` skill. Read this when a failure may be the compiler,
+Companion to the `institute` skill. Read this when a failure may be the compiler,
 the optimizer, or the build system rather than product logic.
 
 ## Produce a decision, not a pile of diagnostics
@@ -42,7 +42,7 @@ generic / ownership / isolation / conformance constraints that trigger it, and
 the relevant file and module boundaries. If the trigger cannot itself compile,
 drive `swiftc` out of process from a test and assert on the process result.
 
-Every reduction step needs a verified clean build: run `workspace package clean`
+Every reduction step needs a verified clean build: run `institute package clean`
 before building, or build a standalone `swiftc` reproducer with no SwiftPM cache.
 Stale caches have produced false reductions here — a "crashing" reduction may be
 running cached SIL from a previous variant, which looks exactly like a successful
@@ -75,7 +75,7 @@ specialization), and hide access-control and serialization effects that depend o
 failed evidence dressed as success.
 
 ```bash
-workspace package build --fresh --argument=-c --argument release
+institute package build --fresh --argument=-c --argument release
 ```
 
 ## Compiler-level diagnosis

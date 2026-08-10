@@ -1,6 +1,6 @@
 # Instrument traps
 
-Companion to the `workspace` skill. Read this before any large sweep, census, or
+Companion to the `institute` skill. Read this before any large sweep, census, or
 claim that something is absent.
 
 Every trap here fails into a clean, confident negative — a zero that looks
@@ -21,8 +21,8 @@ Ask in this order. Only the third step is allowed to be a `grep`.
    `@_exported import FoundationNetworking`, and `import FoundationXML`. A
    pattern like `@[a-zA-Z]+` **cannot match `@_exported`** — the underscore is
    outside the class — so it returns a clean zero over a file full of imports.
-2. **Does Workspace own the fact?** `workspace doctor` for repository state,
-   `workspace package dump-package --package-path <p>` for one package's
+2. **Does the Institute coordinator own the fact?** `institute doctor` for repository state,
+   `institute package dump-package --package-path <p>` for one package's
    evaluated manifest.
 3. **Only then inspect source directly.** Bound the population, run a
    known-positive and a known-negative through the same path, state roots and
@@ -148,7 +148,7 @@ other look plausible.
   the environment that would provide the capability before declaring it absent.
 - **A directory holding several checkouts is not itself a git root.** Sibling
   repositories are separate roots, so probing the parent gives a false "commit
-  not found". Derive a package's location from the Workspace inventory, never
+  not found". Derive a package's location from the Institute inventory, never
   from the tree.
 - **Verify a push against the real remote** (`git ls-remote`), never a cached
   tracking ref. Local HEAD equal to `ls-remote` after your own push does not
