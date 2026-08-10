@@ -17,7 +17,7 @@ gates. Bind every finding and mutation to the exact reviewed head.
 Read the complete changed surface and its commits. Load only the domain skills
 the diff actually triggers. Use `github` for public tracking policy,
 `github-access` for authenticated mutations, `ci-cd` for off-machine evidence,
-and `workspace` only when originating local build or test evidence.
+and `institute` only when originating local build or test evidence.
 
 ## Judge with proportional evidence
 
@@ -27,7 +27,7 @@ every mechanical check.
 Preserve existing exact-head evidence as **task-attributed** and inspect its
 scope, toolchain, command, exit status, and provenance. Reproduce only an
 uncertainty material to the verdict. If originating local evidence, follow the
-Workspace skill; `--fresh` makes a chosen result admissible but does not oblige a
+`institute` skill; `--fresh` makes a chosen result admissible but does not oblige a
 reviewer to create another result.
 
 Treat CI as decision evidence, not a completeness exercise. Wait for a terminal

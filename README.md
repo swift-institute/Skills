@@ -29,11 +29,11 @@ unenforced is a statement about who decides, not a softening of the guidance.
 
 ## Loading
 
-`swift-institute/Workspace` owns installation for the shared checkout:
+`swift-institute/institute-application` owns installation for the shared checkout:
 
 ```sh
-workspace context install
-workspace context check
+institute context install
+institute context check
 ```
 
 The installer parses each canonical `SKILL.md` and projects whole skill
@@ -49,7 +49,7 @@ Two gates run against this corpus, and neither has an opinion about the writing:
   are present and `name` matches its directory; every relative link resolves; no
   machine-local path and no internal rule ID reaches a public file; an empty
   corpus fails closed rather than reading as a clean scan.
-- **Loadability, in the Workspace installer.** The frontmatter parses under the
+- **Loadability, in the Institute installer.** The frontmatter parses under the
   installer's own stricter reader, and the document is small enough for it to
   accept. Companions are projected but not parsed, so a hub that has grown past
   the installer is a hub with a companion waiting to be split out of it.
@@ -64,7 +64,7 @@ Swift Institute maintainers also project private operational skills from
 | [swift-institute/swift-institute.org](https://github.com/swift-institute/swift-institute.org) | Website + DocC catalog |
 | [swift-institute/Research](https://github.com/swift-institute/Research) | Design rationale and trade-off analysis |
 | [swift-institute/Experiments](https://github.com/swift-institute/Experiments) | Standalone Swift packages backing technical claims |
-| [swift-institute/Workspace](https://github.com/swift-institute/Workspace) | Inventory, context installation, and Swift-owned workspace tooling |
+| [swift-institute/institute-application](https://github.com/swift-institute/institute-application) | Inventory, context installation, and the Swift-owned `institute` coordinator |
 
 ## License
 

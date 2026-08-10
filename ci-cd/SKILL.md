@@ -20,13 +20,15 @@ the GitHub control-plane boundary; this skill defines CI workflow structure, aut
 and evidence.
 
 Institute-authored CI semantics are Swift, owned by packages under `Tools/` in
-`swift-institute/.github` — `institute-ci`, `institute-ci-control`, `repository-policy`, and
-`pull-request-transaction` (kebab-case package roots, per the house convention). Workflow YAML
+`swift-institute/.github` — `institute-ci`, `institute-ci-control`, and `repository-policy`
+(kebab-case package roots, per the house convention) — and by the standalone
+`swift-institute/institute-pull-request-transaction` repository, which owns the
+landing-transaction admission protocol. Workflow YAML
 is wiring: triggers, `uses:`, permissions, and typed inputs. A semantic `run:` block —
 classification, policy, mutation, or verdict logic embedded in a workflow or a companion
 script — belongs in one of those packages instead. Institute-authored CI semantics in
 `swift-institute/.github` are Swift, with exactly three named exception categories:
-22 files transferred out of Institute semantics by the CW ruling (the Workspace-owned
+22 files transferred out of Institute semantics by the CW ruling (the coordinator-owned
 predicate-script transfer class, ported under TX-APP1W), 13 fixture
 stubs that are test corpus data pinned by a guard test, and the small retained-typed set
 recorded per file in the `terminalCensus` of
@@ -222,9 +224,10 @@ relax the visibility gate.
 
 The control plane's private-verification
 sweep enumerates private ordinary repositories (R10-positive-controlled), dispatches each
-exact private head to the trusted verifier, and the verifier executes Workspace against
-that head, seals a leak-safe envelope (`workspace verification seal`/`check`), and
-publishes exactly one `verification / workspace` check-run on the exact subject head with
+exact private head to the trusted verifier, and the verifier executes the Institute
+coordinator against that head, seals a leak-safe envelope (`institute verification
+seal`/`check`), and publishes exactly one `verification / workspace` check-run — the
+check-run name keeps its historical spelling — on the exact subject head with
 the dispatch's request-id as its `external_id`. Public surfaces stay opaque: run titles
 and artifacts carry the request-id and binding digest only, never a private coordinate.
 Stale heads, replayed requests, and invalid payloads fail closed before publication.
@@ -233,7 +236,7 @@ Private repositories cannot carry branch rulesets on the current plan (platform-
 Ruling R33 records the 403 readbacks as the absence control), so `verification / workspace`
 is the private convergence signal rather than a required-check context. The G1 seal
 contract currently runs reduced under Ruling R34 (lint not required; inventory digest
-unmeasured, both Workspace-side causes); the Swift-native follow-up programme owns the
+unmeasured, both coordinator-side causes); the Swift-native follow-up programme owns the
 restoration and its activation gate is a green full-contract run.
 
 ## Reading results

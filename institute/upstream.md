@@ -1,6 +1,6 @@
 # Upstream Swift
 
-Companion to the `workspace` skill. Read this before opening a pull request
+Companion to the `institute` skill. Read this before opening a pull request
 against `swiftlang/swift`, drafting a Swift Evolution pitch, or preparing a
 public launch for Forums review.
 

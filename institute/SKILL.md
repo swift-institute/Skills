@@ -1,43 +1,44 @@
 ---
-name: workspace
-description: Run and interpret every Institute build, test, resolve, lint, and local probe through the Workspace coordinator, and handle failures that come from the toolchain itself — compiler, optimizer and build-system defects, swiftlang/swift pull requests, Swift Evolution pitches, and pre-launch Swift Forums critique. Apply whenever a task builds, tests, resolves, cleans, lints, composes local sources, reports a result as evidence, or when a failure may be the toolchain rather than product logic.
+name: institute
+description: Run and interpret every Institute build, test, resolve, lint, and local probe through the Institute coordinator, and handle failures that come from the toolchain itself — compiler, optimizer and build-system defects, swiftlang/swift pull requests, Swift Evolution pitches, and pre-launch Swift Forums critique. Apply whenever a task builds, tests, resolves, cleans, lints, composes local sources, reports a result as evidence, or when a failure may be the toolchain rather than product logic.
 ---
 
-# Workspace
+# Institute
 
-Workspace owns local SwiftPM execution. Never invoke `swift build`, `swift test`, `swift
+The `institute` coordinator (`swift-institute/institute-application`) owns local SwiftPM
+execution. Never invoke `swift build`, `swift test`, `swift
 package`, or `xcodebuild` directly, and never wrap them in a repository-local script — a
 repository-local wrapper is how a machine-specific assumption becomes everyone's.
 
 ## Commands
 
 ```sh
-workspace package build   --package-path <path>
-workspace package test    --package-path <path>
-workspace package resolve --package-path <path>
-workspace package update  --package-path <path>
-workspace package clean   --package-path <path>
-workspace package run     --package-path <path>
-workspace package dump-package --package-path <path>
+institute package build   --package-path <path>
+institute package test    --package-path <path>
+institute package resolve --package-path <path>
+institute package update  --package-path <path>
+institute package clean   --package-path <path>
+institute package run     --package-path <path>
+institute package dump-package --package-path <path>
 
-workspace doctor            # machine-checked checkout facts
-workspace inventory         # the name → org → path register
-workspace sync              # clone and fast-forward; --dry-run plans only
-workspace context install|check
-workspace navigation install|check
+institute doctor            # machine-checked checkout facts
+institute inventory         # the name → org → path register
+institute sync              # clone and fast-forward; --dry-run plans only
+institute context install|check
+institute navigation install|check
 
-workspace compose --consumer <c> --dependency <d>   # local-source composition
-workspace verify  --consumer <c> --dependency <d>
-workspace restore --consumer <c> --dependency <d>
+institute compose --consumer <c> --dependency <d>   # local-source composition
+institute verify  --consumer <c> --dependency <d>
+institute restore --consumer <c> --dependency <d>
 ```
 
 Add `--fresh` when a chosen `build` or `test` result will be reported as newly originated
 evidence. Freshness makes that result admissible; it does not require every task or reviewer to
 originate another run. Forward SwiftPM arguments by repeating `--argument`, using the `=` form
-whenever the forwarded value begins with `-` or the parser claims it as a Workspace option:
+whenever the forwarded value begins with `-` or the parser claims it as an `institute` option:
 
 ```sh
-workspace package test --argument=--filter --argument "Suite or test"
+institute package test --argument=--filter --argument "Suite or test"
 ```
 
 In a fresh clone, from the institute-application checkout root, the bootstrap `swift run
@@ -47,21 +48,17 @@ hung.
 
 ## Local-build policy
 
-Local iteration runs through coordinated paths only — `workspace package build|test|lint`, never
+Local iteration runs through coordinated paths only — `institute package build|test|lint`, never
 raw `swift build`/`swift test`/package-administration commands. The machine-wide
 `swiftpm-build-coordinator` flock serializes every coordinated SwiftPM build; no session bypasses,
 kills, or replaces it.
 
 Interactive concurrency is capped, not uncapped, whenever another session shares the machine. Pass
-`--jobs <n>` on `workspace package build|test` so a coordinated build leaves cores free for
+`--jobs <n>` on `institute package build|test` so a coordinated build leaves cores free for
 co-tenant sessions — start at half the machine's cores and adjust from there by observed
-contention, never uncapped while another session is on the machine. This is gated on the flag
-actually being installed: until the local `workspace` binary carries `--jobs`, local building
-stays halted machine-wide and every session verifies through CI instead — a push for iteration
-signal, a full-tier dispatch for closure. Once `--jobs` is installed, the halt lifts for capped
-coordinated builds only.
+contention, never uncapped while another session is on the machine.
 
-`workspace build` — one `xcodebuild` invocation over the merged `institute.xcworkspace` graph — is
+`institute build` — one `xcodebuild` invocation over the merged `institute.xcworkspace` graph — is
 the quiet-point integration check, not an iteration tool. It is the only local path that sees
 unpushed cross-package edits, so its blast radius includes concurrent source edits anywhere else
 in the checkout. Run it at quiet points only, never during active lane work.
@@ -110,7 +107,7 @@ a toolchain-sensitive result.
 `Package.resolved` is generated. Never commit, hand-edit, copy, stage, or delete it to force
 resolution — change `Package.swift` and resolve.
 
-Never delete `.build` directly; use `workspace package clean`. A manual deletion costs a full
+Never delete `.build` directly; use `institute package clean`. A manual deletion costs a full
 rebuild of an artifact tree large enough that the mistake is measured in hours, not seconds.
 
 A composed manifest writes a machine-local absolute path deliberately, so that it fails loudly
@@ -119,15 +116,15 @@ pushing. `restore`'s check is structural only — the manifest evaluates, the de
 declared by URL, no local path leaked. It resolves nothing and contacts no remote, so report its
 scope honestly rather than as a resolution check.
 
-The generated Xcode workspace and `Workspace.json` carry relative references only; never emit a
-machine path into either. `Workspace.json` is the sole name → org → path authority.
+The generated Xcode workspace and `Institute.json` carry relative references only; never emit a
+machine path into either. `Institute.json` is the sole name → org → path authority.
 
 `sync` never rewrites work: it fast-forwards only a clean checkout on `main` tracking
 `origin/main` with no local commits, and reports dirty worktrees and feature branches without
 touching them.
 
 Institute tooling is Full Swift. Do not add Python or shell automation, or revive a `Scripts`
-grab-bag; extend the typed Workspace surface and test the extension.
+grab-bag; extend the typed Institute surface and test the extension.
 
 ## Local probes
 
@@ -145,7 +142,7 @@ zero from a broken instrument.
 
 A convention graduates from prose to a mechanical rule when it is recognizable from syntax or
 from a package graph. That is the dividing line worth keeping in mind while writing either one:
-swift-linter owns Swift syntax and AST semantics, Workspace validators own checkout and
+swift-linter owns Swift syntax and AST semantics, Institute validators own checkout and
 package-graph facts, repository-policy owns GitHub state, and central CI executes them. Never
 restate an executable predicate as prose, and never create package-local severity overrides.
 

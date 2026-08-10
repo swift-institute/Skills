@@ -13,11 +13,11 @@ An executable target in a nested `Benchmarks/` package with its own
 coordinator-owned clean state, built and run in release:
 
 ```sh
-workspace package build --argument=-c --argument=release
-workspace package run   --argument=-c --argument=release
+institute package build --argument=-c --argument=release
+institute package run   --argument=-c --argument=release
 ```
 
-Never delete `.build` directly — `workspace package clean` from the benchmark
+Never delete `.build` directly — `institute package clean` from the benchmark
 root.
 
 ## Mechanics

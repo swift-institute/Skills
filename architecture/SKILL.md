@@ -57,8 +57,8 @@ interop, no runtime features absent in embedded contexts.
 L1 primitives packages carry no macro targets, for the same reason: a macro target pulls in
 `swift-syntax` and a host compiler plugin, neither of which is deployable on Swift Embedded. A
 capability that needs a macro belongs at a higher layer, with the macro target owned there. The
-mechanical check — no `.macro` target in an L1 `Package.swift` — is Workspace-owned
-(swift-institute/Workspace#90).
+mechanical check — no `.macro` target in an L1 `Package.swift` — is Institute-owned
+(swift-institute/institute-application#90).
 
 The single exception is a target whose name ends in `Foundation Integration`. It may import
 Foundation, it must be a leaf product, and no core target may depend on it directly or
@@ -82,8 +82,9 @@ swift-standards itself holds the convergence packages, `swift-{concept}-standard
 spec revisions so consumers importing the stable module never change. Convergence packages are
 policy-free — opinion lives in Foundations.
 
-- A package's location comes from its inventory entry in Workspace. Never infer it from the
-  package name, and never determine it by scanning the tree.
+- A package's location comes from its entry in the Institute inventory
+  (`Institute.json`). Never infer it from the package name, and never determine
+  it by scanning the tree.
 - One specification can carry two authorities' designations — IEEE 1003.1 *is* ISO/IEC 9945.
   Packages under different authority orgs are then not duplicates; they partition the spec by
   surface. Check that before flagging duplication.
