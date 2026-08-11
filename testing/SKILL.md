@@ -125,7 +125,7 @@ swift-<package>/
     Package.swift          # depends on ".." — the parent package
     <Module> Tests/
     <Module> Snapshot Tests/
-      __Snapshots__/       # committed
+      .snapshots/          # committed
 ```
 
 Most packages need no such manifest, and most do not have one: a `.testTarget` in the main
@@ -144,7 +144,7 @@ by URL like any other dependency. A relative path to a sibling *package* resolve
 machine whose checkout happens to match, which is why the parent is the only one spelled that
 way.
 
-Snapshot references live in `__Snapshots__/` beside the test source and are committed.
+Snapshot references live in `.snapshots/` beside the test source and are committed.
 Recording modes: `.missing` records new and compares existing (the default), `.all` always
 records, `.failed` records on failure and still fails, `.never` compares only and fails when
 missing — use `.never` in CI, where recording a snapshot means asserting nothing.
