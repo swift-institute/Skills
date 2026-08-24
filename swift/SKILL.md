@@ -1,6 +1,6 @@
 ---
 name: swift
-description: How Swift is written across the Institute — namespaces and noun naming, one type per file, typed throws, intent-over-mechanism call sites, Byte-vs-UInt8 discipline, typed indices and conversions, data-structure selection, ownership and lifetime, unsafe containment, Span access, Sendable and isolation, and platform code placement. Apply whenever declaring a type, method, property, error, or file, writing implementation bodies, working at the byte or arithmetic boundary, converting between typed values, choosing a container, touching ~Copyable, ~Escapable, deinit, Span, raw pointers, @safe, Sendable, actors or Mutex, or placing platform code, conditionals, C imports, and package settings.
+description: How Swift is written across the Institute — namespaces and noun naming, one type per file, typed throws, intent-over-mechanism call sites, Byte-vs-UInt8 discipline, typed indices and conversions, data-structure selection, ownership and lifetime, unsafe containment, Span access, Sendable and isolation, and platform code placement. Apply whenever declaring a type, method, property, error, or file, writing implementation bodies, working at the byte or arithmetic boundary, converting between typed values, choosing a container, touching ~Copyable, ~Escapable, deinit, Span, raw pointers, @safe, Sendable, actors or Mutex, or placing platform code, conditionals, and C imports.
 ---
 
 # Swift
@@ -219,5 +219,3 @@ methods forwarding to the stored closures.
 - `@safe` / `@unsafe`, raw pointers, the Span family — [unsafe-and-span.md](unsafe-and-span.md).
 - `Sendable`, `@unchecked`, actors, `Mutex` — [concurrency.md](concurrency.md).
 - Platform stack, kernel vocabulary, conditionals, platform C — [platform.md](platform.md).
-- Tools-version pins, upcoming features, products, linking —
-  [package-settings.md](package-settings.md).
