@@ -1,6 +1,6 @@
 ---
 name: architecture
-description: The Swift Institute's organization and layering — the three realized layers, dependency direction, Standards authority structure, Foundation-freedom, and package and namespace naming. Applies in any Swift Institute repository, always, and governs where any package, target, type, or dependency is placed.
+description: The Swift Institute's organization and layering — the four layers and their organizations, dependency direction, Standards authority structure, Foundation-freedom, and package and namespace naming. Applies in any Swift Institute repository, always, and governs where any package, target, type, or dependency is placed.
 ---
 
 # Architecture
@@ -8,21 +8,31 @@ description: The Swift Institute's organization and layering — the three reali
 The ecosystem is one composed Institute. Every capability has exactly one semantic owner;
 every other package composes that owner.
 
-## The three realized layers
+## The four layers
 
 ```
-L3 Foundations   swift-{concept}              What can be composed safely?
-L2 Standards     swift-{spec-id} / -standard  What is specified externally?
-L1 Primitives    swift-{concept}-primitives   What must exist?
+L4 Compositions  swift-compositions/swift-{concept}   What can be composed safely?
+L3 Standards     swift-standards and the authority     What is specified externally?
+                 orgs: swift-{spec-id} / -standard
+L2 Molecules     swift-molecules/swift-{concept}      What is built from atoms alone?
+L1 Atoms         swift-atoms/swift-{concept}          What must exist?
 ```
 
-All three are Apache 2.0. Components (L4) and Applications (L5) are reserved names, not
-residences — a `swift-components/*` or `swift-applications/*` directory records an intention,
-never precedent or ownership evidence. L3 is the top realized layer; extractions land in
-Foundations unless a layer is deliberately being stood up.
+The authority is `swift-institute/.github`'s `.github/policy/fleet.json`, which assigns every
+organization its layer; `swift-institute` is the control organization and roots no layer. The
+August–September 2026 reorganization split the former Primitives layer (`swift-primitives`,
+`swift-{concept}-primitives`) into atoms and molecules, dropped the `-primitives` suffix, and
+renamed the former Foundations layer (`swift-foundations`) to `swift-compositions`; text that
+still says Primitives means L1–L2 and Foundations means L4.
+
+All four are Apache 2.0. `swift-components` and `swift-applications` were emptied on
+2026-07-28 and are not residences — a directory under either records an intention, never
+precedent or ownership evidence. L4 is the top layer; extractions land in `swift-compositions`
+unless a layer is deliberately being stood up.
 
 Placement test: can you point to an external man page, spec chapter, or SDK document defining
-this type's surface? Yes → L2. No → L1 if it is an atomic prerequisite, L3 if it composes.
+this type's surface? Yes → L3. No → L1 if it is an atomic prerequisite, L2 if it is built from
+atoms alone, L4 if it composes beyond that.
 
 ## Dependency direction
 
@@ -32,7 +42,7 @@ A same-layer edge is admissible only when the edge is an essential semantic prer
 same-layer graph stays acyclic, and the edge does not push higher-layer policy into the
 dependency. Convenience and incidental reuse are not admissible — the question is whether the
 dependency could be understood without the dependent, not whether the edge is handy. Within L1
-the stricter tier DAG applies: strictly lower tier only, no lateral edges, and tiers are
+and L2 the stricter tier DAG applies: strictly lower tier only, no lateral edges, and tiers are
 computed from the graph rather than hand-maintained.
 
 Institute packages must not depend on `github.com/coenttb/*`. Local `coenttb/*` paths are not
@@ -51,13 +61,13 @@ prohibited; repository scope decides whether they may be changed.
 
 No package's main target at any layer imports the Foundation module family — `Foundation`,
 `FoundationEssentials`, `FoundationNetworking`, `FoundationXML` — or uses Foundation types.
-Primitives must additionally be deployable on Swift Embedded: no reflection, no Objective-C
-interop, no runtime features absent in embedded contexts.
+Atoms and molecules must additionally be deployable on Swift Embedded: no reflection, no
+Objective-C interop, no runtime features absent in embedded contexts.
 
-L1 primitives packages carry no macro targets, for the same reason: a macro target pulls in
+L1 and L2 packages carry no macro targets, for the same reason: a macro target pulls in
 `swift-syntax` and a host compiler plugin, neither of which is deployable on Swift Embedded. A
 capability that needs a macro belongs at a higher layer, with the macro target owned there. The
-mechanical check — no `.macro` target in an L1 `Package.swift` — is Institute-owned
+mechanical check — no `.macro` target in an L1 or L2 `Package.swift` — is Institute-owned
 (swift-institute/institute-application#90).
 
 The single exception is a target whose name ends in `Foundation Integration`. It may import
@@ -66,7 +76,7 @@ transitively. The exception covers the target class, never a per-file waiver —
 wants Foundation moves that surface into the integration target.
 
 L1 string and scalar escape hatches are withheld on purpose. Bridging an L1 typed value to
-`Swift.String` by hand at L3 is the intended cost, not a gap.
+`Swift.String` by hand at L4 is the intended cost, not a gap.
 
 A linter rule owns the import form, and it is the reason not to hand-roll the check: it has
 named cases for the shapes a regex loses, including `@_exported import FoundationNetworking`.
@@ -77,10 +87,11 @@ evidence about imports and nothing more.
 
 Each authority has its own GitHub org: swift-ietf (`swift-rfc-{number}`), swift-iso
 (`swift-iso-{number}`), swift-w3c, swift-whatwg, swift-ieee, swift-iec, swift-ecma,
-swift-incits, and the vendor orgs swift-arm-ltd, swift-intel, swift-riscv, swift-microsoft.
+swift-incits, swift-linux-foundation, swift-bipm, and the vendor orgs swift-arm-ltd,
+swift-intel, swift-riscv, swift-microsoft. They and swift-standards are L3.
 swift-standards itself holds the convergence packages, `swift-{concept}-standard`, which absorb
 spec revisions so consumers importing the stable module never change. Convergence packages are
-policy-free — opinion lives in Foundations.
+policy-free — opinion lives in `swift-compositions`.
 
 - A package's location comes from its entry in the Institute inventory
   (`Institute.json`). Never infer it from the package name, and never determine

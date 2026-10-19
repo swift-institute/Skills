@@ -37,7 +37,7 @@ publication.
 The license-header check walks *every* `exports.swift`, not just the umbrella
 module's. CI's `lint-license-header` job is advisory, so a green run is not
 coverage evidence; this grep is the control of record. Also verify a
-clean-worktree build, test, and lint on the principal toolchain, plus the L1
+clean-worktree build, test, and lint on the principal toolchain, plus the L1–L2
 Embedded build where the layer requires it — through the `institute` coordinator, and fresh, since
 a cached green is not evidence.
 
