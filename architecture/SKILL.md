@@ -11,11 +11,11 @@ every other package composes that owner.
 ## The four layers
 
 ```
-L4 Compositions  swift-compositions/swift-{concept}   What can be composed safely?
+L4 Compositions  org swift-compositions, repo swift-{concept}   What can be composed safely?
 L3 Standards     swift-standards and the authority     What is specified externally?
                  orgs: swift-{spec-id} / -standard
-L2 Molecules     swift-molecules/swift-{concept}      What is built from atoms alone?
-L1 Atoms         swift-atoms/swift-{concept}          What must exist?
+L2 Molecules     org swift-molecules, repo swift-{concept}      What is built from atoms alone?
+L1 Atoms         org swift-atoms, repo swift-{concept}          What must exist?
 ```
 
 The authority is `swift-institute/.github`'s `.github/policy/fleet.json`, which assigns every
