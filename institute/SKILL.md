@@ -48,8 +48,13 @@ hung.
 
 ## Local-build policy
 
-Local iteration runs through coordinated paths only — `institute package build|test|lint`, never
-raw `swift build`/`swift test`/package-administration commands. The machine-wide
+Local iteration runs through coordinated paths only — `institute package build|test`, never
+raw `swift build`/`swift test`/package-administration commands. Lint has one entry point,
+`institute ci -- source --repository <owner/name> --revision <commit> --root <path> --bundle
+<bundle> --xcode-application <Xcode.app>`. It measures a whole package at an exact commit
+against the pinned Institute.Source.Policy. There is no per-file mode, and running `swift-format` or
+`swiftlint` directly with a repository's stray configuration is never Institute lint. A local
+run is guidance only: CI's `Quality · source` job is the evidence. The machine-wide
 `swiftpm-build-coordinator` flock serializes every coordinated SwiftPM build; no session bypasses,
 kills, or replaces it.
 
