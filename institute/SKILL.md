@@ -40,10 +40,13 @@ whenever the forwarded value begins with `-` or the parser claims it as an `inst
 institute package test --argument=--filter --argument "Suite or test"
 ```
 
-In a fresh clone, from the institute-application checkout root, the bootstrap `swift run
-institute install` (no `--package-path`; the repository is the package, and the executable is
-`institute`) compiles the whole dependency graph and is silent for several minutes. It is not
-hung.
+Install `institute` once by bootstrap: in a fresh clone, from the institute-application checkout
+root, run `swift run institute install` (no `--package-path`; the repository is the package, and
+the executable is `institute`). It compiles the whole dependency graph and is silent for several
+minutes. It is not hung. After that bootstrap, plain `institute install` installs the pinned,
+digest-verified planner binary published by institute-application's `publish-planner` workflow
+and pinned in swift-institute/.github. `institute source` (and `institute ci -- source`) refuses
+to run any binary that is not the pinned one; run `institute install` to replace a stale one.
 
 ## Local-build policy
 
