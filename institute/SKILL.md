@@ -25,7 +25,6 @@ institute doctor            # machine-checked checkout facts
 institute inventory         # the name → org → path register
 institute sync              # clone and fast-forward; --dry-run plans only
 institute context install|check
-institute navigation install|check
 
 institute compose --consumer <c> --dependency <d>   # local-source composition
 institute verify  --consumer <c> --dependency <d>

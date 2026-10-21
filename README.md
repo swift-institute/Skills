@@ -5,7 +5,7 @@ Development conventions for the [Swift Institute](https://swift-institute.org) e
 Skills are lightweight guides, not a register of every known practice. They are written to be loaded by an agent when the work calls for them, and they carry judgment where judgment is what the situation needs; humans can read them directly.
 
 This public repository contains reusable engineering and project conventions. Machine-specific
-navigation wiring and fleet-wide repository mutation workflows are intentionally excluded from
+wiring and fleet-wide repository mutation workflows are intentionally excluded from
 the public corpus.
 
 ## Structure
