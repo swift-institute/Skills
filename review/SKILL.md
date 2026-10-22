@@ -15,8 +15,7 @@ current head, current default branch, merge policy, prior reviews, and relevant
 gates. Bind every finding and mutation to the exact reviewed head.
 
 Read the complete changed surface and its commits. Load only the domain skills
-the diff actually triggers. Use `github` for public tracking policy,
-`github-access` for authenticated mutations, `ci-cd` for off-machine evidence,
+the diff actually triggers. Use `github-access` for authenticated mutations
 and `institute` only when originating local build or test evidence.
 
 ## Judge with proportional evidence
