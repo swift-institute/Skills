@@ -64,10 +64,9 @@ No package's main target at any layer imports the Foundation module family — `
 Atoms and molecules must additionally be deployable on Swift Embedded: no reflection, no
 Objective-C interop, no runtime features absent in embedded contexts.
 
-Macro targets are allowed at L1, L2 and L4, and not at L3: a Standards package carries no
-`.macro` target. A macro's plugin runs on the host at compile time, so the code it expands into
-a main target is what must stay Embedded-deployable at L1 and L2. No machine check enforces
-the L3 rule yet.
+Macro targets sit at L1, L2 and L4. L3 Standards packages mirror an external authority rather
+than owning compiler-plugin machinery. A macro's plugin runs on the host at compile time, while
+Embedded deployment at L1 and L2 concerns the code it expands into a main target.
 
 The single exception is a target whose name ends in `Foundation Integration`. It may import
 Foundation, it must be a leaf product, and no core target may depend on it directly or
