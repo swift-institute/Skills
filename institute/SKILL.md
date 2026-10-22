@@ -208,3 +208,6 @@ requester judge fit.
   SIL-level diagnosis — [toolchain-defects.md](toolchain-defects.md).
 - Pull requests to swiftlang/swift, Evolution pitches, pre-launch Forums review —
   [upstream.md](upstream.md).
+- Reporting a toolchain bug upstream: record it with swift-institute/Issues' "Toolchain bug"
+  form; nothing is filed until `issue-check` admits `upstream-ready` and Coen says yes —
+  [UPSTREAM-PROCEDURE.md](https://github.com/swift-institute/Issues/blob/main/UPSTREAM-PROCEDURE.md).
