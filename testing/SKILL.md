@@ -87,7 +87,7 @@ list above is what has been hit, not what can be hit.
   cryptic `@section` error. Drop to one suite per file and shorten the nesting suffix.
 - Macro expansion tests validate the expansion, not whether the macro may be attached at a
   given site. Neither harness checks form-vs-site applicability, so macro coverage must include
-  at least one real consumer site compiled through the coordinator.
+  at least one real consumer site compiled through the app workspace using Xcode's connector.
 - Prefer the generic macro-test support with a Swift Testing `failureHandler` routing to
   `Issue.record`; do not pull XCTest or Foundation in for fixture convenience.
 - A mock produced by `unsafeBitCast` over a pointer-like `BitwiseCopyable` type must offset its
@@ -151,31 +151,26 @@ missing — use `.never` in CI, where recording a snapshot means asserting nothi
 
 ## Verification
 
-Filter while iterating, then run the affected package fresh when reporting:
-
-```sh
-institute package test --argument=--filter --argument "Behavior"
-institute package test --fresh
-```
+Run tests through the selected Xcode's connector in the app's `.xcworkspace` (for Laurie,
+`Laurie.xcworkspace`). Inspect the active scheme, test plan and destination first. Select tests
+through the connector while iterating, then run the affected test plan for final verification.
+Use the workspace's local package graph and Xcode resolution; do not use Institute package
+commands or raw SwiftPM as a substitute.
 
 A filtered run proves only that filter. For what a run has to satisfy before it counts as
-evidence — including why a gate covering `canImport`-conditional suites has to start from a
-clean worktree — see the `institute` skill.
+evidence — including why a gate covering `canImport`-conditional suites needs a
+verified clean build — see the `institute` skill.
 
-TSan legs on packages whose dependency closure carries `~Copyable & ~Escapable`
-lifetime-dependent accessor projections use the carved invocation:
+For local Thread Sanitizer checks, use a dedicated Xcode scheme or test-plan configuration
+with Thread Sanitizer enabled. Keep sanitized and unsanitized build products separate through
+Xcode's build configuration. When lifetime-dependent `~Copyable & ~Escapable` projections
+require `-Xllvm -sil-disable-pass=lifetime-dependence-diagnostics`, scope that compiler setting
+to the sanitizer configuration and record it in the result. If the connector cannot configure
+or select the required mode, report the limitation rather than switching build paths.
 
-```sh
-institute package test --argument=--sanitize=thread \
-  --argument=--scratch-path --argument=.build-tsan \
-  --argument=-Xswiftc --argument=-Xllvm \
-  --argument=-Xswiftc --argument=-sil-disable-pass=lifetime-dependence-diagnostics
-```
-
-`.build-tsan` is used for every sanitized invocation and never without `--sanitize=thread`;
-sanitized and unsanitized artifacts never share a scratch. A seeded race positive control rides
-every TSan gate with its expected nonzero report count asserted — TSan reports do not fail
-swift-testing runs, so pass criteria count `WARNING: ThreadSanitizer` lines, never test counts.
+A seeded race positive control rides every TSan gate with its expected nonzero report count
+asserted — sanitizer reports need not fail Swift Testing runs, so inspect the full logs and count
+`WARNING: ThreadSanitizer` reports rather than relying on test counts.
 
 ## Elsewhere
 

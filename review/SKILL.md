@@ -26,8 +26,8 @@ every mechanical check.
 Preserve existing exact-head evidence as **task-attributed** and inspect its
 scope, toolchain, command, exit status, and provenance. Reproduce only an
 uncertainty material to the verdict. If originating local evidence, follow the
-`institute` skill; `--fresh` makes a chosen result admissible but does not oblige a
-reviewer to create another result.
+`institute` skill's Xcode workspace workflow. Verify the actual compilation and test scope;
+a reviewer need not originate another result when existing evidence settles the question.
 
 Treat CI as decision evidence, not a completeness exercise. Wait for a terminal
 conclusion or inspect additional jobs only when the result can change the

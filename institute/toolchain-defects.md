@@ -18,7 +18,9 @@ covered and what was not.
 
 ## Eliminate the cheap explanations first
 
-Record the exact command and `swift --version`. Check the dependency URL and
+Record the Xcode workspace, scheme, destination, SDK, compiler version and build action.
+For a standalone compiler reduction, also record the exact command and `swift --version`.
+Check the dependency URL and
 requirement, the selected toolchain and any unintended `TOOLCHAINS` override,
 resolver diagnostics, and a fresh operation. Then retest on the latest
 development toolchain, because the bug may already be fixed:
@@ -42,8 +44,9 @@ generic / ownership / isolation / conformance constraints that trigger it, and
 the relevant file and module boundaries. If the trigger cannot itself compile,
 drive `swiftc` out of process from a test and assert on the process result.
 
-Every reduction step needs a verified clean build: run `institute package clean`
-before building, or build a standalone `swiftc` reproducer with no SwiftPM cache.
+Every reduction step needs a verified clean build through Xcode's connector,
+or a standalone `swiftc` reproducer with no SwiftPM cache. Use Xcode's supported clean
+operation; if unavailable, state the limitation instead of claiming a clean result.
 Stale caches have produced false reductions here — a "crashing" reduction may be
 running cached SIL from a previous variant, which looks exactly like a successful
 reduction.
@@ -74,9 +77,9 @@ specialization), and hide access-control and serialization effects that depend o
 `package` versus `public`. A pattern safe in debug and unsafe in release is
 failed evidence dressed as success.
 
-```bash
-institute package build --fresh --argument=-c --argument release
-```
+Select a Release configuration in the workspace through Xcode's connector and verify the
+optimization settings in the build log. Build the production consumer across the same module
+boundary. A standalone compiler reduction does not replace this workspace verification.
 
 ## Compiler-level diagnosis
 

@@ -1,93 +1,72 @@
 ---
 name: institute
-description: Run and interpret every Institute build, test, resolve, lint, and local probe through the Institute coordinator, and handle failures that come from the toolchain itself — compiler, optimizer and build-system defects, swiftlang/swift pull requests, Swift Evolution pitches, and pre-launch Swift Forums critique. Apply whenever a task builds, tests, resolves, cleans, lints, composes local sources, reports a result as evidence, or when a failure may be the toolchain rather than product logic. Package CI is one hop: each repository's generated `.github/workflows/ci.yml` calls the universal reusable `swift-ci.yml` in swift-institute/.github. The CI planner moves planner → `.institute-ci-pin` → publish, canary, adopt. The Embedded leg is advisory (swift-institute/.github#615); the Windows toolchain is an assertions build.
+description: Develop locally in an app-owned Xcode workspace through the selected Xcode's connector; interpret build and test evidence and investigate toolchain defects. Also covers Institute CI, inventory and lint policy when those systems are explicitly in scope. Local resolution, builds and tests use Xcode, not the Institute coordinator.
 ---
 
 # Institute
 
-The `institute` coordinator (`swift-institute/institute-application`) owns local SwiftPM
-execution. Never invoke `swift build`, `swift test`, `swift
-package`, or `xcodebuild` directly, and never wrap them in a repository-local script — a
-repository-local wrapper is how a machine-specific assumption becomes everyone's.
+## Local development
 
-## Commands
+The app's `.xcworkspace` owns local development and dependency resolution. For Laurie, use
+`Laurie.xcworkspace` (formerly `Harvest.xcworkspace`). Include the app, its hosts, and the local
+package checkouts needed for the change in that workspace, using relative references. Xcode
+must resolve and build the intended local sources, including unpushed cross-package edits.
+Keep published package requirements portable; do not rewrite manifests to machine-local
+absolute paths for local iteration.
 
-```sh
-institute package build   --package-path <path>
-institute package test    --package-path <path>
-institute package resolve --package-path <path>
-institute package update  --package-path <path>
-institute package clean   --package-path <path>
-institute package run     --package-path <path>
-institute package dump-package --package-path <path>
+Use the selected Xcode's current connector (`xcode-integration` MCP tools) and Apple-exported
+skills. Discover the available tool capabilities rather than assuming an older tool interface.
+Never edit or copy Xcode-exported skills.
 
-institute doctor            # machine-checked checkout facts
-institute inventory         # the name → org → path register
-institute sync              # clone and fast-forward; --dry-run plans only
-institute context install|check
+- Open the workspace through the connector and identify its workspace identifier.
+- Inspect and select the scheme, test plan and destination through Xcode.
+- Let Xcode own package resolution. Verify the resolved dependency identity, revision and local
+  checkout from Xcode's package graph and diagnostics before interpreting a result.
+- Build, run tests, read compiler diagnostics and full logs, and interact with devices through
+  the connector. Use a focused test selection during iteration and the affected test plan for
+  final local verification.
+- If a required workspace, package-resolution or clean-build operation is unavailable through
+  the connected tools, report the specific missing capability. Do not silently substitute an
+  Institute command, raw SwiftPM command, `xcodebuild`, or a repository-local wrapper.
 
-institute compose --consumer <c> --dependency <d>   # local-source composition
-institute verify  --consumer <c> --dependency <d>
-institute restore --consumer <c> --dependency <d>
-```
+Institute installation, `doctor`, inventory, composition and fleet builds are not prerequisites
+for local app work. Do not use `institute package`, `institute compose`, or `institute build`
+for local iteration. Do not start a fleet operation to answer an app-workspace question.
 
-Add `--fresh` when a chosen `build` or `test` result will be reported as newly originated
-evidence. Freshness makes that result admissible; it does not require every task or reviewer to
-originate another run. Forward SwiftPM arguments by repeating `--argument`, using the `=` form
-whenever the forwarded value begins with `-` or the parser claims it as an `institute` option:
+## Institute CI and administration
 
-```sh
-institute package test --argument=--filter --argument "Suite or test"
-```
+Use Institute machinery when the task explicitly concerns its CI, inventory, lint policy or
+administration. This does not change the local Xcode workflow above.
 
-Install `institute` once by bootstrap: in a fresh clone, from the institute-application checkout
-root, run `swift run institute install` (no `--package-path`; the repository is the package, and
-the executable is `institute`). It compiles the whole dependency graph and is silent for several
-minutes. It is not hung. After that bootstrap, plain `institute install` installs the pinned,
-digest-verified planner binary published by institute-application's `publish-planner` workflow
-and pinned in swift-institute/.github. `institute source` (and `institute ci -- source`) refuses
-to run any binary that is not the pinned one; run `institute install` to replace a stale one.
+Institute lint's entry point is `institute ci -- source --repository <owner/name> --revision
+<commit> --root <path> --bundle <bundle> --xcode-application <Xcode.app>`. A local lint run is
+guidance; CI's `Quality · source` job is the evidence. Running `swift-format` or `swiftlint`
+with a stray repository configuration is not Institute lint.
 
-## Local-build policy
-
-Local iteration runs through coordinated paths only — `institute package build|test`, never
-raw `swift build`/`swift test`/package-administration commands. Lint has one entry point,
-`institute ci -- source --repository <owner/name> --revision <commit> --root <path> --bundle
-<bundle> --xcode-application <Xcode.app>`. It measures a whole package at an exact commit
-against the pinned Institute.Source.Policy. There is no per-file mode, and running `swift-format` or
-`swiftlint` directly with a repository's stray configuration is never Institute lint. A local
-run is guidance only: CI's `Quality · source` job is the evidence. The machine-wide
-`swiftpm-build-coordinator` flock serializes every coordinated SwiftPM build; no session bypasses,
-kills, or replaces it.
-
-Interactive concurrency is capped, not uncapped, whenever another session shares the machine. Pass
-`--jobs <n>` on `institute package build|test` so a coordinated build leaves cores free for
-co-tenant sessions — start at half the machine's cores and adjust from there by observed
-contention, never uncapped while another session is on the machine.
-
-`institute build` — one `xcodebuild` invocation over the merged `institute.xcworkspace` graph — is
-the quiet-point integration check, not an iteration tool. It is the only local path that sees
-unpushed cross-package edits, so its blast radius includes concurrent source edits anywhere else
-in the checkout. Run it at quiet points only, never during active lane work.
-
-CI full-tier `workflow_dispatch` is the sole evidence of record for issue closure. A local green,
-capped or not, is iteration signal — never closure evidence. `gh run rerun` re-executes a pinned
-old snapshot and is void as closure evidence; dispatch a fresh run.
+CI full-tier `workflow_dispatch` is the evidence of record for issue closure. A local green is
+iteration evidence, not CI closure evidence. `gh run rerun` re-executes an old snapshot; dispatch
+a fresh run when fresh CI evidence is required. Dispatch and other public actions still require
+the user's authorization.
 
 ## Evidence
 
-A cached green is not newly originated evidence. Use `--fresh` for a new local release, audit,
-migration, benchmark, or correctness result. Exact-head evidence from another task remains
+A cached green is not newly originated evidence. For a new local correctness, migration or
+performance claim, verify that Xcode compiled the relevant changed sources and ran the intended
+tests. When a claim requires a clean build, use an available Xcode clean-build operation and
+record it; if unavailable, state that limitation rather than claiming freshness.
+Exact-head evidence from another task remains
 usable when its command, root, toolchain, revision, exit status, and provenance are reported as
 task-attributed rather than re-labelled as independently checked.
 
-Choose the smallest command that can change the decision. A fresh test normally compiles the
+Choose the smallest Xcode operation that can change the decision. A test normally compiles the
 tested target, so do not add a separate fresh build unless it answers a different material
 question. Once a decisive blocker fixes the next action, stop unrelated verification rather
 than filling out an evidence inventory.
 
-A zero from the wrong root is not evidence either, so record what the run was: the package root,
-the action, the toolchain, the forwarded arguments, the exit status, and whether it was fresh.
+A zero from the wrong root is not evidence either, so record what the run was: the workspace
+and package roots,
+full Git SHAs and relevant uncommitted changes, scheme, test plan or test selection, destination,
+SDK and toolchain, action, result, and whether a clean build was performed.
 That record is what lets someone else disagree with your conclusion rather than only with your
 confidence.
 
@@ -98,7 +77,8 @@ unfiltered enumeration, never a pattern: a pattern matching zero lines and a wro
 identical. A sweep's shape — which roots, which file kinds, which spelling — is itself a claim
 and needs its own control.
 
-Dependencies are branch-based, so a green over stale pins `doctor` flagged is not evidence.
+Dependencies are branch-based, so verify Xcode resolved the intended revisions and local
+checkouts; a green over stale or remote sources does not verify local edits.
 `canImport`-gated code does not re-evaluate on an incremental build: a suite rejoined by a
 dependency change stays silently excluded from a green incremental run, so a clean build is the
 gate of record whenever conditional compilation is in scope. Embedded compatibility is proved by
@@ -106,25 +86,21 @@ compiling with the declared SDK and compiler mode, never by searching for import
 
 Report failures with the first compiler diagnostic and the complete log. Do not infer a source
 defect from a setup, resolution, capacity, or toolchain failure; recheck a nightly-only failure
-on stable; and confirm `swift --version` resolves to the intended toolchain before interpreting
-a toolchain-sensitive result.
+on stable; and confirm the toolchain and SDK used by Xcode before interpreting
+a toolchain-sensitive result. The shell's `swift --version` alone does not identify Xcode's compiler.
 
 ## Generated and machine-local state
 
 `Package.resolved` is generated. Never commit, hand-edit, copy, stage, or delete it to force
 resolution — change `Package.swift` and resolve.
 
-Never delete `.build` directly; use `institute package clean`. A manual deletion costs a full
-rebuild of an artifact tree large enough that the mistake is measured in hours, not seconds.
+Never delete `.build` or DerivedData directly as a reset. Use Xcode's supported clean-build
+operation when needed; avoid discarding unrelated build caches.
 
-A composed manifest writes a machine-local absolute path deliberately, so that it fails loudly
-off-machine instead of silently resolving elsewhere. It is uncommittable: `restore` before
-pushing. `restore`'s check is structural only — the manifest evaluates, the dependency is
-declared by URL, no local path leaked. It resolves nothing and contacts no remote, so report its
-scope honestly rather than as a resolution check.
-
-The generated Xcode workspace and `Institute.json` carry relative references only; never emit a
-machine path into either. `Institute.json` is the sole name → org → path authority.
+Workspace references are relative and package requirements remain portable. Verify local
+package overrides in Xcode; an evaluated manifest alone does not prove which checkout Xcode
+resolved. `Institute.json` remains the inventory authority for Institute administration, but
+it is not a prerequisite for opening or resolving an app's workspace.
 
 `sync` never rewrites work: it fast-forwards only a clean checkout on `main` tracking
 `origin/main` with no local commits, and reports dirty worktrees and feature branches without

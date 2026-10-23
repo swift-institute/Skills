@@ -9,16 +9,12 @@ there.
 
 ## Shape
 
-An executable target in a nested `Benchmarks/` package with its own
-coordinator-owned clean state, built and run in release:
-
-```sh
-institute package build --argument=-c --argument=release
-institute package run   --argument=-c --argument=release
-```
-
-Never delete `.build` directly — `institute package clean` from the benchmark
-root.
+An executable target in a nested `Benchmarks/` package, included in the app's `.xcworkspace`
+and built and run through Xcode's connector with a Release configuration. Verify Xcode uses
+the intended local package sources, toolchain and destination. Keep benchmark build products
+separate from ordinary development through Xcode's configuration. Use a supported Xcode clean
+operation when required; never delete `.build` or DerivedData directly. If the connector cannot
+run the benchmark configuration, report that capability gap.
 
 ## Mechanics
 

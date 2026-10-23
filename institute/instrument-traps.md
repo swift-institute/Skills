@@ -21,9 +21,10 @@ Ask in this order. Only the third step is allowed to be a `grep`.
    `@_exported import FoundationNetworking`, and `import FoundationXML`. A
    pattern like `@[a-zA-Z]+` **cannot match `@_exported`** — the underscore is
    outside the class — so it returns a clean zero over a file full of imports.
-2. **Does the Institute coordinator own the fact?** `institute doctor` for repository state,
-   `institute package dump-package --package-path <p>` for one package's
-   evaluated manifest.
+2. **Does Xcode own the local fact?** Inspect the app workspace, resolved package graph,
+   selected scheme, destination and build diagnostics through Xcode's connector. For Git
+   checkout facts use Git. Institute inventory tools apply only to Institute administration;
+   they are not a local-development prerequisite.
 3. **Only then inspect source directly.** Bound the population, run a
    known-positive and a known-negative through the same path, state roots and
    exclusions, and label the result triage. Do not claim source inspection is
