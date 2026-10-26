@@ -29,17 +29,9 @@ unenforced is a statement about who decides, not a softening of the guidance.
 
 ## Loading
 
-`swift-institute/institute-application` owns installation for the shared checkout:
-
-```sh
-institute context install
-institute context check
-```
-
-The installer parses each canonical `SKILL.md` and projects whole skill
-directories into the common Claude/Codex entry point, so linked companions ride
-along with their hub. Skills use only `name` and `description` frontmatter — the
-installer rejects any other field. The description is the routing interface: it
+On Coen's machine, the dotfiles bootstrap links each skill directory into
+`~/.claude/skills`, so linked companions ride along with their hub. Skills use only
+`name` and `description` frontmatter. The description is the routing interface: it
 is loaded whether or not the skill is used, which is what makes it worth writing
 carefully and worth keeping the body out of.
 
@@ -64,7 +56,7 @@ Swift Institute maintainers also project private operational skills from
 | [swift-institute/swift-institute.org](https://github.com/swift-institute/swift-institute.org) | Website + DocC catalog |
 | [swift-institute/Research](https://github.com/swift-institute/Research) | Design rationale and trade-off analysis |
 | [swift-institute/Experiments](https://github.com/swift-institute/Experiments) | Standalone Swift packages backing technical claims |
-| [swift-institute/institute-application](https://github.com/swift-institute/institute-application) | Inventory, context installation, and the Swift-owned `institute` coordinator |
+| [swift-institute/institute-application](https://github.com/swift-institute/institute-application) | The `institute` command: the central CI planner and organization policy |
 
 ## License
 

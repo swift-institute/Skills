@@ -1,6 +1,6 @@
 ---
 name: institute
-description: Develop locally in an app-owned Xcode workspace through the selected Xcode's connector; interpret build and test evidence and investigate toolchain defects. Also covers Institute CI, inventory and lint policy when those systems are explicitly in scope. Local resolution, builds and tests use Xcode, not the Institute coordinator.
+description: Develop locally in an app-owned Xcode workspace through the selected Xcode's connector; interpret build and test evidence and investigate toolchain defects. Also covers Institute CI, repository policy and lint when those systems are explicitly in scope. Local resolution, builds and tests use Xcode.
 ---
 
 # Institute
@@ -27,13 +27,12 @@ Discover the available tool capabilities rather than assuming an older tool inte
   the connected tools, report the specific missing capability. Do not silently substitute an
   Institute command, raw SwiftPM command, `xcodebuild`, or a repository-local wrapper.
 
-Institute installation, `doctor`, inventory, composition and fleet builds are not prerequisites
-for local app work. Do not use `institute package`, `institute compose`, or `institute build`
-for local iteration. Do not start a fleet operation to answer an app-workspace question.
+The `institute` command is not a prerequisite for local app work: it operates CI and the
+GitHub organizations, and has no build, composition or checkout commands.
 
 ## Institute CI and administration
 
-Use Institute machinery when the task explicitly concerns its CI, inventory, lint policy or
+Use Institute machinery when the task explicitly concerns its CI, repository policy, lint or
 administration. This does not change the local Xcode workflow above.
 
 Institute lint's entry point is `institute ci -- source --repository <owner/name> --revision

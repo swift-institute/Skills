@@ -90,9 +90,9 @@ swift-standards itself holds the convergence packages, `swift-{concept}-standard
 spec revisions so consumers importing the stable module never change. Convergence packages are
 policy-free — opinion lives in `swift-compositions`.
 
-- A package's location comes from its entry in the Institute inventory
-  (`Institute.json`). Never infer it from the package name, and never determine
-  it by scanning the tree.
+- A package's organization is the GitHub organization that holds it, and that
+  organization's layer comes from `swift-institute/.github`'s `fleet.json`. Never infer
+  either from the package name.
 - One specification can carry two authorities' designations — IEEE 1003.1 *is* ISO/IEC 9945.
   Packages under different authority orgs are then not duplicates; they partition the spec by
   surface. Check that before flagging duplication.
