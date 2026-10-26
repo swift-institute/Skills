@@ -5,7 +5,7 @@ Companion to the `swift` skill. Read this when touching raw pointers, `@safe` /
 
 ## Containment
 
-Enable `.strictMemorySafety()` on every target. `unsafe` is an expression
+`unsafe` is an expression
 keyword like `try`, not a block: mark each unsafe operation individually, wrap the
 whole expression from the left including the assignment destination, and remember
 it does not propagate into closures.

@@ -147,10 +147,3 @@ than pedantry.
 - POSIX `si_code` subgroups (`FPE_*`, `ILL_*`, `SEGV_*`, `BUS_*`, `CLD_*`, `SI_*`)
   import as `Int` on glibc and `Int32` on Darwin. Wrap case labels — `case
   Int32(FPE_INTDIV):` — or Linux fails to compile.
-- A pure Swift struct is not `@objc`-representable and cannot appear as
-  `UnsafeMutablePointer<T>?` in a `@convention(c)` signature, however
-  layout-compatible it is. `@convention(c, cType:)` does not help. Keep the
-  callback on `OpaquePointer?` and bind the typed wrapper on the callback's first
-  line.
-- Platform `System` targets extend `System` from `System_Primitives` directly. Do
-  not create `Darwin.System` / `Linux.System` / `Windows.System` namespace enums.

@@ -27,16 +27,6 @@ coherent.
 
 ## Finding the seam
 
-Cut where meaning already separates:
-
-- what varies independently — two parts that change on different schedules are two units;
-- what has its own reason to change — one unit, one source of change;
-- what a different consumer would want alone — if any plausible consumer wants half, that half
-  is a unit;
-- what carries its own invariants — an invariant that only some of the code must uphold marks
-  its own boundary;
-- what could be understood, named, and tested without the rest.
-
 Place each unit at the narrowest owner that can host it without reversing the dependency graph.
 Prefer an owner extension or a trait-gated conformance for integration; add a new target or
 package only for a real import, dependency, or release boundary.
@@ -44,10 +34,6 @@ package only for a real import, dependency, or release boundary.
 ## Signals a unit is doing too much
 
 - Its name is a category, a mechanism, or ends in a grab-bag noun.
-- Its description needs "and", or a list of unrelated responsibilities.
-- Consumers import it for one part and carry the rest.
-- Parts of it are tested with disjoint fixtures, or one part is untestable without the other.
-- Changing one concern in it forces recompilation or re-review of unrelated concerns.
 - It exposes an escape hatch so callers can reach past its own abstraction.
 
 ## Judging a change

@@ -7,11 +7,7 @@ boundary, or converting between typed values.
 
 They are not refinement-related. `UInt8` is the stdlib arithmetic carrier; `Byte`
 is the institute byte-domain twin, carrying equality, hash, comparison, and
-bitwise operations — but no arithmetic. `UInt8` must not conform to
-`Byte.Protocol`, and `Byte` must not conform to any stdlib arithmetic protocol.
-`Binary.Serializable` / `Binary.Parseable` witnesses use `Buffer.Element ==
-Byte`; stdlib-interop forwarders carrying `@_disfavoredOverload` are the only
-exemption.
+bitwise operations — but no arithmetic.
 
 For a conformer with `rawValue: UInt8` storage, classify by domain:
 
@@ -44,17 +40,13 @@ unannotated `Array(s)` call site cannot choose between the `[Byte]` and `[UInt8]
 forms, and Swift will sometimes prefer the `UInt8` one — silently unwinding the
 byte typing at exactly the sites you were trying to type.
 
-Forwarders declared as extensions **on stdlib types** live in the package's
-`* Standard Library Integration` target; forwarders on institute types stay put.
-
 Promote at the boundary, not at the destination: a byte-domain body declares its
 accumulator as `Byte` from construction, and a parameter's type is lifted rather
 than bridged inside the body. A forwarder file existing only to bridge to a
 `[Byte]` primary in a sibling file is migration debt. The one sanctioned bridge
 is at an unpacking iterator boundary where bytes enter integer accumulation.
 
-`extension UInt8` must not declare `.ascii`-namespace members — `ASCII.Code` is
-the canonical typed ASCII substrate. In ASCII-strict contexts (0x00–0x7F) prefer
+In ASCII-strict contexts (0x00–0x7F) prefer
 `ASCII.Code`; UTF-8 or raw binary that may exceed 0x7F is `Byte`. In a cohort
 migration, classify each site by domain first — never blanket-assign to `Byte`.
 

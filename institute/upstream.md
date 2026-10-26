@@ -1,8 +1,6 @@
 # Upstream Swift
 
-Companion to the `institute` skill. Read this before opening a pull request
-against `swiftlang/swift`, drafting a Swift Evolution pitch, or preparing a
-public launch for Forums review.
+Companion to the `institute` skill.
 
 ## Pull requests to swiftlang/swift
 
@@ -56,8 +54,7 @@ CODEOWNERS auto-assigns reviewers on non-draft PRs. CI runs from a PR comment
 benchmark`); contributors without commit access cannot trigger it and must ask a
 reviewer to.
 
-Address feedback with follow-up commits — never force-push, which discards the
-review context reviewers are reading against. If asked to split a PR, close it
+If asked to split a PR, close it
 with an explanatory comment and open focused replacements rather than rewriting
 history.
 

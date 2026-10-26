@@ -65,8 +65,7 @@ A single-word removal op that can fail on empty returns `Optional` — `pop()`, 
 structurally unavailable, so those keep crashing preconditions.
 
 Drop a redundant prefix the namespace already supplies (`Manifest.Dependency.name`).
-Phantom-type tags take the bare concept name — no `*Tag` suffix, no inner `.Tag`; the
-surrounding namespace enum *is* the phantom. A phantom generic parameter — never stored, never
+A phantom generic parameter — never stored, never
 flowing through an operation — is bound `~Copyable & ~Escapable`. Widening is non-breaking;
 relaxing a *stored* parameter is breaking, and the discriminator is whether any value of that
 type is stored or passed through an operation. Relaxing a phantom forces companion edits:
@@ -89,16 +88,13 @@ can't nest under X because it's a typealias" is false — write it and let the c
 
 ## Files and type bodies
 
-One type declaration per file; extensions do not count. The file name is the type's full nested
+The file name is the type's full nested
 path with dots: `Array.Dynamic.Iterator.swift`. Extension-only files carry a `+` conformance
 suffix (`Array.Dynamic+Sequence.swift`) or a where-clause discriminator matching the extension.
 Tests, experiments, and examples are out of scope.
 
-Type bodies hold only stored properties, the canonical initializer, and `deinit`; everything
-else lives in extensions. `~Copyable` generic types may keep nested storage types in the body to
+`~Copyable` generic types may keep nested storage types in the type body to
 avoid constraint poisoning, and conditional conformances still go in the same file.
-Result-builder enums, `Protocol`-sentinel hosts, and SwiftSyntax visitor subclasses satisfy the
-rule as written.
 
 Moving witnesses to extensions while leaving conformances on the struct declaration creates an
 associatedtype inference cycle (`unsupported recursion for reference to type alias`) — put the
@@ -142,8 +138,7 @@ noun.
 Every throwing function uses typed throws. `throws`, `throws(any Error)`, and `Self.Error` in a
 `throws(...)` clause outside a protocol are forbidden. When a stored closure can throw
 user-domain errors, make the containing type generic over the error type. Error types nest as
-`Domain.Error` and conform to the explicitly qualified `Swift.Error`. Cases describe the failure
-condition (`invalidHeader(expected:found:)`), never the recovery action.
+`Domain.Error` and conform to the explicitly qualified `Swift.Error`.
 
 Calling a stdlib `rethrows` function from a `throws(E)` context requires an explicit `throws(E)`
 annotation on the closure — without it Swift infers `any Error`, and the diagnostic you get is
@@ -200,9 +195,6 @@ intermediate bindings; extract named functions, not locals. Keep the execution m
 a given structural level — never mix immediate and deferred. Iteration climbs the ladder: bulk
 operation, then iteration infrastructure, then a typed `while`, never a raw counter loop. Push
 `Int` to the edge.
-
-Reach for ecosystem dependencies before ad-hoc implementations, and ask whether the component
-needs to exist at all — the `composition` skill is the fuller version of that question.
 
 When converting a protocol to a witness struct with stored closures, call sites lose argument
 labels (`set(attribute:)` degrades to `setAttribute`) — add `@inlinable` labeled convenience

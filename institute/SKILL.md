@@ -14,9 +14,7 @@ must resolve and build the intended local sources, including unpushed cross-pack
 Keep published package requirements portable; do not rewrite manifests to machine-local
 absolute paths for local iteration.
 
-Use the selected Xcode's current connector (`xcode-integration` MCP tools) and Apple-exported
-skills. Discover the available tool capabilities rather than assuming an older tool interface.
-Never edit or copy Xcode-exported skills.
+Discover the available tool capabilities rather than assuming an older tool interface.
 
 - Open the workspace through the connector and identify its workspace identifier.
 - Inspect and select the scheme, test plan and destination through Xcode.
@@ -45,8 +43,7 @@ with a stray repository configuration is not Institute lint.
 
 CI full-tier `workflow_dispatch` is the evidence of record for issue closure. A local green is
 iteration evidence, not CI closure evidence. `gh run rerun` re-executes an old snapshot; dispatch
-a fresh run when fresh CI evidence is required. Dispatch and other public actions still require
-the user's authorization.
+a fresh run when fresh CI evidence is required.
 
 ## Evidence
 
@@ -77,8 +74,6 @@ unfiltered enumeration, never a pattern: a pattern matching zero lines and a wro
 identical. A sweep's shape — which roots, which file kinds, which spelling — is itself a claim
 and needs its own control.
 
-Dependencies are branch-based, so verify Xcode resolved the intended revisions and local
-checkouts; a green over stale or remote sources does not verify local edits.
 `canImport`-gated code does not re-evaluate on an incremental build: a suite rejoined by a
 dependency change stays silently excluded from a green incremental run, so a clean build is the
 gate of record whenever conditional compilation is in scope. Embedded compatibility is proved by
@@ -96,11 +91,6 @@ resolution — change `Package.swift` and resolve.
 
 Never delete `.build` or DerivedData directly as a reset. Use Xcode's supported clean-build
 operation when needed; avoid discarding unrelated build caches.
-
-Workspace references are relative and package requirements remain portable. Verify local
-package overrides in Xcode; an evaluated manifest alone does not prove which checkout Xcode
-resolved. `Institute.json` remains the inventory authority for Institute administration, but
-it is not a prerequisite for opening or resolving an app's workspace.
 
 `sync` never rewrites work: it fast-forwards only a clean checkout on `main` tracking
 `origin/main` with no local commits, and reports dirty worktrees and feature branches without
@@ -179,7 +169,6 @@ requester judge fit.
 
 ## Elsewhere
 
-- Probes that return a confident zero — [instrument-traps.md](instrument-traps.md).
 - Compiler, optimizer, and build-system defects: reduction, production-shape verification,
   SIL-level diagnosis — [toolchain-defects.md](toolchain-defects.md).
 - Pull requests to swiftlang/swift, Evolution pitches, pre-launch Forums review —

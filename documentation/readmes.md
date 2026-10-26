@@ -37,24 +37,11 @@ document its default instead.
 
 ## Sub-package structure scales with maturity
 
-- **Minimum, always** — title, ~~development-status badge~~ (struck in part,
-  superseded by https://github.com/swift-institute/.github/issues/126,
-  2026-07-30), one-liner, `## Installation`, `## License`.
+- **Minimum, always** — title, one-liner, `## Installation`, `## License`.
 - **Standard, once there is a public API** — plus Key Features, Quick Start,
-  Architecture, ~~Platform Support~~ (struck, superseded by
-  https://github.com/swift-institute/.github/issues/126, 2026-07-30).
+  Architecture.
 - **Complete, at v1.0 or with external users** — plus Error Handling, Related
   Packages.
-
-~~The development-status badge is the first badge line, directly after the H1,
-and uses the standard status vocabulary (`status-active--development-blue`, not
-an improvised `status-beta-yellow`).~~ Superseded in full by
-https://github.com/swift-institute/.github/issues/126 (2026-07-30): one
-unfalsifiable claim copied fleet-wide. ~~Platform Support cells use only `Full
-support`, `Supported`, `Planned`, `Possible`, `Not supported`.~~ Superseded in
-full together with the Platform Support requirement above by
-https://github.com/swift-institute/.github/issues/126 (2026-07-30): the
-platform matrix is derived from the manifest, not authored prose.
 
 Placeholder READMEs carry a title, a one-line scope, and a status from exactly
 `Pre-implementation`, `Namespace-reservation`, `Unnecessary`, `Archived`. The
@@ -78,32 +65,6 @@ into the native tab with one filter link per domain,
 
 ## Where the check and the text disagree
 
-The shipped README validator is not a faithful implementation of the prose above,
-and the gaps run in both directions.
-
-The most consequential one: a process/workflow repo that also ships an executable
-is permitted by the text to document its command surface, but the check flags a
-literal `## Installation` heading, any badge line, and a `## Quick Start` heading
-unconditionally for that family, and flags a process README past a fixed line
-count. Expect the finding. Do not delete correct content to silence it, and do
-not read a clean validator run as proof that the prose rules hold.
-
 The general form is worth carrying: where a check's condition is narrower than
 the rule it is named for, a finding asserts only the narrow condition. Read what
 fired, not what it was named after.
-
-A second, separate layer sits beside the Python validator: Swift
-repository-policy's advisory predicates, which check documentation surfaces the
-validator does not touch — `REPO-DOCS-001` (SPI-published placeholder DocC
-catalogues, https://github.com/swift-institute/.github/issues/132, landed at
-swift-institute/.github@dee5c6b6f1a2d863d64ce80c50b55ae401a89a43) and
-`REPO-README-001`/`REPO-README-002` (status badge / Platform Support heading
-advisories, https://github.com/swift-institute/.github/issues/133, landed at
-swift-institute/.github@3a95953dbf625d8b81ec680df67d179ab6fb2d1c). All three
-are report-only: they populate a `SurfaceReport`'s `advisories` list, which its
-`passed` property never reads, so a finding never fails the check — it only
-flags a documentation surface a ratified decision has not caught up with yet.
-Their authoritative implementation, not this prose, is what to trust when the
-two disagree:
-https://github.com/swift-institute/.github/blob/7810501c462cf2d4bcb850910317adff3d941240/Tools/RepositoryPolicy/Sources/Repository%20Policy/Repository.Policy.Surface.swift
-(`Repository.Policy.Surface.swift` in swift-institute/.github).

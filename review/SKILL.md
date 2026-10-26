@@ -15,8 +15,7 @@ current head, current default branch, merge policy, prior reviews, and relevant
 gates. Bind every finding and mutation to the exact reviewed head.
 
 Read the complete changed surface and its commits. Load only the domain skills
-the diff actually triggers. Use `github-access` for authenticated mutations
-and `institute` only when originating local build or test evidence.
+the diff actually triggers.
 
 ## Judge with proportional evidence
 
@@ -76,9 +75,6 @@ Report:
 - public review or merge URL;
 - actionable blocker or clean-verdict rationale;
 - exact next owner and mutations made or deliberately withheld.
-
-Scan every public payload for machine paths, private internals, credentials,
-control-plane data, task/session identifiers, and prohibited attribution.
 
 Read [references/verdict-rubric.md](references/verdict-rubric.md) when the
 verdict is high-consequence, the evidence conflicts, or the review skill itself

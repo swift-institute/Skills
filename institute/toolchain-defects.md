@@ -1,7 +1,6 @@
 # Investigating a toolchain failure
 
-Companion to the `institute` skill. Read this when a failure may be the compiler,
-the optimizer, or the build system rather than product logic.
+Companion to the `institute` skill.
 
 ## Produce a decision, not a pile of diagnostics
 
@@ -18,8 +17,7 @@ covered and what was not.
 
 ## Eliminate the cheap explanations first
 
-Record the Xcode workspace, scheme, destination, SDK, compiler version and build action.
-For a standalone compiler reduction, also record the exact command and `swift --version`.
+For a standalone compiler reduction, record the exact command and `swift --version`.
 Check the dependency URL and
 requirement, the selected toolchain and any unintended `TOOLCHAINS` override,
 resolver diagnostics, and a fresh operation. Then retest on the latest
@@ -45,8 +43,7 @@ the relevant file and module boundaries. If the trigger cannot itself compile,
 drive `swiftc` out of process from a test and assert on the process result.
 
 Every reduction step needs a verified clean build through Xcode's connector,
-or a standalone `swiftc` reproducer with no SwiftPM cache. Use Xcode's supported clean
-operation; if unavailable, state the limitation instead of claiming a clean result.
+or a standalone `swiftc` reproducer with no SwiftPM cache.
 Stale caches have produced false reductions here — a "crashing" reduction may be
 running cached SIL from a previous variant, which looks exactly like a successful
 reduction.
@@ -128,9 +125,6 @@ given SDK's compiled interface, driven by SDK-build availability annotations
 rather than source visibility. Both surface as the same "no such type in module"
 failure, which is why reading the source is not enough.
 
-Never suppress optimization to hide a miscompile. A proposed fix must change the
+A proposed fix must change the
 diagnosed behavior in the production shape; an explicit conformance or a no-op
 rewrite is not a fix merely because it looks related.
-
-Searching upstream issues is evidence gathering. It does not authorize filing or
-modifying an upstream issue.

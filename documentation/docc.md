@@ -8,8 +8,7 @@ or tutorial, building a documentation archive, or checking a deployed docs site.
 A `.docc` article must not restate facts derivable from the package manifest —
 target lists, dependency versions, platform floors, product enumeration. The
 manifest and the evaluated-manifest command are the projection; an article
-carries judgment, rationale, and usage the manifest cannot express. (Added per
-https://github.com/swift-institute/.github/issues/126, 2026-07-30.)
+carries judgment, rationale, and usage the manifest cannot express.
 
 ## Catalogue naming
 
@@ -57,9 +56,6 @@ xcrun docc convert "Sources/<Umbrella>/<Umbrella>.docc" \
     --output-path "${DOCS_WORK}/archives/<Umbrella>.doccarchive"
 ```
 
-Symbol-graph emission, umbrella isolation, patching, and conversion are one
-Swift-owned operation; CI only schedules it.
-
 ## Tutorials
 
 A catalogue containing any `@Tutorial` file must also contain a `@Tutorials`
@@ -76,9 +72,6 @@ long-lived release needs a verification mechanism of its own — a test target
 mirroring the final step, or a CI step running `swiftc` over `Resources/*.swift`.
 Either works. "We'll remember" is not a mechanism, and the failure mode is a
 tutorial that has silently stopped compiling against the API it teaches.
-
-Start with one tutorial, scoped to a single sitting, and add more only once the
-first proves insufficient.
 
 Keep page design (`@PageColor`, `@PageImage`, landing layout) consistent across
 every catalogue in a package. A variant catalogue may omit `@PageColor` to

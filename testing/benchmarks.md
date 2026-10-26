@@ -3,10 +3,6 @@
 Companion to the `testing` skill. Read this when writing, running, or citing a
 performance measurement.
 
-Benchmarks may be deferred for a surface that makes no performance claims. An
-empty benchmark package is worse than none — it asserts coverage that is not
-there.
-
 ## Shape
 
 An executable target in a nested `Benchmarks/` package, included in the app's `.xcworkspace`

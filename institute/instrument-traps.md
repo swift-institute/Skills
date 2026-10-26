@@ -1,7 +1,6 @@
 # Instrument traps
 
-Companion to the `institute` skill. Read this before any large sweep, census, or
-claim that something is absent.
+Companion to the `institute` skill.
 
 Every trap here fails into a clean, confident negative — a zero that looks
 exactly like success. None is a logic error.
@@ -23,8 +22,7 @@ Ask in this order. Only the third step is allowed to be a `grep`.
    outside the class — so it returns a clean zero over a file full of imports.
 2. **Does Xcode own the local fact?** Inspect the app workspace, resolved package graph,
    selected scheme, destination and build diagnostics through Xcode's connector. For Git
-   checkout facts use Git. Institute inventory tools apply only to Institute administration;
-   they are not a local-development prerequisite.
+   checkout facts use Git.
 3. **Only then inspect source directly.** Bound the population, run a
    known-positive and a known-negative through the same path, state roots and
    exclusions, and label the result triage. Do not claim source inspection is
@@ -76,7 +74,6 @@ So control it, at both ends and at the degenerate case:
 | **`/bin` and `/usr/bin` are strictly disjoint** — a few dozen entries against several hundred, intersection empty. `/bin` only: `cat ps ls cp mv rm date echo`. `/usr/bin` only: `sed grep awk find wc head sort cut xargs stat`. Either directory preference is wrong for most of the other list, and a wrong guess is exit 127 leaving an empty artifact | An absolute path to a coreutil is a per-tool fact, not a directory preference — there is no rule to remember. Know the tool's path, or use the bare name and let PATH resolve it |
 | **A failed generator still leaves a valid, empty artifact.** `/bin/sed … > out.sh` → exit 127, `out.sh` created, size 0 — the shell creates the redirect target *before* running the command. `bash out.sh` then exits 0, so a test shelling out to the generated script reports success while testing nothing. `set -o pipefail` does not help; the redirect already happened | Assert the artifact is non-empty and differs from baseline before drawing any conclusion, or check the generator's own exit status |
 | **A linter can fall back to a zero-rules configuration** when its manifest path is unset — the engine runs, exits 0, and reports a clean-looking zero having loaded no rules at all | Accept a zero only when the run demonstrably loaded rules: assert `N active rules` with N>0 and files>0, else record UNMEASURED, not clean. An engine's exit status attests that it ran, never that it was configured |
-| `timeout(1)` does not exist on macOS — exits 127 without running | None; restructure the probe |
 | `script(1)` exits 1 and yields zero bytes whenever its own stdout is a file — indistinguishable from "the program printed nothing", and it fools you even when the program did print | A controlled pty harness, never `script -q /dev/null > file` |
 | `swift-format`'s `BeginDocumentationCommentWithOneLineSummary` is platform-dependent — the same version reports findings on Linux and nothing on macOS | Verify that gate in the Linux container, never locally |
 | `${PIPESTATUS[0]}` is empty in zsh | `$pipestatus[1]`, or a bare `$?` |
@@ -149,8 +146,7 @@ other look plausible.
   the environment that would provide the capability before declaring it absent.
 - **A directory holding several checkouts is not itself a git root.** Sibling
   repositories are separate roots, so probing the parent gives a false "commit
-  not found". Derive a package's location from the Institute inventory, never
-  from the tree.
+  not found".
 - **Verify a push against the real remote** (`git ls-remote`), never a cached
   tracking ref. Local HEAD equal to `ls-remote` after your own push does not
   prove your push landed — verify content-level against the pushed tree.

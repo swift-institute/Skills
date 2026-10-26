@@ -22,10 +22,6 @@ one side of a call, layer, or closure boundary and reconstructing on the other
 voids the close-on-drop guarantee; any `_raw` / `init(_rawValue:)` outside the
 wrapper's own file is a review finding.
 
-`Swift.Error` requires `Copyable`, so move-only values never go in error payloads
-— return a non-throwing outcome enum instead. For recursive value-type
-indirection use `Reference<T>` / `Owned<T>`, never an ad-hoc `_Box` class.
-
 ## Suppression does not propagate
 
 Every extension, protocol refinement, and conformance re-imposes `Copyable` on

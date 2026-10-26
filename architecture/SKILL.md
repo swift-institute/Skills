@@ -69,9 +69,7 @@ Macro targets are allowed at L1, L2 and L4, and not at L3: a Standards package c
 a main target is what must stay Embedded-deployable at L1 and L2. No machine check enforces
 the L3 rule yet.
 
-The single exception is a target whose name ends in `Foundation Integration`. It may import
-Foundation, it must be a leaf product, and no core target may depend on it directly or
-transitively. The exception covers the target class, never a per-file waiver — a core file that
+The single exception is a target whose name ends in `Foundation Integration`. The exception covers the target class, never a per-file waiver — a core file that
 wants Foundation moves that surface into the integration target.
 
 L1 string and scalar escape hatches are withheld on purpose. Bridging an L1 typed value to

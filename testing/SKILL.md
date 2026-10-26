@@ -5,10 +5,9 @@ description: Design, structure, and place Swift Institute tests and benchmarks �
 
 # Swift testing
 
-Name the invariant, the input space, the observable result, and the failure signal before
-choosing a fixture. Test through the narrowest interface that expresses the behavior, on the
+Test through the narrowest interface that expresses the behavior, on the
 boundary the behavior actually depends on — a same-target test cannot prove a cross-module
-claim, however green it is. Prefer laws and reference models over repeated examples.
+claim, however green it is.
 
 ## Suite structure
 
@@ -90,10 +89,6 @@ list above is what has been hit, not what can be hit.
   at least one real consumer site compiled through the app workspace using Xcode's connector.
 - Prefer the generic macro-test support with a Swift Testing `failureHandler` routing to
   `Issue.record`; do not pull XCTest or Foundation in for fixture convenience.
-- A mock produced by `unsafeBitCast` over a pointer-like `BitwiseCopyable` type must offset its
-  tag away from zero. The all-zeros pattern is what `Optional<T>` reads as `.none`, so a
-  zero-tagged mock is indistinguishable from "no value".
-- Do not add copyability to a production API to satisfy a test macro.
 
 **Main-actor isolation checks.** `pthread_main_np()` is Darwin-only, and on Linux the MainActor
 executor does not necessarily run on the thread glibc considers the process's initial thread —
@@ -109,9 +104,7 @@ Test directories are flat siblings under `Tests/`. Test support is a `.library` 
 a `.testTarget` — a test target cannot be consumed across packages. Product and target names
 use spaces (`"Memory Primitives Test Support"`); imports use underscores (`import
 Memory_Primitives_Test_Support`); the path is `Tests/Support`. Test support may depend on
-production products; production products never depend on test support. Search for an existing
-support product before adding helpers — reusable helpers live with the lowest layer that can
-own them, package-specific fixtures stay local.
+production products; production products never depend on test support.
 
 A package needing **test-only third-party dependencies** — macro-testing, snapshot support, a
 driver for an integration test — puts them in a nested test manifest rather than the main one,
