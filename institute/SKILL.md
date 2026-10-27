@@ -27,6 +27,21 @@ Discover the available tool capabilities rather than assuming an older tool inte
   the connected tools, report the specific missing capability. Do not silently substitute an
   Institute command, raw SwiftPM command, `xcodebuild`, or a repository-local wrapper.
 
+### Using the connector
+
+- Keep the app workspace open across tasks; closing it discards Xcode's build state, so the
+  next build re-plans from scratch. Do not call `XcodeCloseWorkspace` between tasks.
+- Build packages through the app workspace. When a package must be opened on its own, pass its
+  directory, never `Package.swift`, which Xcode opens as a lone source file.
+- Workspace and window identifiers do not survive a close. After any close or error naming the
+  identifier, list workspaces again rather than reusing the old one.
+- A run with failing tests returns as a successful call; read `counts.failed`. An incomplete
+  result bundle is not a test failure until the bundle has been read.
+- A timed-out call leaves Xcode building. Wait for that build to finish before starting another;
+  a retry stacks a second build on the first. Run one build or test at a time.
+- Follow Apple's `xcode-integration:device-interaction` skill for device sessions: one
+  workspace-bound session per workspace, handed exclusively to one agent, ended when done.
+
 The `institute` command is not a prerequisite for local app work: it operates CI and the
 GitHub organizations, and has no build, composition or checkout commands.
 
