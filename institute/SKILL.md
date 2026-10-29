@@ -16,7 +16,11 @@ absolute paths for local iteration.
 
 Discover the available tool capabilities rather than assuming an older tool interface.
 
-- Open the workspace through the connector and identify its workspace identifier.
+- Hold one instance of the workspace. List workspaces first; if the workspace is open in an
+  Xcode window, target that window's identifier. Call `XcodeOpenWorkspace` only when Xcode has
+  no instance of it open: opening it again beside the window starts a second headless instance
+  with its own build service, and the two re-plan the package graph against each other until
+  Xcode hangs.
 - Inspect and select the scheme, test plan and destination through Xcode.
 - Let Xcode own package resolution. Verify the resolved dependency identity, revision and local
   checkout from Xcode's package graph and diagnostics before interpreting a result.
@@ -34,7 +38,9 @@ Discover the available tool capabilities rather than assuming an older tool inte
 - Build packages through the app workspace. When a package must be opened on its own, pass its
   directory, never `Package.swift`, which Xcode opens as a lone source file.
 - Workspace and window identifiers do not survive a close. After any close or error naming the
-  identifier, list workspaces again rather than reusing the old one.
+  identifier, list workspaces again rather than reusing the old one. If the list shows the same
+  path twice, one instance is extra: quit Xcode, reopen the workspace once, and continue on the
+  identifier the list then shows.
 - A run with failing tests returns as a successful call; read `counts.failed`. An incomplete
   result bundle is not a test failure until the bundle has been read.
 - A timed-out call leaves Xcode building. Wait for that build to finish before starting another;
