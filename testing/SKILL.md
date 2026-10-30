@@ -144,19 +144,22 @@ missing — use `.never` in CI, where recording a snapshot means asserting nothi
 
 ## Verification
 
-Run tests through the selected Xcode's connector in the app's `.xcworkspace` (for Laurie,
-`Laurie.xcworkspace`). Inspect the active scheme, test plan and destination first, then keep
+Standalone package tests run with SwiftPM in the package directory (`swift test`, narrowed with
+`--filter`); no Xcode. App tests, and package changes that must be proven through an app, run
+through the selected Xcode's connector in the app's `.xcworkspace` (for Laurie,
+`Laurie.xcworkspace`). There, inspect the active scheme, test plan and destination first, then keep
 them fixed while iterating: a different scheme, action or set of test targets makes Xcode plan
 the whole graph again (the `institute` skill's planning cost). Narrow by test inside the plan's
 test targets, and run the affected test plan for final verification.
-Use the workspace's local package graph and Xcode resolution; do not use Institute package
-commands or raw SwiftPM as a substitute.
+In that workspace, use its local package graph and Xcode resolution; do not use Institute
+package commands or raw SwiftPM as a substitute.
 
 A filtered run proves only that filter. For what a run has to satisfy before it counts as
 evidence — including why a gate covering `canImport`-conditional suites needs a
 verified clean build — see the `institute` skill.
 
-For local Thread Sanitizer checks, use a dedicated Xcode scheme or test-plan configuration
+For local Thread Sanitizer checks on a standalone package, use `swift test --sanitize=thread`.
+Through an app workspace, use a dedicated Xcode scheme or test-plan configuration
 with Thread Sanitizer enabled. Keep sanitized and unsanitized build products separate through
 Xcode's build configuration. When lifetime-dependent `~Copyable & ~Escapable` projections
 require `-Xllvm -sil-disable-pass=lifetime-dependence-diagnostics`, scope that compiler setting

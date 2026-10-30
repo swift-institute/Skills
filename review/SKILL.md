@@ -25,7 +25,8 @@ every mechanical check.
 Preserve existing exact-head evidence as **task-attributed** and inspect its
 scope, toolchain, command, exit status, and provenance. Reproduce only an
 uncertainty material to the verdict. If originating local evidence, follow the
-`institute` skill's Xcode workspace workflow. Verify the actual compilation and test scope;
+`institute` skill's local workflow (SwiftPM for a standalone package, the app's Xcode
+workspace for app work). Verify the actual compilation and test scope;
 a reviewer need not originate another result when existing evidence settles the question.
 
 Treat CI as decision evidence, not a completeness exercise. Wait for a terminal

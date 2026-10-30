@@ -1,11 +1,21 @@
 ---
 name: institute
-description: Develop locally in an app-owned Xcode workspace through the selected Xcode's connector; interpret build and test evidence and investigate toolchain defects. Also covers Institute CI, repository policy and lint when those systems are explicitly in scope. Local resolution, builds and tests use Xcode.
+description: Develop locally — standalone packages with SwiftPM, apps (and package edits built through an app) in the app-owned Xcode workspace through the selected Xcode's connector; interpret build and test evidence and investigate toolchain defects. Also covers Institute CI, repository policy and lint when those systems are explicitly in scope.
 ---
 
 # Institute
 
 ## Local development
+
+Pick the build path by what the change is:
+
+- **Standalone package work** (a package's own sources and tests, no app in scope): use SwiftPM
+  in the package directory — `swift build`, `swift test`, `swift test --filter`. Do not open
+  Xcode for it.
+- **App work** (Laurie or another app, its hosts, or a package change that must be proven
+  through the app): use the app's Xcode workspace, as below.
+
+### App workspace
 
 The app's `.xcworkspace` owns local development and dependency resolution. For Laurie, use
 `Laurie.xcworkspace` (formerly `Harvest.xcworkspace`). Include the app, its hosts, and the local
@@ -27,9 +37,10 @@ Discover the available tool capabilities rather than assuming an older tool inte
 - Build, run tests, read compiler diagnostics and full logs, and interact with devices through
   the connector. Iterate on one fixed build request (see below) and run the affected test plan
   for final local verification.
-- If a required workspace, package-resolution or clean-build operation is unavailable through
-  the connected tools, report the specific missing capability. Do not silently substitute an
-  Institute command, raw SwiftPM command, `xcodebuild`, or a repository-local wrapper.
+- For app work, if a required workspace, package-resolution or clean-build operation is
+  unavailable through the connected tools, report the specific missing capability. Do not
+  silently substitute an Institute command, raw SwiftPM command, `xcodebuild`, or a
+  repository-local wrapper.
 
 ### Using the connector
 
