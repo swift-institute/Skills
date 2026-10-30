@@ -145,8 +145,10 @@ missing — use `.never` in CI, where recording a snapshot means asserting nothi
 ## Verification
 
 Run tests through the selected Xcode's connector in the app's `.xcworkspace` (for Laurie,
-`Laurie.xcworkspace`). Inspect the active scheme, test plan and destination first. Select tests
-through the connector while iterating, then run the affected test plan for final verification.
+`Laurie.xcworkspace`). Inspect the active scheme, test plan and destination first, then keep
+them fixed while iterating: a different scheme, action or set of test targets makes Xcode plan
+the whole graph again (the `institute` skill's planning cost). Narrow by test inside the plan's
+test targets, and run the affected test plan for final verification.
 Use the workspace's local package graph and Xcode resolution; do not use Institute package
 commands or raw SwiftPM as a substitute.
 

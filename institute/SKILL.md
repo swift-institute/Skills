@@ -25,8 +25,8 @@ Discover the available tool capabilities rather than assuming an older tool inte
 - Let Xcode own package resolution. Verify the resolved dependency identity, revision and local
   checkout from Xcode's package graph and diagnostics before interpreting a result.
 - Build, run tests, read compiler diagnostics and full logs, and interact with devices through
-  the connector. Use a focused test selection during iteration and the affected test plan for
-  final local verification.
+  the connector. Iterate on one fixed build request (see below) and run the affected test plan
+  for final local verification.
 - If a required workspace, package-resolution or clean-build operation is unavailable through
   the connected tools, report the specific missing capability. Do not silently substitute an
   Institute command, raw SwiftPM command, `xcodebuild`, or a repository-local wrapper.
@@ -47,6 +47,30 @@ Discover the available tool capabilities rather than assuming an older tool inte
   a retry stacks a second build on the first. Run one build or test at a time.
 - Follow Apple's `xcode-integration:device-interaction` skill for device sessions: one
   workspace-bound session per workspace, handed exclusively to one agent, ended when done.
+
+### Planning cost
+
+In a graph of hundreds of package targets, most of an incremental build passes before the first
+compile task: package graph loading, target dependency graph, build operation and build
+description each scale with targets, not with the edit. Only the build description is cached,
+and Xcode can reuse it only when both its inputs match an earlier build: the build request
+(scheme, action, configuration, destination and the set of targets to build, test targets
+included) and the workspace's project description. Every new combination plans from scratch.
+
+- Pick one scheme, action, destination and test plan per task and keep them. Switching between
+  build, run and test, between schemes, or between test selections that name different test
+  targets is a new request each time.
+- Narrow by test identifier inside the plan's test targets rather than by swapping test targets
+  in and out. Whether a narrower selection still reuses the description is unverified; the plan
+  itself is the request known to stay fixed.
+- Editing a local package's manifest or adding and removing files changes the project
+  description; that cost is real and unavoidable. Projects Xcode discovers inside package
+  checkouts (playgrounds, for instance) also arrive one by one after the workspace opens, so the
+  first builds after opening re-plan.
+- To diagnose a re-plan, read the build log's `Build description signature` line and compare
+  `build-request.json` across `Build/Intermediates.noindex/XCBuildData/<signature>.xcbuilddata`
+  in DerivedData; `XCBuildData/PIFCache` modification times show when the project description
+  changed. These are read-only probes; never delete them.
 
 The `institute` command is not a prerequisite for local app work: it operates CI and the
 GitHub organizations, and has no build, composition or checkout commands.
