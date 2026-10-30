@@ -1,233 +1,138 @@
 ---
 name: institute
-description: Develop locally — standalone packages with SwiftPM, apps (and package edits built through an app) in the app-owned Xcode workspace through the selected Xcode's connector; interpret build and test evidence and investigate toolchain defects. Also covers Institute CI, repository policy and lint when those systems are explicitly in scope.
+description: How the Swift Institute is built — its four layers and organizations, dependency direction, Standards authority structure, Foundation-freedom, package and namespace naming — and how to work in it locally (SwiftPM for standalone packages, the app's Xcode workspace for app work), what counts as evidence, and where CI and lint own the rules. Applies in any Swift Institute repository, and governs where any package, target, type, or dependency is placed.
 ---
 
 # Institute
+
+The ecosystem is one composed Institute. Every capability has exactly one semantic owner; every
+other package composes that owner. When an Institute package is insufficient, improve it — do
+not reach for Foundation, a third-party library, or a local workaround.
+
+Any rule a machine can check lives in that check (swift-linter, Institute validators, CI), not
+here. This skill holds what remains: the architecture, and the judgment a check cannot express.
+
+## The four layers
+
+```
+L4 Compositions  org swift-compositions, repo swift-{concept}   What can be composed safely?
+L3 Standards     swift-standards and the authority     What is specified externally?
+                 orgs: swift-{spec-id} / -standard
+L2 Molecules     org swift-molecules, repo swift-{concept}      What is built from atoms alone?
+L1 Atoms         org swift-atoms, repo swift-{concept}          What must exist?
+```
+
+The authority is `swift-institute/.github`'s `.github/policy/fleet.json`, which assigns every
+organization its layer; `swift-institute` is the control organization and roots no layer. Text
+that still says Primitives (`swift-primitives`, `-primitives`) means L1–L2, and Foundations
+(`swift-foundations`) means L4. `swift-components` and `swift-applications` are empty and are
+not residences. Extractions land in `swift-compositions` unless a layer is deliberately being
+stood up.
+
+Placement test: can you point to an external man page, spec chapter, or SDK document defining
+this type's surface? Yes → L3. No → L1 if it is an atomic prerequisite, L2 if it is built from
+atoms alone, L4 if it composes beyond that.
+
+## Dependency direction
+
+Dependencies point downward and the graph stays acyclic. A same-layer edge is admissible only
+when it is an essential semantic prerequisite, keeps the graph acyclic, and pushes no
+higher-layer policy down. Within L1 and L2, edges go to a strictly lower tier only. Institute
+packages never depend on `github.com/coenttb/*`.
+
+- Layer follows essence, never dependencies. When edges violate a package's layer, refactor the
+  edges; a capability a lower layer needs moves down — the consumer never lifts.
+- Tests share `Package.swift` and bind to the layer rule too. Move offending tests to a sibling
+  package at the right layer.
+
+## Foundation-freedom
+
+No main target at any layer imports the Foundation family or uses Foundation types; the one
+exception is a target whose name ends in `Foundation Integration`. Atoms and molecules must
+also deploy on Swift Embedded. Standards packages carry no macro target. The linter checks
+imports only, not Foundation types reached transitively, and Embedded compatibility is proved
+by compiling, never by searching.
+
+## Standards is an organization of organizations
+
+Each authority has its own GitHub org: swift-ietf (`swift-rfc-{number}`), swift-iso
+(`swift-iso-{number}`), swift-w3c, swift-whatwg, swift-ieee, swift-iec, swift-ecma,
+swift-incits, swift-linux-foundation, swift-bipm, and the vendor orgs swift-arm-ltd,
+swift-intel, swift-riscv, swift-microsoft — all L3. swift-standards holds the policy-free
+convergence packages, `swift-{concept}-standard`, which absorb spec revisions so consumers
+never change; opinion lives in `swift-compositions`.
+
+- A package's organization is the GitHub org that holds it; its layer comes from `fleet.json`.
+  Never infer either from the name.
+- One spec can carry two authorities' designations (IEEE 1003.1 is ISO/IEC 9945). Such
+  packages partition the spec by surface; they are not duplicates.
+
+## Package and namespace naming
+
+Package names and top-level namespaces are nouns, never gerunds: the shortest natural noun
+(`Render`, `Order`, `Format`); a stateful machine takes the agent noun (`Parser`, `Cursor`).
+The gerund survives only as a typealias onto the capability protocol at the enclosing scope —
+`Memory.Pool` / `Memory.Pool.Protocol` / `Memory.Pooling` is the full shape — and only where a
+concrete value type backs the namespace.
+
+Before a namespace rename, search the whole ecosystem for `import <OldModule>` (transitive
+imports appear in no manifest) and for collision sites: collapsing `Ordering.Order` into
+`Order.Order` re-binds bare `Order` inside `extension Order` without any error.
 
 ## Local development
 
 Pick the build path by what the change is:
 
-- **Standalone package work** (a package's own sources and tests, no app in scope): use SwiftPM
-  in the package directory — `swift build`, `swift test`, `swift test --filter`. Do not open
-  Xcode for it.
+- **Standalone package work** (a package's own sources and tests, no app in scope): SwiftPM in
+  the package directory — `swift build`, `swift test`, `swift test --filter`. Do not open Xcode.
 - **App work** (Laurie or another app, its hosts, or a package change that must be proven
-  through the app): use the app's Xcode workspace, as below.
+  through the app): the app's `.xcworkspace` (for Laurie, `Laurie.xcworkspace`) through the
+  selected Xcode's connector, with the local package checkouts in that workspace by relative
+  reference. Never rewrite manifests to machine-local absolute paths.
 
-### App workspace
+In the app workspace:
 
-The app's `.xcworkspace` owns local development and dependency resolution. For Laurie, use
-`Laurie.xcworkspace` (formerly `Harvest.xcworkspace`). Include the app, its hosts, and the local
-package checkouts needed for the change in that workspace, using relative references. Xcode
-must resolve and build the intended local sources, including unpushed cross-package edits.
-Keep published package requirements portable; do not rewrite manifests to machine-local
-absolute paths for local iteration.
-
-Discover the available tool capabilities rather than assuming an older tool interface.
-
-- Hold one instance of the workspace. List workspaces first; if the workspace is open in an
-  Xcode window, target that window's identifier. Call `XcodeOpenWorkspace` only when Xcode has
-  no instance of it open: opening it again beside the window starts a second headless instance
-  with its own build service, and the two re-plan the package graph against each other until
-  Xcode hangs.
-- Inspect and select the scheme, test plan and destination through Xcode.
-- Let Xcode own package resolution. Verify the resolved dependency identity, revision and local
-  checkout from Xcode's package graph and diagnostics before interpreting a result.
-- Build, run tests, read compiler diagnostics and full logs, and interact with devices through
-  the connector. Iterate on one fixed build request (see below) and run the affected test plan
-  for final local verification.
-- For app work, if a required workspace, package-resolution or clean-build operation is
-  unavailable through the connected tools, report the specific missing capability. Do not
-  silently substitute an Institute command, raw SwiftPM command, `xcodebuild`, or a
-  repository-local wrapper.
-
-### Using the connector
-
-- Keep the app workspace open across tasks; closing it discards Xcode's build state, so the
-  next build re-plans from scratch. Do not call `XcodeCloseWorkspace` between tasks.
-- Build packages through the app workspace. When a package must be opened on its own, pass its
-  directory, never `Package.swift`, which Xcode opens as a lone source file.
-- Workspace and window identifiers do not survive a close. After any close or error naming the
-  identifier, list workspaces again rather than reusing the old one. If the list shows the same
-  path twice, one instance is extra: quit Xcode, reopen the workspace once, and continue on the
-  identifier the list then shows.
-- A run with failing tests returns as a successful call; read `counts.failed`. An incomplete
-  result bundle is not a test failure until the bundle has been read.
-- A timed-out call leaves Xcode building. Wait for that build to finish before starting another;
-  a retry stacks a second build on the first. Run one build or test at a time.
-- Follow Apple's `xcode-integration:device-interaction` skill for device sessions: one
-  workspace-bound session per workspace, handed exclusively to one agent, ended when done.
-
-### Planning cost
-
-In a graph of hundreds of package targets, most of an incremental build passes before the first
-compile task: package graph loading, target dependency graph, build operation and build
-description each scale with targets, not with the edit. Only the build description is cached,
-and Xcode can reuse it only when both its inputs match an earlier build: the build request
-(scheme, action, configuration, destination and the set of targets to build, test targets
-included) and the workspace's project description. Every new combination plans from scratch.
-
-- Pick one scheme, action, destination and test plan per task and keep them. Switching between
-  build, run and test, between schemes, or between test selections that name different test
-  targets is a new request each time.
-- Narrow by test identifier inside the plan's test targets rather than by swapping test targets
-  in and out. Whether a narrower selection still reuses the description is unverified; the plan
-  itself is the request known to stay fixed.
-- Editing a local package's manifest or adding and removing files changes the project
-  description; that cost is real and unavoidable. Projects Xcode discovers inside package
-  checkouts (playgrounds, for instance) also arrive one by one after the workspace opens, so the
-  first builds after opening re-plan.
-- To diagnose a re-plan, read the build log's `Build description signature` line and compare
-  `build-request.json` across `Build/Intermediates.noindex/XCBuildData/<signature>.xcbuilddata`
-  in DerivedData; `XCBuildData/PIFCache` modification times show when the project description
-  changed. These are read-only probes; never delete them.
-
-The `institute` command is not a prerequisite for local app work: it operates CI and the
-GitHub organizations, and has no build, composition or checkout commands.
-
-## Institute CI and administration
-
-Use Institute machinery when the task explicitly concerns its CI, repository policy, lint or
-administration. This does not change the local Xcode workflow above.
-
-Institute lint's entry point is `institute ci -- source --repository <owner/name> --revision
-<commit> --root <path> --bundle <bundle> --xcode-application <Xcode.app>`. A local lint run is
-guidance; CI's `Quality · source` job is the evidence. Running `swift-format` or `swiftlint`
-with a stray repository configuration is not Institute lint.
-
-CI full-tier `workflow_dispatch` is the evidence of record for issue closure. A local green is
-iteration evidence, not CI closure evidence. `gh run rerun` re-executes an old snapshot; dispatch
-a fresh run when fresh CI evidence is required.
+- Hold one instance. List workspaces first and target the open window; opening it again starts
+  a second headless instance and the two re-plan against each other until Xcode hangs. Keep it
+  open across tasks; identifiers do not survive a close.
+- Let Xcode own package resolution, and check the resolved revisions before reading a result.
+- Pick one scheme, action, destination and test plan per task and keep them: every new
+  combination re-plans the whole graph from scratch. Narrow by test identifier inside the plan.
+- One build or test at a time. A timed-out call leaves Xcode building; wait, do not retry.
+- A run with failing tests returns as a successful call; read `counts.failed`.
+- If the connector lacks a needed operation, report it; do not silently substitute SwiftPM,
+  `xcodebuild`, or a wrapper.
 
 ## Evidence
 
-A cached green is not newly originated evidence. For a new local correctness, migration or
-performance claim, verify that Xcode compiled the relevant changed sources and ran the intended
-tests. When a claim requires a clean build, use an available Xcode clean-build operation and
-record it; if unavailable, state that limitation rather than claiming freshness.
-Exact-head evidence from another task remains
-usable when its command, root, toolchain, revision, exit status, and provenance are reported as
-task-attributed rather than re-labelled as independently checked.
+- A cached green is not new evidence. For a new correctness or performance claim, confirm the
+  changed sources compiled and the intended tests ran. `canImport`-gated code does not
+  re-evaluate on an incremental build, so a clean build is the gate when conditional
+  compilation is in scope.
+- Record what a run was: roots, full SHAs and uncommitted changes, command or scheme, test
+  selection, toolchain and SDK, result, clean or incremental. A filtered run proves only that
+  filter.
+- Pair every probe with a positive control. An absence claim ends with an unfiltered
+  enumeration, never a pattern. Bare `grep` in this shell honours `.gitignore`; use
+  `/usr/bin/grep` for evidence, quote paths (target directories contain spaces), and remember
+  imports often live in `exports.swift` as `@_exported public import`.
+- Report the first compiler diagnostic with the full log. Do not infer a source defect from a
+  setup, resolution or toolchain failure; recheck nightly-only failures on stable.
+- Stop unrelated verification once a decisive blocker fixes the next action.
 
-Choose the smallest Xcode operation that can change the decision. A test normally compiles the
-tested target, so do not add a separate fresh build unless it answers a different material
-question. Once a decisive blocker fixes the next action, stop unrelated verification rather
-than filling out an evidence inventory.
+## CI, lint and generated state
 
-A zero from the wrong root is not evidence either, so record what the run was: the workspace
-and package roots,
-full Git SHAs and relevant uncommitted changes, scheme, test plan or test selection, destination,
-SDK and toolchain, action, result, and whether a clean build was performed.
-That record is what lets someone else disagree with your conclusion rather than only with your
-confidence.
-
-Pair every probe with a positive control. A probe that cannot demonstrate it can report
-something proves nothing by reporting nothing — and a control proves the instrument RAN, not
-that the query was complete. For any claim that something is ABSENT, the final check is an
-unfiltered enumeration, never a pattern: a pattern matching zero lines and a wrong pattern look
-identical. A sweep's shape — which roots, which file kinds, which spelling — is itself a claim
-and needs its own control.
-
-`canImport`-gated code does not re-evaluate on an incremental build: a suite rejoined by a
-dependency change stays silently excluded from a green incremental run, so a clean build is the
-gate of record whenever conditional compilation is in scope. Embedded compatibility is proved by
-compiling with the declared SDK and compiler mode, never by searching for imports.
-
-Report failures with the first compiler diagnostic and the complete log. Do not infer a source
-defect from a setup, resolution, capacity, or toolchain failure; recheck a nightly-only failure
-on stable; and confirm the toolchain and SDK used by Xcode before interpreting
-a toolchain-sensitive result. The shell's `swift --version` alone does not identify Xcode's compiler.
-
-## Generated and machine-local state
-
-`Package.resolved` is generated. Never commit, hand-edit, copy, stage, or delete it to force
-resolution — change `Package.swift` and resolve.
-
-Never delete `.build` or DerivedData directly as a reset. Use Xcode's supported clean-build
-operation when needed; avoid discarding unrelated build caches.
-
-`sync` never rewrites work: it fast-forwards only a clean checkout on `main` tracking
-`origin/main` with no local commits, and reports dirty worktrees and feature branches without
-touching them.
-
-Institute tooling is Full Swift. Do not add Python or shell automation, or revive a `Scripts`
-grab-bag; extend the typed Institute surface and test the extension.
-
-## Local probes
-
-Bare `grep` in this shell is a function wrapping ugrep with `--ignore-files`, so it honours
-`.gitignore` and silently skips files — use `/usr/bin/grep` when the result is evidence. Target
-directories contain spaces, so quote paths and expect word-splitting bugs in any loop over
-`find` output. Imports frequently live in umbrella `exports.swift` files, often as `@_exported
-public import`, so a grep for `import X` in consumer files under-reports.
-
-Before any large sweep, census, or absence claim, read
-[instrument-traps.md](instrument-traps.md) — every entry there is a way to obtain a confident
-zero from a broken instrument.
-
-## swift-linter
-
-A convention graduates from prose to a mechanical rule when it is recognizable from syntax or
-from a package graph. That is the dividing line worth keeping in mind while writing either one:
-swift-linter owns Swift syntax and AST semantics, Institute validators own checkout and
-package-graph facts, repository-policy owns GitHub state, and central CI executes them. Never
-restate an executable predicate as prose, and never create package-local severity overrides.
-
-Consumers activate exactly one bundle in a root `Lint.swift` (`Lint.Rule.Bundle.primitives`,
-`.standards`, `.institute`, `.universal`); configuration stays in Swift.
-
-Specify the predicate before implementing it: the exact syntax matched, the convention it
-represents, known false positives and negatives, diagnostic location and message, canonical fix,
-allowed exemptions. Ship positive, negative, edge, exemption, and self-firing fixtures — the
-fixtures are the rule's contract, and a rule with no failing fixture is not known to work.
-
-Fix the predicate before measuring its zero. Graduate a rule to error only after the fixtures
-cover the intended surface, a fresh run scans Sources and Tests across every applicable package
-root with a non-zero control, the unsuppressed count is zero, and the same scope is reproducible
-in central CI.
-
-Be honest in the rule's own message about which half it checks. A rule that requires a
-justification comment checks that the comment is *there*; it does not check that the
-justification is sound, and the reader deciding whether to trust a clean run needs to know
-which.
-
-Suppress a single finding only for a sanctioned pattern, with `// swift-linter:disable:next
-<rule>` plus a `// REASON:` line naming the lawful shape. Never evade a detector by respelling
-the prohibited code. Exemptions belong in the rule's Swift predicate, not in consumer
-configuration, and must name the narrowest stable property distinguishing the lawful shape; add
-a violation fixture, an exempt fixture, and a near-miss fixture that must still fire.
-
-**Path-scoped exemptions are the dangerous class.** Every AST-based exemption fails toward still
-firing, so an author complains and you find out. A path exemption fails toward NOT firing,
-silently suppressing the findings the rule exists to surface — and the drop reads as progress.
-Match whole directory segments against a required suffix that includes its leading separator,
-drop the trailing filename before matching, never use `contains` or a prefix test, and gate
-before the visitor walks. Fixtures are mandatory in both directions, including a positive
-control with a bare filename and no directory component — without it, a careless predicate
-silences the whole fixture suite and the run still reads green.
-
-## Exporting a package for an LLM
-
-```sh
-PKG=<absolute-package-path>; OUT="/tmp/$(basename "$PKG")-sources.swift"; \
-{ echo "# $(basename "$PKG")"; printf '\n## Package Manifest\n\n'; cat "$PKG/Package.swift"; \
-  printf '\n## Source Files\n'; \
-  /usr/bin/find "$PKG/Sources" -name '*.swift' -type f | sort | while read -r f; do \
-    printf '\n### File: %s\n\n' "${f#"$PKG"/}"; cat "$f"; done; } > "$OUT"; wc -c "$OUT"
-```
-
-Package name, raw manifest, then each file under a `### File: <relative path>` header with raw
-contents. Exclude `.build/`, `.git/`, `Package.resolved`, and anything `.gitignore`d. Export
-tests to a sibling `-tests.swift` file only when asked. Report the byte count and let the
-requester judge fit.
-
-## Elsewhere
-
-- Compiler, optimizer, and build-system defects: reduction, production-shape verification,
-  SIL-level diagnosis — [toolchain-defects.md](toolchain-defects.md).
-- Pull requests to swiftlang/swift, Evolution pitches, pre-launch Forums review —
-  [upstream.md](upstream.md).
-- Reporting a toolchain bug upstream: record it with swift-institute/Issues' "Toolchain bug"
-  form; nothing is filed until `issue-check` admits `upstream-ready` and Coen says yes —
-  [UPSTREAM-PROCEDURE.md](https://github.com/swift-institute/Issues/blob/main/UPSTREAM-PROCEDURE.md).
+- CI full-tier `workflow_dispatch` is the evidence of record for issue closure; a local green
+  is iteration evidence. `gh run rerun` replays an old snapshot — dispatch fresh.
+- Institute lint is `institute ci -- source …`; CI's `Quality · source` job is the evidence. A
+  stray `swift-format` or `swiftlint` run is not Institute lint.
+- A convention recognisable from syntax or the package graph belongs in a rule, not in prose:
+  swift-linter owns Swift syntax, Institute validators own package-graph facts,
+  repository-policy owns GitHub state. Rules ship with positive, negative and exemption
+  fixtures; suppress a finding only with `// swift-linter:disable:next <rule>` plus a
+  `// REASON:` line.
+- `Package.resolved` is generated: never commit, hand-edit or delete it to force resolution.
+  Never delete `.build` or DerivedData as a reset; use a supported clean build.
+- Institute tooling is Full Swift; no Python or shell automation.
+- Toolchain bugs go to swift-institute/Issues' "Toolchain bug" form; nothing goes upstream
+  until `issue-check` admits `upstream-ready` and Coen says yes.
