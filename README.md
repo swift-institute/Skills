@@ -39,7 +39,7 @@ Swift Institute maintainers also project private operational skills from
 | [swift-institute/swift-institute.org](https://github.com/swift-institute/swift-institute.org) | Website + DocC catalog |
 | [swift-institute/Research](https://github.com/swift-institute/Research) | Design rationale and trade-off analysis |
 | [swift-institute/Experiments](https://github.com/swift-institute/Experiments) | Standalone Swift packages backing technical claims |
-| [swift-institute/institute-application](https://github.com/swift-institute/institute-application) | The `institute` command: the central CI planner and organization policy |
+| [swift-institute/institute](https://github.com/swift-institute/institute) | The `institute` command: the central CI planner and organization policy |
 
 ## License
 
